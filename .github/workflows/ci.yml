@@ -1,4 +1,4 @@
-name: M0 validation
+name: M0 + M1 validation
 on:
   push:
     branches: [dev, 'feature/**']
@@ -44,13 +44,13 @@ jobs:
       - name: Upload staging build
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ProjectVelocity-M0-Windows-staging
+          name: ProjectVelocity-M1-Windows-staging
           path: builds/windows/
           if-no-files-found: error
       - name: Upload validation logs
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: M0-validation-logs
+          name: M1-validation-logs
           path: builds/validation/
           if-no-files-found: warn

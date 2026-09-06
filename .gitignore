@@ -11,3 +11,10 @@ export_credentials.cfg
 *.key
 .DS_Store
 Thumbs.db
+
+# Local player data must never be versioned.
+save.json
+save.backup.json
+save.tmp
+backup.tmp
+*.corrupt-*

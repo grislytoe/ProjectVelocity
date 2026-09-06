@@ -27,11 +27,12 @@ function Invoke-GodotCheck {
 
 Invoke-GodotCheck -Name "version" -Arguments @("--version") -Marker "4.7.2.stable."
 Invoke-GodotCheck -Name "import" -Arguments @("--headless", "--path", ".", "--import")
-Get-ChildItem core,tests,dev_tools -Recurse -Filter "*.gd" | ForEach-Object {
+Get-ChildItem core,save_system,tests,dev_tools -Recurse -Filter "*.gd" | ForEach-Object {
     $relative = $_.FullName.Substring($projectRoot.Length + 1).Replace("\", "/")
     Invoke-GodotCheck -Name ("parse-" + $_.BaseName) -Arguments @("--headless", "--path", ".", "--check-only", "--script", $relative)
 }
 Invoke-GodotCheck -Name "tests" -Arguments @("--headless", "--path", ".", "--script", "tests/bootstrap_test.gd") -Marker "PROJECTVELOCITY_TESTS_OK"
+Invoke-GodotCheck -Name "m1-tests" -Arguments @("--headless", "--path", ".", "--script", "tests/save_foundation_test.gd") -Marker "PROJECTVELOCITY_M1_TESTS_OK"
 Invoke-GodotCheck -Name "boot" -Arguments @("--headless", "--path", ".", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
 git diff --cached --check
 if ($LASTEXITCODE -ne 0) { throw "Staged whitespace validation failed" }
@@ -44,4 +45,4 @@ if ($ExportWindows) {
     $Godot = Join-Path $projectRoot "builds/windows/ProjectVelocity.exe"
     Invoke-GodotCheck -Name "export-boot" -Arguments @("--headless", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
 }
-Write-Output "M0 validation passed."
+Write-Output "M0 + M1 validation passed."

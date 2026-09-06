@@ -20,3 +20,7 @@
 The repository began with an unborn main branch. A small initial conventions/specification commit establishes dev; the M0 implementation follows on feature/m0-bootstrap for review into dev. No main commit is fabricated. Initial GitHub default-branch setup and branch protection require developer administration.
 
 Before committing, inspect staged changes and run validation. Never commit credentials, generated cache, tool downloads, logs, or exports. Additional dependencies need the review information in DEPENDENCIES.md.
+
+## Persistence conventions
+
+Validate untrusted Variant data before typed access. Keep migrations pure and sequential; test old fixtures and preserve identity. Inject storage paths into tests; never use the production user save. Stage and validate writes before replacement, keep a previous-good backup, and return localized recovery/error state instead of crashing on bad input. Never use nickname as identity. Persistence currently assumes a single writer.

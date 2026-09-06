@@ -44,8 +44,13 @@ func _run() -> void:
 	_check(scene != null, "Main scene failed to load")
 	if scene != null:
 		var main: Node = scene.instantiate()
+		var save_path: String = OS.get_cache_dir().path_join(
+			"project_velocity_m0-test-" + PlayerProfileData.new_uuid())
+		main.save_store = SaveStore.new(save_path)
 		root.add_child(main)
 		await process_frame
+		DirAccess.remove_absolute(save_path.path_join("save.json"))
+		DirAccess.remove_absolute(save_path)
 		var label: Label = main.get_node("Center/Content/BuildLabel") as Label
 		_check(label.visible and label.text == BuildInfo.label(), "DEV watermark missing")
 		main.queue_free()
