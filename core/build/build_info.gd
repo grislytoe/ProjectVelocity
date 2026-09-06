@@ -4,6 +4,8 @@ extends RefCounted
 
 const VERSION: String = "0.0.1-dev"
 const BUILD_NUMBER: int = 1
+## Wire compatibility identity; increment when incompatible network changes are introduced.
+const NETWORK_PROTOCOL_VERSION: int = 1
 const MILESTONE: String = "M0"
 const REQUIRED_ENGINE: String = "4.7.2"
 

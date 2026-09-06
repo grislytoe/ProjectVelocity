@@ -4,6 +4,8 @@
 
 `core/bootstrap/main.tscn` is the composition root. It displays the placeholder and build identity. `AppLogger` is the only autoload; it uses Godot's local rotating log sink. `BuildInfo` exposes constants and engine-derived build flags. `AppConfig` is a typed Resource with a checked-in default. No runtime dependency on Steam or EOS exists.
 
+Build/network identity lives in `core/build/build_info.gd`: `VERSION` (game version), `BUILD_NUMBER`, `NETWORK_PROTOCOL_VERSION` (initially `1`) and `channel()` (DEV/STAGING/RELEASE). The version constants persist in source control and exported scripts; channel derives from engine build/features. Protocol compatibility is versioned independently of release numbering; see NETWORKING.md for bump policy and future handshake use.
+
 ## Directory ownership
 
 | Directory | Responsibility |
