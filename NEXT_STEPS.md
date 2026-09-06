@@ -1,6 +1,5 @@
 # Next steps
 
-1. Developer reviews the M1 core-data/save PR into dev and performs the final merge.
-2. M2 has not started; wait for an explicit milestone instruction.
-3. Review the persistence limitations in KNOWN_ISSUES.md before adding consumers or UI.
-4. Prove EOSG 2.3.0 compatibility before production multiplayer; required architecture/release/Steam review gates remain in force.
+1. Review the M2 PR into dev; developer performs the final merge.
+2. Run the physical-controller checks in CONTROLS.md (no controller was available during implementation).
+3. Wait for the next explicit milestone request. M3 has not started.

@@ -152,6 +152,7 @@ func _run() -> void:
 	var legacy: Dictionary = initial.duplicate(true)
 	legacy.save_version = 0
 	legacy.erase("last_lobby_settings")
+	legacy.settings.controls.erase("input")
 	var migrated: Dictionary = SaveSchema.decode(legacy)
 	_check(migrated.status == "valid" and migrated.migrated, "Version 0 migrates sequentially")
 	_check(legacy.save_version == 0 and not legacy.has("last_lobby_settings"), "Migration is pure")
@@ -161,7 +162,7 @@ func _run() -> void:
 	var migration_store: SaveStore = _store()
 	_write(migration_store, "save.json", JSON.stringify(legacy))
 	_check(migration_store.open(), "Migration loads from disk")
-	_check(JSON.parse_string(_text(migration_store, "save.json")).save_version == 1,
+	_check(JSON.parse_string(_text(migration_store, "save.json")).save_version == SaveSchema.CURRENT_VERSION,
 		"Migrated schema persisted")
 
 	var future: Dictionary = initial.duplicate(true)

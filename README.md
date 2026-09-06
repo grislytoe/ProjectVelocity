@@ -2,7 +2,7 @@
 
 Competitive high-speed 2D racing platformer, built with Godot **4.7.2 Stable** and typed GDScript.
 
-M0 establishes the engineering foundation; M1 adds persistent profiles, validated versioned JSON, migrations and backup recovery. The main scene remains a translated placeholder with a DEV/STAGING label. No gameplay or online services are implemented. See SAVE_FORMAT.md for the persistence contract.
+M0 establishes the engineering foundation; M1 adds persistent profiles, validated versioned JSON, migrations and backup recovery. M2 adds keyboard/gamepad actions, rebindable profiles, eight-way Dash selection, device detection and prompt switching. The main scene remains a translated placeholder with a DEV/STAGING label and input hints. No gameplay or online services are implemented. See SAVE_FORMAT.md for the persistence contract.
 
 Open `project.godot` in Godot 4.7.2 and press F6/F5 to run the main scene. See [BUILD_AND_RUN.md](BUILD_AND_RUN.md) for reproducible validation and staging export.
 

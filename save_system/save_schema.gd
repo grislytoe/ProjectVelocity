@@ -2,8 +2,8 @@ class_name SaveSchema
 extends RefCounted
 ## Pure schema validation and sequential migrations. No filesystem access.
 
-const CURRENT_VERSION: int = 1
-const MIGRATIONS: Dictionary = {0: "_migrate_v0_to_v1"}
+const CURRENT_VERSION: int = 2
+const MIGRATIONS: Dictionary = {0: "_migrate_v0_to_v1", 1: "_migrate_v1_to_v2"}
 
 
 static func defaults() -> Dictionary:
@@ -14,7 +14,7 @@ static func defaults() -> Dictionary:
 			"video": {"resolution": [1920, 1080], "window_mode": "windowed", "vsync": true,
 				"fps_limit": 60, "effects_quality": "balanced"},
 			"audio": {"master": 1.0, "music": 1.0, "sfx": 1.0, "ui": 1.0, "ambience": 1.0},
-			"controls": {"bindings": {}},
+			"controls": {"bindings": {}, "input": InputBindings.configuration()},
 			"accessibility": {"high_contrast": false, "flash_intensity": 1.0,
 				"screen_shake": 0.5, "ui_scale": 1.0, "hud_opacity": 1.0},
 		},
@@ -65,6 +65,17 @@ static func number_in(value: Variant, low: float, high: float) -> bool:
 		float(value) >= low and float(value) <= high)
 
 
+func _migrate_v1_to_v2(source: Dictionary) -> Dictionary:
+	var result: Dictionary = source.duplicate(true)
+	if not result.get("settings") is Dictionary or not result.settings.get("controls") is Dictionary:
+		return {}
+	# Keep the M1 serialized binding foundation verbatim; M2 uses explicit device profiles.
+	if not result.settings.controls.has("input"):
+		result.settings.controls["input"] = InputBindings.configuration()
+	result.save_version = 2
+	return result
+
+
 static func validate(data: Dictionary) -> bool:
 	if not PlayerProfileData.is_whole_number(data.get("save_version")) or (
 		data.save_version != CURRENT_VERSION):
@@ -97,6 +108,8 @@ static func validate(data: Dictionary) -> bool:
 		if not number_in(settings.audio.get(bus), 0.0, 1.0):
 			return false
 	var bindings: Variant = settings.controls.get("bindings")
+	if not InputBindings.valid_config(settings.controls.get("input")):
+		return false
 	if not bindings is Dictionary:
 		return false
 	for action: Variant in bindings:

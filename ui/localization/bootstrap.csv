@@ -6,3 +6,9 @@ SAVE_RESET,Save could not be recovered. Defaults are in use.,Не удалось
 SAVE_UNSUPPORTED,Save version is unsupported. Saving is disabled.,Версия сохранения не поддерживается. Запись отключена.
 SAVE_IO_ERROR,Save could not be accessed. Progress may not persist.,Нет доступа к сохранению. Прогресс может не сохраниться.
 SAVE_INVALID,Changes could not be saved because data is invalid.,Изменения не сохранены из-за некорректных данных.
+INPUT_PROMPTS,Jump: %s · Dash: %s,Прыжок: %s · Рывок: %s
+INPUT_UNBOUND,Unbound,Не назначено
+INPUT_MOUSE_BUTTON,Mouse %d,Мышь %d
+INPUT_PAD_BUTTON,Button %d,Кнопка %d
+INPUT_BINDING_INVALID,Invalid binding,Недопустимое назначение
+INPUT_BINDING_CONFLICT,Binding is already used,Кнопка уже назначена

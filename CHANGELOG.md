@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0-dev — M2 input and device layer
+
+- Godot keyboard/gamepad action maps, physical-key defaults, independent profiles, capture/rebind/reset and deadzones.
+- Eight-way Dash selection, intent snapshots, device detection/hotplug and generic/Xbox/PlayStation/Nintendo/Steam Deck prompt descriptors.
+- Debounced preference persistence, save schema 2 and M1 migration; network protocol unchanged at 1.
+- 124 input checks alongside M0/M1 regression suites; no gameplay or settings UI.
+
 ## 0.1.0-dev — M1 core data and save foundation
 
 - Persistent UUID profile, nickname validation, colors, cosmetic slots, language/device and timestamps.

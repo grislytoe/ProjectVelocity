@@ -1,5 +1,57 @@
-# Controls
+# Input and device layer — M2
 
-M0 has no gameplay inputs or interactive menu. Close the placeholder with the normal window close control.
+InputLayer is the application-wide Godot Input adapter, created by bootstrap. Gameplay consumes sample() → InputFrame; it does not query keyboards, controller IDs or platform SDKs directly. No movement, ability state or player state machine exists in M2.
 
-Future defaults from the specification: WASD movement, arrow keys dash selection, Shift dash; controller left stick movement, right stick eight-way dash selection, RB/R1 dash. Future quick restart defaults to holding R for approximately 0.5 seconds. These bindings are not implemented yet. Jump binding and rebindable UI navigation will be established with the input milestone.
+## Defaults
+
+| Action | Keyboard | Standard gamepad |
+| --- | --- | --- |
+| Movement | WASD | Left stick |
+| Dash selection | Arrow keys | Right stick |
+| Jump | Space | Bottom face button (Xbox/Deck A, PlayStation cross, Nintendo B) |
+| Dash trigger | Shift | RB / R1 / R |
+| Pause intent | Escape | Start / Options / + |
+| Quick restart hold intent | R | Top face button (Y / triangle / X) |
+| UI directions | Arrows | D-pad or left stick |
+| UI accept | Enter or Space | Bottom face button |
+| UI cancel | Escape | Right face button |
+| Focus next / previous | Tab / Shift+Tab | Right / left shoulder |
+
+Jump/pause/restart defaults are initial M2 choices; all are rebindable. No restart hold timer or pause behavior is implemented. Stick axes and face positions use Godot's standard mapping; no Steam Input dependency or rumble.
+
+## Profiles and bindings
+
+Keyboard/mouse and gamepad overrides are independent. InputBindings contains source-controlled defaults for every action. The stored profiles contain only overrides; empty overrides use defaults. Up to four bindings per action are supported. Empty arrays explicitly unbind an action except ui_accept/ui_cancel, which retain at least one binding.
+
+Tokens:
+- key:PHYSICAL_CODE:MODIFIERS, with mask Shift=1, Ctrl=2, Alt=4.
+- mouse:BUTTON (1–9), keyboard profile only.
+- button:INDEX or axis:INDEX:SIGN, gamepad only; axis 0–5 and sign -1/+1.
+
+API: rebind(profile, action, tokens) validates token type and rejects conflicts within gameplay or UI contexts, returning ok/message_key/action. Gameplay and UI may share a binding. begin_rebind()/cancel_rebind() provide event capture without building a settings UI; capture takes the first pressed key/button or axis beyond 0.6, suppresses gameplay intent and consumes the captured input. Modifier-only bindings are supported; full modifier masks can also be assigned directly through rebind(). reset_profile() restores defaults. Rebinding clears held state and refreshes prompts.
+
+Configuration is copied on configure()/rebind(). Treat exposed dictionaries as read-only; edit through the API. One InputLayer owns the application's input maps at a time. Keyboard entries use pv_keyboard_ACTION, pad entries pv_pad_ID_ACTION. Standard ui_* maps drive Godot Control navigation; prior UI mappings are restored when the layer exits.
+
+## Vectors and Dash
+
+Movement and Dash use configurable radial deadzones (defaults 0.2 and 0.25); outside the deadzone magnitude is rescaled to 0–1 and diagonal movement is clamped. Activity detection has a separate default threshold 0.3. Options accept finite thresholds 0.05–0.9.
+
+Dash direction quantizes to exactly eight unit vectors, with neutral = zero. Sectors are centered every 45 degrees; midpoint ties advance to the next sector. Selection persists after releasing a direction. Dash trigger is an independent pressed edge and never fires from direction input alone. The future gameplay consumer calls clear_dash_selection() after accepted Dash, death or respawn. Holding the same direction after clear cannot immediately relatch it; neutral or a changed direction must be observed first. Ability availability is never stored here.
+
+Call sample() once per physics tick and distribute that snapshot. Edges use Godot's just-pressed/released semantics. InputFrame contains movement, selected Dash direction, jump pressed/held/released, Dash/pause pressed, and restart held. It contains no network identity, physics state or ability cooldowns.
+
+## Device detection, hotplug and prompts
+
+Last meaningful device wins for gameplay sampling. Key/button presses, mouse movement >=2 pixels, and stick activity above the threshold switch device; key echo, releases and drift do not. Each connected pad has separate action maps, so an inactive pad cannot supply another pad's movement. The most recently used pad becomes active.
+
+Input.joy_connection_changed updates maps. Connecting alone does not steal focus. Disconnecting the active pad falls back to keyboard/mouse and clears held actions and Dash selection. Rebuilds and application focus loss also clear transient state; focus loss cancels capture.
+
+InputPrompts returns token/label descriptors independently of UI assets. Families: generic, Xbox, PlayStation, Nintendo, Steam Deck. Auto-detection uses the Godot device name; set_options() provides a manual override for ambiguous names. Generic/extra buttons use localized numeric fallback labels. Bootstrap displays only Jump/Dash hints to demonstrate device/rebind switching. This is not a settings menu or glyph asset system.
+
+InputPreferences persists profiles, deadzones, prompt family and last active device through SaveStore after 0.5 seconds of inactivity, or flush() on shutdown. No per-frame writes occur. Unsupported/read-only saves are not overwritten. Language changes refresh the hint.
+
+## Validation
+
+tests/input_layer_test.gd sends synthetic InputEvents through Godot Input, tests vectors/edges, bindings, prompts, two-pad isolation, hotplug adapter and Godot signal routing, focus cleanup, persistence and v1→v2 migration. It uses isolated save paths.
+
+No physical gamepad was available on the implementation host. USB/Bluetooth hotplug, platform-specific controller naming and glyph expectations remain manual hardware checks; simulated tests do not claim driver/device coverage.
