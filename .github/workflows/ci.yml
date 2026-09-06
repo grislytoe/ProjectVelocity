@@ -1,0 +1,56 @@
+name: M0 validation
+on:
+  push:
+    branches: [dev, 'feature/**']
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-build:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install pinned Godot and export templates
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $version = "4.7.2"
+          $base = "https://github.com/godotengine/godot-builds/releases/download/$version-stable"
+          $engine = "Godot_v$version-stable_win64.exe.zip"
+          $templates = "Godot_v$version-stable_export_templates.tpz"
+          New-Item -ItemType Directory -Force .tools | Out-Null
+          Invoke-WebRequest "$base/SHA512-SUMS.txt" -OutFile .tools/SHA512-SUMS.txt
+          foreach ($asset in @($engine, $templates)) {
+            Invoke-WebRequest "$base/$asset" -OutFile ".tools/$asset"
+            $entry = Get-Content .tools/SHA512-SUMS.txt | Where-Object { ($_ -split '\s+')[-1].TrimStart('*') -eq $asset }
+            if (@($entry).Count -ne 1) { throw "Missing unique checksum for $asset" }
+            $expected = ($entry -split '\s+')[0]
+            if ((Get-FileHash ".tools/$asset" -Algorithm SHA512).Hash -ne $expected) { throw "Checksum mismatch: $asset" }
+          }
+          Expand-Archive ".tools/$engine" .tools/godot
+          Copy-Item ".tools/$templates" .tools/templates.zip
+          Expand-Archive .tools/templates.zip .tools/templates
+          $destination = "$env:APPDATA/Godot/export_templates/$version.stable"
+          New-Item -ItemType Directory -Force $destination | Out-Null
+          Copy-Item .tools/templates/templates/* $destination -Recurse
+      - name: Validate and build Windows staging
+        shell: pwsh
+        run: ./dev_tools/validate.ps1 -Godot "$pwd/.tools/godot/Godot_v4.7.2-stable_win64_console.exe" -ExportWindows
+      - name: Upload staging build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ProjectVelocity-M0-Windows-staging
+          path: builds/windows/
+          if-no-files-found: error
+      - name: Upload validation logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: M0-validation-logs
+          path: builds/validation/
+          if-no-files-found: warn
