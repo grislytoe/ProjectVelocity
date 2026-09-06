@@ -1,3 +1,3 @@
-# Versioned persistence and migration
+# Save system
 
-Reserved for later milestones. No runtime implementation in M0. See ../ARCHITECTURE.md for ownership and ../docs/MASTER_SPECIFICATION.txt for approved requirements.
+SaveSchema validates JSON-compatible data and migrates sequential versions without I/O. SaveStore loads, stages, backs up and recovers data using an injected directory. The default is user://saves; tests must supply isolated paths. See ../SAVE_FORMAT.md for the complete version 1 contract and recovery policy.

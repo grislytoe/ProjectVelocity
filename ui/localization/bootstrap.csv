@@ -1,3 +1,8 @@
 keys,en,ru
 APP_TITLE,ProjectVelocity,ProjectVelocity
 BOOTSTRAP_STATUS,Project foundation ready,Основа проекта готова
+SAVE_RECOVERED,Save restored from backup,Данные восстановлены из резервной копии
+SAVE_RESET,Save could not be recovered. Defaults are in use.,Не удалось восстановить данные. Используются начальные значения.
+SAVE_UNSUPPORTED,Save version is unsupported. Saving is disabled.,Версия сохранения не поддерживается. Запись отключена.
+SAVE_IO_ERROR,Save could not be accessed. Progress may not persist.,Нет доступа к сохранению. Прогресс может не сохраниться.
+SAVE_INVALID,Changes could not be saved because data is invalid.,Изменения не сохранены из-за некорректных данных.
