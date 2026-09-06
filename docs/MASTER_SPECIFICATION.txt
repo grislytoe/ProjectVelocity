@@ -1,0 +1,1137 @@
+PROJECTVELOCITY — CODEX MASTER PROMPT
+You are the primary coding agent responsible for implementing ProjectVelocity, a competitive highspeed 2D racing platformer in Godot 4.7.2 using typed GDScript.
+You have direct access to the Godot project directory and, where configured, may launch Godot,
+execute the game, run tests, inspect logs/debugger output, use Git, and create commits and pull
+requests.
+Your job is not merely to write code. Your job is to produce, test, document, profile, and progressively
+stabilize a complete playable standalone version of ProjectVelocity.
+1. NON-NEGOTIABLE PROJECT CONSTRAINTS
+Engine:
+Godot 4.7.2 Stable.
+Language:
+GDScript.
+Primary platforms:
+Windows x64. Linux x64. SteamOS / Steam Deck.
+Primary development target:
+Standalone.
+Steam integration is a later milestone and MUST NOT become a hard dependency of gameplay or
+multiplayer architecture.
+Physics simulation:
+60 Hz fixed physics tick.
+Target:
+Stable 60 FPS even on low-end target hardware approximately equivalent to:
+older 4-core Core i5 / Ryzen 3;
+8 GB RAM;
+GTX 1050 Ti / RX 570;
+1080p Low.
+•
+•
+•
+•
+1
+Steam Deck must target stable 60 FPS in Balanced/Performance modes.
+2. YOUR OPERATING RULES
+Work milestone by milestone.
+Do not attempt to build the whole project in one uncontrolled pass.
+For each milestone:
+inspect the existing repository;
+read relevant documentation;
+create or update a feature branch where appropriate;
+implement the requested scope;
+run the project;
+fix runtime/parser errors;
+run automated tests;
+perform applicable manual/dev smoke tests;
+inspect Godot debugger output;
+profile when performance-sensitive;
+update documentation;
+commit a stable result;
+provide a short completion report.
+Do not mark a milestone complete while known critical errors remain.
+You may automatically proceed through ordinary milestones after acceptance criteria pass.
+STOP and request developer review before critical milestones involving:
+EOS production integration;
+replacement of EOS dependency;
+fundamental networking changes;
+major architecture replacement;
+release builds;
+Steam integration.
+3. ARCHITECTURAL AUTHORITY
+The approved architecture described in the project specification is authoritative.
+You may perform local refactoring.
+You may NOT silently replace fundamental architecture.
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+11.
+12.
+13.
+•
+•
+•
+•
+•
+•
+2
+If you identify a fundamental problem:
+reproduce it;
+investigate it;
+document the cause;
+list viable alternatives;
+describe pros/cons;
+recommend one option;
+stop that blocked architectural task.
+Continue unrelated safe tasks if possible.
+Never invent a workaround that violates project requirements simply to mark a milestone complete.
+4. DEPENDENCY RULES
+Approved initial dependencies:
+Godot 4.7.2 Stable.
+EOSG 2.3.0 as the initial EOS integration candidate.
+EOSG compatibility with this exact project environment MUST be proven by smoke testing before
+production multiplayer implementation.
+Do not assume compatibility from the version string alone.
+Do not replace EOSG without developer approval.
+Any additional third-party dependency requires:
+technical justification;
+exact version;
+source;
+license;
+commercial Steam compatibility;
+free standalone redistribution compatibility.
+Record all dependencies in DEPENDENCIES.md .
+Never commit credentials, private tokens or local developer secrets.
+5. CODING STANDARD
+Create and maintain CODING_STANDARDS.md .
+Use typed GDScript wherever practical.
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+•
+•
+•
+•
+•
+•
+•
+•
+3
+Avoid:
+god classes;
+giant scripts;
+magic numbers;
+gameplay constants embedded in state code;
+implicit ownership;
+tight coupling between UI and gameplay;
+Steam-specific code in gameplay;
+network transport calls inside player movement logic;
+per-frame SceneTree searches;
+unnecessary runtime allocation in _physics_process() .
+Prefer:
+clear components;
+Resources;
+explicit state machines;
+composition;
+dependency injection/service interfaces where appropriate;
+signals for decoupled notifications;
+deterministic simulation;
+testable pure logic where possible.
+6. REQUIRED TOP-LEVEL LAYERS
+Keep these responsibilities separated:
+Core. Gameplay. Networking. Platform Services. UI. Save System. Map Data. Audio. Visuals. Developer
+Tools. Tests.
+Provide platform abstractions such as:
+PlatformService OnlineService LobbyService MultiplayerTransport
+IdentityService
+Standalone multiplayer must not depend on Steam.
+7. PLAYER MOVEMENT
+Implement a high-speed controller inspired by the responsiveness of Super Meat Boy but with more
+precise aerial control.
+The controller must be data driven.
+Use PlayerMovementConfig .
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+4
+Required configurable parameters include at minimum:
+ground_max_speed
+ground_acceleration
+ground_deceleration
+air_max_speed
+air_acceleration
+air_deceleration
+rise_gravity
+fall_gravity
+terminal_velocity
+jump_force
+second_jump_force
+coyote_time
+jump_cut_gravity_multiplier
+wall_slide_speed
+wall_slide_gravity_multiplier
+wall_jump_horizontal_force
+wall_jump_vertical_force
+wall_jump_input_lock_time
+dash_speed
+dash_duration
+dash_momentum_retention
+dash_end_lag
+dash_cancel_enabled
+Do not implement Jump Buffer.
+Implement Variable Jump Height and Coyote Time.
+8. WALL MOVEMENT
+Wall contact produces wall sliding, not wall hanging.
+Wall sliding:
+lower downward speed than normal falling;
+configurable acceleration/gravity multiplier;
+configurable terminal wall-slide speed.
+Wall Jump:
+strong upward and outward impulse;
+brief lock against immediate reverse input;
+restores Double Jump;
+restores Dash.
+Ordinary wall contact/wall slide also restores Double Jump and Dash.
+Surface architecture must later permit wall-slide speed modifiers.
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+5
+Do not currently implement multiple surface types.
+9. DOUBLE JUMP
+One extra jump.
+Second-jump force is independently configurable.
+Restore on:
+ground contact;
+wall contact;
+wall slide;
+wall jump.
+Provide a visually distinguishable Double Jump animation/effect.
+10. DASH
+One Dash is available before refresh.
+Dash directions are limited to exactly eight.
+Keyboard default:
+WASD = movement. Arrow keys = Dash direction. Shift = Dash trigger.
+Controller:
+Left Stick = movement. Right Stick = Dash direction. RB/R1 = Dash trigger.
+Right-stick vector must quantize to eight directions.
+Dash:
+clears current velocity;
+disables normal gravity during Dash;
+applies constant Dash vector;
+locks direction for its duration;
+restores normal physics afterwards;
+retains a configurable portion of Dash momentum.
+The player cannot steer Dash after activation.
+Dash cancellation is configurable but disabled by default.
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+6
+Dash refreshes on:
+ground;
+wall;
+wall slide;
+wall jump.
+The player may preselect a direction while Dash is unavailable.
+Dash never auto-fires.
+After a successful Dash, clear the selected Dash direction.
+Clear selected Dash direction on death/respawn.
+Show a small local-only Dash direction indicator.
+Never replicate this preselection indicator to the opponent.
+11. PLAYER STATE MACHINES
+Use a gameplay state machine.
+At minimum support:
+Idle. Run. Jump. Fall. WallSlide. WallJump. Dash. Death. Respawn. Finish.
+Use a separate animation state machine.
+Do not implement a giant conditional controller.
+12. ANIMATIONS
+Required animation set:
+Idle Run Jump Fall DoubleJump WallSlide WallJump Dash Landing Death Respawn FinishVictory
+Turnaround Skid
+Wall-slide animation may mirror horizontally.
+Dash uses one directional base animation rotated/oriented for eight directions.
+Run playback speed should correlate with horizontal velocity.
+Provide a subtle max-speed visual state.
+At high-speed direction reversal:
+•
+•
+•
+•
+7
+Skid → Turnaround → Run.
+Do not implement squash-and-stretch.
+Prepare architecture for future FastFall animation, but do not implement Fast Fall gameplay.
+13. CHARACTER VISUAL DESIGN
+The character is a compact techno android/robot.
+It must remain legible at approximately 5–7% of screen height.
+Use clean high-resolution 2D, not pixel art.
+Character customization must be modular.
+Initial customization:
+main/body color;
+accent/emissive color.
+Future slots should be possible for:
+head;
+hat;
+torso;
+arms;
+legs.
+Do not block gameplay development on final art.
+Use placeholders if necessary.
+When image-generation tools are available, create coherent production-oriented assets after gameplay
+has stabilized.
+Otherwise produce detailed asset specifications and generation prompts.
+14. DEATH / RESPAWN
+Death sources include all fatal hazards.
+On death:
+play a short approximately 0.3–0.6 second robot disintegration effect;
+respawn at the last valid checkpoint;
+if no checkpoint was reached, respawn at Start.
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+8
+At respawn:
+zero velocity;
+reset temporary movement state;
+restore Dash;
+restore Double Jump;
+clear Dash direction;
+grant approximately 0.75 seconds of invulnerability.
+Invulnerability protects from all fatal hazards while keeping normal level collision.
+Show subtle visual feedback during invulnerability.
+Race timers do NOT stop for death/respawn.
+15. CHECKPOINTS
+Checkpoints are per-player.
+They must have visible activation feedback.
+Show a short UI message such as:
+CHECKPOINT
+By default checkpoints activate in order.
+Allow a map-level option to disable strict ordering.
+A Finish cannot validate until mandatory checkpoints are satisfied.
+If a player attempts Finish after skipping one:
+do not teleport;
+do not finish;
+display a clear skipped-checkpoint message.
+Do not allow checkpoint respawn positions on moving platforms.
+Validate respawn positions.
+16. PLATFORM SYSTEM
+Implement modular scenes for:
+Static Platform. OneWay Platform. Moving Platform. Breakable/Temporary Platform. Jump Pad.
+•
+•
+•
+•
+•
+•
+•
+•
+•
+9
+Moving Platform supports a route made of points with configurable:
+speed;
+waits;
+loop;
+direction.
+Breakable Platform supports:
+activation delay;
+disappearance;
+optional restoration;
+restore delay.
+Jump Pad supports configurable force and direction.
+Support sloped collision.
+Add a configurable slope angle beyond which the player slides.
+Architect for future:
+conveyors;
+boost pads;
+portals;
+gravity zones;
+force zones.
+Do not implement those future objects now.
+17. HAZARDS
+Implement modular hazard scenes.
+DeathZone
+Reusable fatal Area2D.
+Spikes
+Support:
+static;
+timed extension;
+locally trigger-configurable mode.
+Do not build a universal level event system yet.
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+10
+Circular Saw
+Support:
+static;
+path-moving.
+Laser
+Support:
+permanent;
+cyclic.
+Cyclic lasers must telegraph before activation.
+Turret
+A turret consists of one base with two independent barrels/weapon sections.
+Each player has an independent targeting channel.
+A turret may attack both players simultaneously.
+Each channel performs:
+Detection → Line of Sight → Aim → Telegraph → Fire → Cooldown
+Each barrel has independent state but defaults from a common TurretConfig .
+Required parameters include:
+detection_range;
+fire_range;
+aim_turn_speed;
+telegraph duration;
+cooldown;
+minimum cooldown;
+projectile speed;
+aim lead factor.
+Projectile speed should initially be approximately 120% of the player's base maximum running speed.
+Use limited velocity-based lead targeting.
+Projectiles are host authoritative.
+Each projectile has a specific target_player_id .
+It can only kill that designated player.
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+11
+Other players can see it but cannot be killed by it.
+Destroy/return projectile to pool on:
+blocking geometry collision;
+confirmed target hit.
+Object pooling is mandatory.
+Projectile caps:
+5 per target player;
+10 global for two players.
+If cap is reached:
+skip the shot;
+enter ordinary cooldown;
+never queue deferred shots.
+Maximum turrets simultaneously engaging one player:
+default 3, configurable.
+Both barrels may fire simultaneously.
+18. MAP ARCHITECTURE
+Use modular level sections.
+Do not create a giant monolithic level scene.
+Example:
+Map
+Section01
+Section02
+Section03
+Section04
+The first map may remain fully loaded.
+Do not implement runtime streaming yet.
+Do not design the architecture in a way that prevents future streaming.
+Use a modular grid for major geometry.
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+12
+Allow hazards/decor finer placement.
+Create section entrance/exit anchors.
+Create structural validation for section seams.
+19. MAP DEFINITION
+Implement a data-driven MapDefinition .
+Include:
+map_id;
+map_version;
+name translation key;
+description translation key;
+scene path;
+preview;
+official/custom type;
+difficulty;
+expected duration;
+par_time;
+mandatory checkpoint metadata;
+map hash/checksum.
+Official map identifiers must remain stable.
+Before online play compare:
+map_id;
+map_version;
+checksum.
+Reject incompatible maps with a clear message.
+Do not implement digital signatures yet.
+20. FIRST PLAYABLE MAP
+Theme:
+Industrial + Brutalism.
+This is only the first map theme.
+Do not make map systems industrial-specific.
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+13
+Target clean-run duration:
+1–2 minutes.
+Difficulty:
+Normal.
+Layout:
+Primarily left-to-right. Include vertical sections. Avoid labyrinth navigation. Player should understand
+general forward progression.
+Use gradual difficulty progression.
+The map MUST exercise:
+acceleration;
+deceleration;
+normal jumps;
+variable jump;
+Double Jump;
+Wall Slide;
+Wall Jump;
+Dash;
+moving platforms;
+one-way platform;
+breakable platform;
+Jump Pad;
+spikes;
+static saw;
+moving saw;
+permanent laser;
+cyclic laser;
+turret;
+DeathZones;
+multiple checkpoints.
+Include approximately 1–2 optional advanced shortcuts.
+Shortcuts must not bypass mandatory checkpoints.
+Place checkpoints so normal death commonly costs roughly 5–15 seconds on this map.
+21. TEST PLAYGROUND
+Create a dedicated developer playground.
+Provide isolated stations for every major movement and hazard feature.
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+14
+Include a high-speed network synchronization test lane.
+This scene is required before final map tuning.
+22. CAMERA
+Each client has its own Camera2D following the local player only.
+No split-screen.
+Opponent is rendered within the world when visible.
+Initial framing:
+player approximately 5–7% of screen height.
+Use:
+follow;
+smoothing;
+forward look-ahead.
+Put tuning in CameraConfig .
+Support map CameraBounds.
+Architect for CameraZones that may modify:
+zoom;
+offset;
+look ahead;
+temporary lock.
+23. OPPONENT PRESENTATION
+Players have no physical collision with each other.
+Both spawn at the same start position.
+Local player:
+100% opacity.
+Remote player:
+30% opacity.
+•
+•
+•
+•
+•
+•
+•
+15
+Remote player's visual effects:
+approximately 30% intensity/opacity.
+Preserve opponent's actual customized colors.
+Local player gets a subtle contrast outline.
+Opponent outline is weak or absent.
+Render opponent nickname above the remote player at approximately 30% opacity.
+Do not render local player's own nickname above themselves.
+24. PLAYER PROFILE
+Create PlayerProfileData .
+Generate a persistent local UUID at first launch.
+Nickname constraints:
+3–15 characters.
+Allowed:
+Latin letters. Cyrillic. Numbers. Space. Underscore. Hyphen.
+Reject emoji, control characters and exotic Unicode.
+Duplicate display names are allowed.
+Never use display names as network identity.
+Store:
+UUID;
+nickname;
+character colors;
+future cosmetic slots;
+language;
+last input device;
+created_at;
+last_launch_at.
+Nickname and customization are locked after entering an online lobby until leaving it.
+•
+•
+•
+•
+•
+•
+•
+•
+16
+25. TIME TRIAL
+Solo mode IS Time Trial.
+Flow:
+Menu → Solo → Map Select → Load → Controls Hint → Countdown → Run → Results.
+When entering a map from menu:
+show control hints for up to 3 seconds.
+Allow early dismissal.
+Block player control.
+Then:
+3 2 1 GO!
+Start timer exactly on GO.
+Timer continues through normal death/respawn.
+Normal Solo Pause stops the simulation and timer without invalidating the record.
+Implement Quick Restart:
+dedicated rebindable input;
+default keyboard R;
+hold approximately 0.5 seconds;
+available during death/respawn;
+no control hint replay after Quick Restart;
+immediately return to countdown.
+Store:
+personal best total time;
+checkpoint splits of PB run;
+individual best split data for future features.
+Live checkpoint delta should compare against the checkpoint timestamp from the player's best
+COMPLETE run.
+Runs using developer gameplay manipulation must be invalid for records.
+Visual/audio/settings changes do not invalidate a run.
+Automatically persist a new PB immediately after valid Finish.
+•
+•
+•
+•
+•
+•
+•
+•
+•
+17
+Time Trial result screen:
+final time;
+new record state;
+PB delta;
+splits;
+deaths this run;
+Replay/Retry;
+Map Select;
+Main Menu.
+Do not save lifetime death statistics.
+26. ONLINE NETWORK MODEL
+Two players in v1.
+Host-client listen-server.
+The host is authoritative.
+The guest uses local client-side prediction.
+Client sends INPUT COMMANDS, not trusted final transforms.
+Host re-simulates/validates input.
+Host periodically returns authoritative snapshots.
+Client performs reconciliation.
+Small error:
+smooth correction.
+Large error:
+hard correction.
+Keep thresholds configurable.
+Use interpolation for remote players.
+Do not directly replicate animation state.
+Replicate gameplay state and key events; reconstruct animation locally.
+Do not replicate VFX entities unless truly required.
+•
+•
+•
+•
+•
+•
+•
+•
+18
+Recreate remote VFX locally from network state/events.
+27. AUTHORITATIVE EVENTS
+Host is authoritative for:
+deaths;
+checkpoints;
+Finish;
+round winner;
+series state;
+hazards;
+turret hits;
+dynamic object state;
+match clock.
+Reject impossible movement such as unauthorized:
+velocity;
+Dash;
+jump;
+teleport;
+Finish.
+28. NETWORK TIMING
+Physics:
+60 Hz.
+Initial snapshot target:
+20–30 Hz.
+Input send frequency may be higher.
+Put all rates in NetworkConfig .
+Quality target:
+0–80 ms: near ideal. 80–150 ms: comfortable. 150–200 ms: playable.
+200 ms: display connection warning.
+Build network emulation for:
+latency;
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+19
+packet loss;
+jitter;
+disconnect.
+29. DYNAMIC LEVEL NETWORKING
+Host authoritative.
+Clients may locally evaluate deterministic trajectories using synchronized match time.
+Use this for:
+moving platforms;
+saws;
+lasers;
+turret presentation.
+Periodically correct from host.
+Official levels must avoid unsynchronized randomness.
+Any future randomness must use synchronized seed/state.
+30. EOS ONLINE SERVICE
+Initial approved candidate:
+EOSG 2.3.0.
+Before production network code:
+perform explicit compatibility smoke tests with Godot 4.7.2.
+Test at least:
+Windows Editor. Windows export. Linux x64 export. Linux/SteamOS path. Clean startup/shutdown.
+Authentication/connect flow. Lobby creation. Lobby query. Lobby join. P2P data. Disconnect handling.
+If this test fails in a material way:
+STOP.
+Do not silently switch library.
+Produce a dependency/architecture report.
+Standalone online must not require a Steam client.
+•
+•
+•
+•
+•
+•
+•
+20
+31. LOBBY
+Private lobbies only in v1.
+Create Lobby generates a six-character join code.
+Use uppercase Latin letters and digits.
+Exclude visually ambiguous characters.
+Store code in searchable lobby attributes.
+Join Lobby searches by code.
+Room capacity:
+2.
+Create lobby screen includes:
+join code;
+selected map;
+round count;
+players;
+Ready state;
+Start.
+Guest can Ready/Not Ready.
+Host Start is enabled only when guest is connected and Ready.
+Changing match settings resets Guest Ready.
+Round count:
+1–10.
+Use one map for the whole series in v1.
+Architect MatchSettings for future map playlists and MatchModifiers.
+32. ROUND / SERIES FLOW
+Before race:
+both clients confirm map/assets loaded.
+•
+•
+•
+•
+•
+•
+21
+Then control hints.
+Then synchronized:
+3 2 1 GO!
+Use host-authoritative start time.
+First valid player to Finish:
+wins the round.
+Second player receives 30 seconds to Finish.
+Winner camera automatically spectates the remaining player.
+Series winner:
+most round wins.
+Tie after final configured round:
+Draw.
+No tiebreaker.
+Between rounds:
+Results → both Ready → reset map and gameplay state → loading → countdown.
+Series Results:
+score;
+winner/draw;
+all round results;
+best times;
+Play Again;
+Return to Lobby;
+Main Menu.
+33. DISCONNECTS
+Guest disconnect:
+Pause entire online match.
+Start 45-second reconnect window.
+•
+•
+•
+•
+•
+•
+•
+22
+If guest returns:
+respawn guest at last valid checkpoint, or Start.
+Resume match.
+If guest does not return:
+host wins current round.
+Host disconnect:
+end match.
+Inform guest.
+Return to Lobby/Menu.
+Do not implement host migration.
+Do not allow unstable host conditions to migrate authority.
+34. HUD
+Use a compact fixed adaptive HUD.
+Display:
+current race timer;
+round number;
+series score;
+player progress;
+opponent progress;
+offscreen opponent direction;
+reconnect/network state.
+Do NOT display:
+Dash charge icon;
+Double Jump icon;
+permanent checkpoint count;
+first/second place badge;
+minimap.
+Ability readiness should be visually encoded on the character.
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+23
+35. UI
+Main Menu:
+New Game
+Solo
+Online
+Create Lobby
+Join Lobby
+Customization
+Settings
+Video
+Audio
+Controls
+Accessibility
+Level Editor
+display "In Development"
+Quit
+Display profile preview/nickname in the main menu header.
+Click/open this to access Profile.
+Use a minimalist techno-industrial presentation.
+Keep transitions short, approximately 150–250 ms.
+36. FIRST RUN
+Splash:
+ProjectVelocity logo.
+Short fade.
+If first launch:
+choose language;
+enter nickname;
+detect initial input device.
+Then open Main Menu.
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+•
+24
+37. INPUT / UI NAVIGATION
+The full UI must be usable with:
+mouse;
+keyboard;
+controller.
+Implement correct focus navigation.
+Support automatic switch of button prompts according to the last active device.
+Persist last active device.
+Support controller hotplug.
+Support Xbox / PlayStation / Nintendo-style / Steam Deck prompt mappings.
+Use Godot Input as the universal gameplay input abstraction.
+Steam Input comes only in a later Steam-specific adapter.
+Do not implement controller rumble in v1.
+38. VIDEO SETTINGS
+Implement:
+Resolution. Windowed. Fullscreen. Borderless. VSync. FPS limit. Effects quality. Screen shake. Post/
+camera effect intensity. Speed effect intensity. UI Scale. HUD opacity.
+FPS limits:
+30 60 90 120 144 165 240 Unlimited
+When changing resolution/window mode:
+apply temporarily; show 15-second confirmation; rollback if not accepted.
+During an active online round, block resolution/window mode changes.
+Support ultrawide but do not grant increased competitive visibility.
+•
+•
+•
+25
+39. STEAM DECK QUALITY
+Implement:
+Quality. Balanced. Performance.
+These presets affect visuals only.
+Never gameplay simulation or networking.
+40. ACCESSIBILITY
+Implement at least:
+High Contrast. Flash intensity. Disable strong flashes. Colorblind correction options. Text size. UI Scale.
+Speed effect intensity. Screen Shake: Off / Low / Medium / High.
+HUD opacity: approximately 50–100%.
+41. AUDIO FOUNDATION
+Do not spend resources generating final sound content.
+Create buses:
+Master Music SFX UI Ambience
+Create settings.
+Prepare empty or placeholder music slots for:
+Main Menu. Level.
+42. SAVE SYSTEM
+Use versioned JSON.
+Include save_version .
+Support migrations.
+Store at minimum:
+• PlayerProfileData;
+26
+settings;
+control bindings;
+accessibility;
+customization;
+language;
+records;
+PB splits;
+last input device;
+lobby defaults.
+Create backup before replacing a valid save.
+If primary corrupt:
+restore backup.
+If both corrupt:
+create defaults and notify user.
+Never silently discard user data.
+43. LOCALIZATION
+Minimum:
+Russian. English.
+Use translation keys.
+Avoid hardcoded user-facing strings.
+44. PERFORMANCE
+Use object pooling for projectiles and repeated effects.
+Avoid first-use stutter through preloading.
+Create a dev benchmark scene.
+Profile after large milestones.
+Atlas/sprite sheet hard cap:
+1024×1024.
+Target around:
+•
+•
+•
+•
+•
+•
+•
+•
+•
+27
+800×800.
+Typical character frames:
+128×128 to 192×192.
+Use reasonable texture memory.
+Do not create unnecessary 2K/4K assets.
+45. DEBUG / QA
+Implement a dev mode containing:
+FPS. Ping. Packet loss. Network timings. Prediction/reconciliation metrics. Player velocity/state. Active
+checkpoint. Collision visualization. Force death. Respawn. Restore abilities. Jump to playground sections.
+Network condition emulation.
+Any gameplay-affecting debug use invalidates Time Trial records.
+Create local network logs in dev builds.
+Create local crash/debug logs.
+Do not automatically upload logs.
+Display DEV/STAGING build watermark where appropriate.
+46. GIT
+GitHub repository.
+Branches:
+main dev feature/*
+You may push:
+dev. feature/*.
+Do not push directly to main.
+Do not merge main.
+For stable work create Pull Requests.
+28
+Developer performs final merge.
+47. CI
+Use GitHub Actions.
+Initial pipeline:
+static/project validation;
+automated tests;
+headless smoke tests where practical;
+Windows standalone build.
+Later add:
+Linux standalone;
+Steam build.
+Create staging/pre-release artifacts for developer testing before merge to main.
+48. DOCUMENTATION
+Maintain:
+README.md ARCHITECTURE.md NETWORKING.md CONTROLS.md MAP_FORMAT.md SAVE_FORMAT.md
+CODING_STANDARDS.md DEPENDENCIES.md CHANGELOG.md BUILD_AND_RUN.md
+TESTING_CHECKLIST.md KNOWN_ISSUES.md NEXT_STEPS.md
+Documentation must reflect actual implementation.
