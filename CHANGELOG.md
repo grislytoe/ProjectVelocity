@@ -2,6 +2,8 @@
 
 ## 0.5.0-dev — M5 local camera
 
+- Reduced zoom excursions by 30% after camera comfort feedback: 1.15 → 1.105 and 0.85 → 0.895; neutral framing and follow timing unchanged.
+
 - Developer-requested controls: movement and Dash aim share WASD/left stick, including rebindings; Shift/RB still trigger separately. Existing saved direction overrides remain readable but cannot restore separate aim.
 
 - Configurable Camera2D follow with capped velocity look-ahead, exponential easing and 5–7% reference framing.

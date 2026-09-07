@@ -18,6 +18,9 @@ func check(value: bool, message: String) -> void:
 func run() -> void:
 	var config := CameraConfig.new()
 	check(config.valid(), "Default config")
+	check(is_equal_approx(config.zoom_for_view(Vector2(1920, 1080), 1.15), 1.105), "Zoom-in excursion reduced by 30 percent")
+	check(is_equal_approx(config.zoom_for_view(Vector2(1920, 1080), 0.85), 0.895), "Zoom-out excursion reduced by 30 percent")
+	check(is_equal_approx(config.zoom_for_view(Vector2(1920, 1080)), 1.0), "Neutral framing unchanged")
 	var invalid: CameraConfig = config.duplicate() as CameraConfig
 	invalid.follow_rate = NAN
 	check(not invalid.valid(), "Reject invalid smoothing")
@@ -63,7 +66,7 @@ func run() -> void:
 	model.select_zone(Vector2(50, 50), [zone, higher], 24)
 	check(model.active_zone == higher, "Higher-priority zone wins")
 	model.step(Vector2(50, 50), Vector2(100, 0), Vector2(1920, 1080), config, null, true)
-	check(model.center == higher.lock_position and is_equal_approx(model.zoom_value, 1.15), "Zone lock and zoom")
+	check(model.center == higher.lock_position and is_equal_approx(model.zoom_value, 1.105), "Zone lock and zoom")
 	model.select_zone(Vector2(110, 50), [zone, higher], 24)
 	check(model.active_zone == higher, "Exit hysteresis prevents boundary chatter")
 	model.select_zone(Vector2(130, 50), [zone, higher], 24)
@@ -84,13 +87,13 @@ func run() -> void:
 	model.active_zone = higher
 	higher.lock_position = Vector2(-1000, -1000)
 	model.step(Vector2.ZERO, Vector2.ZERO, Vector2(1920, 1080), config, bounds, true)
-	check(model.center.x >= 1920 / model.zoom_value / 2, "Map bounds override out-of-map lock")
+	check(model.center.x + 0.001 >= 1920 / model.zoom_value / 2, "Map bounds override out-of-map lock (float tolerance)")
 	model.active_zone = null
 	model.step(Vector2(2000, 1000), Vector2.ZERO, Vector2(1920, 1080), config, null, true)
 	check(model.center == Vector2(2000, 930) and model.look_offset == Vector2.ZERO, "Teleport resets lag and look-ahead")
 	model.active_zone = higher
 	model.step(Vector2(2000, 1000), Vector2.ZERO, Vector2(1920, 1080), config)
-	check(model.zoom_value > 1 and model.zoom_value < 1.15, "Zone zoom eases on entry")
+	check(model.zoom_value > 1 and model.zoom_value < 1.105, "Zone zoom eases on entry")
 	model.active_zone = null
 	for tick: int in 180:
 		model.step(Vector2(2000, 1000), Vector2.ZERO, Vector2(1920, 1080), config)

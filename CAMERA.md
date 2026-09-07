@@ -8,7 +8,7 @@ Instantiate `core/camera/local_player_camera.tscn` as a sibling of the player an
 
 ## Framing and timing
 
-CameraConfig/default_camera.tres owns all tuning. Default base zoom 1.0 shows the 64px robot at 5.93% of a 1080px reference view. The effective zoom scales with the logical viewport height. The default allowed multipliers 0.85–1.15 keep the robot around 5.04–6.81%, including zones. The existing fixed-aspect canvas stretch preserves this framing at 1280×720, 1920×1080, 2560×1440 and 3840×2160; wider windows retain bars. Deliberately changing the config's zoom limits/reference height can change that design contract.
+CameraConfig/default_camera.tres owns all tuning. Default base zoom 1.0 shows the 64px robot at 5.93% of a 1080px reference view. The effective zoom scales with the logical viewport height. Hard zoom limits are 0.85–1.15; the default variation strength of 0.7 reduces the effective range to 0.895–1.105 (around 5.30–6.55% player height), including zones. The existing fixed-aspect canvas stretch preserves this framing at 1280×720, 1920×1080, 2560×1440 and 3840×2160; wider windows retain bars. Deliberately changing the config's zoom limits/reference height can change that design contract.
 
 The camera runs after the controller at physics priority 100, at the same fixed 60 Hz. CameraFollowModel operates on copied world position and velocity; it never writes to the target. Exponential follow, zoom and look-ahead easing use rates per second and a fixed 1/60 step. There is no render-delta feedback into camera or gameplay state.
 
@@ -17,6 +17,7 @@ Project physics interpolation is enabled. Camera2D uses Physics callback mode, a
 | CameraConfig field | Default / meaning |
 | --- | --- |
 | base_zoom / minimum_zoom / maximum_zoom | 1.0 / 0.85 / 1.15 at reference height |
+| zoom_variation_strength | 0.7: reduces clamped zoom excursions from base by 30%; effective default range 0.895–1.105 |
 | reference_height | 1080 logical pixels |
 | follow_rate | 9 per second |
 | look_ahead_rate | 7 per second |
