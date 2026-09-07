@@ -4,6 +4,7 @@ extends CharacterBody2D
 
 signal dash_started
 signal double_jumped
+signal died
 signal relocated(position: Vector2)
 
 @export var movement_config: PlayerMovementConfig = preload("res://gameplay/player/default_movement.tres")
@@ -12,6 +13,7 @@ var input_layer: InputLayer
 var input_provider: Callable
 var motor: PlayerMotor
 var spawn_position: Vector2
+var start_blocked: bool = false
 var contacts := MovementContacts.new()
 var _neutral := InputFrame.new()
 var _left_probe := KinematicCollision2D.new()
@@ -50,6 +52,10 @@ func _physics_process(_delta: float) -> void:
 
 
 func advance(frame: InputFrame) -> void:
+	if start_blocked:
+		clear_selection()
+		publish_visuals()
+		return
 	collect_contacts()
 	motor.step(frame, contacts)
 	velocity = motor.velocity
@@ -116,6 +122,7 @@ func die(ignore_invulnerability: bool = false) -> bool:
 	velocity = Vector2.ZERO
 	clear_selection()
 	publish_visuals()
+	died.emit()
 	return true
 
 

@@ -58,3 +58,10 @@
 - English/Russian placeholder scene; no gameplay.
 - Dependency-free bootstrap tests, bounded headless validation, Windows staging export and GitHub Actions baseline.
 - Engineering, branch, dependency and architecture documentation.
+
+## 0.7.0-dev — M7
+
+- Add per-player ordered/optional checkpoint progress and mandatory Finish validation with localized feedback.
+- Add reusable DeathZone and independently owned 0.45-second death recovery with static respawn validation, Start fallback, blocked-spawn retry and existing 0.75-second immunity/presentation.
+- Add transport-free synchronized-ready tick gate and actor start barrier, isolated M7 fixtures and automated physics tests.
+- Preserve M6 stations, movement/camera replays, controls, profile schema and protocol. Build 8; stacked PR targets unmerged M6.
