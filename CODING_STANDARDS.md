@@ -28,3 +28,7 @@ Validate untrusted Variant data before typed access. Keep migrations pure and se
 ## Input conventions
 
 Gameplay consumes InputFrame snapshots from one application InputLayer. Keep actions separate from availability/cooldowns and from platform APIs. Register bindings through InputBindings/InputLayer, clear held state on rebind/focus loss/disconnect, and treat exposed configuration as read-only. Keep keyboard/gamepad overrides separate, return translation keys for errors, and let InputPreferences own debounced disk writes. Tests inject events and isolated saves; simulated hotplug is not evidence of physical driver compatibility.
+
+## Movement conventions
+
+Call controller simulation only from the fixed 60 Hz physics loop. Resource durations become integer tick budgets; never use rendering delta, wall-clock time or asynchronous timers for movement. Keep PlayerMovementConfig immutable during a run. Feed InputFrame and MovementContacts into the motor, return state/events, and apply collision feedback in the CharacterBody2D adapter. Presentation observes but never mutates simulation. New mechanics need both state-level checks and a real-body collision fixture when geometry matters. Render-rate replay equality is not a cross-platform determinism guarantee.

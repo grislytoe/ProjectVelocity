@@ -68,6 +68,19 @@ func _run() -> void:
 	_layer.sample()
 	_layer.clear_dash_selection()
 	_check(_layer.sample().dash_direction == Vector2.ZERO, "Held direction does not relatch after clear")
+	_send(InputBindings.key(KEY_SHIFT))
+	_check(_layer.sample().dash_pressed and _layer.sample().dash_direction == Vector2.RIGHT,
+		"Fresh Dash trigger reuses continuously held keyboard direction")
+	_layer.clear_dash_selection()
+	await process_frame
+	_check(not _layer.sample().dash_pressed and _layer.sample().dash_direction == Vector2.ZERO,
+		"Held trigger and direction do not auto-repeat")
+	_send(InputBindings.key(KEY_SHIFT), false)
+	await process_frame
+	_send(InputBindings.key(KEY_SHIFT))
+	_check(_layer.sample().dash_pressed and _layer.sample().dash_direction == Vector2.RIGHT,
+		"Further Dash press still reuses held keyboard direction")
+	_send(InputBindings.key(KEY_SHIFT), false)
 	_send(InputBindings.key(KEY_RIGHT), false)
 	_layer.sample()
 	_send(InputBindings.key(KEY_UP))
@@ -103,6 +116,14 @@ func _run() -> void:
 		"Right stick quantizes to diagonal")
 	_send("button:10", true, 42)
 	_check(_layer.sample().dash_pressed, "RB/R1 Dash")
+	_layer.clear_dash_selection()
+	_send("button:10", false, 42)
+	await process_frame
+	_check(_layer.sample().dash_direction == Vector2.ZERO and not _layer.sample().dash_pressed,
+		"Held stick alone does not auto-fire after clearing")
+	_send("button:10", true, 42)
+	_check(_layer.sample().dash_pressed and _layer.sample().dash_direction.is_equal_approx(Vector2(-1, 1).normalized()),
+		"Fresh RB/R1 trigger reuses continuously held stick direction")
 	_layer.update_connection(43, true, "Nintendo Switch Pro")
 	_send("button:0", true, 43)
 	_check(_layer.active_pad == 43 and _layer.prompt("jump").label == "B", "Nintendo positional prompt")

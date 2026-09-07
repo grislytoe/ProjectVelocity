@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://gameplay/player/player_controller.gd" id="1"]
+[ext_resource type="Script" path="res://visuals/player/player_placeholder.gd" id="2"]
+[ext_resource type="Resource" path="res://gameplay/player/default_movement.tres" id="3"]
+
+[sub_resource type="CapsuleShape2D" id="Capsule"]
+radius = 16.0
+height = 64.0
+
+[node name="Player" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1")
+movement_config = ExtResource("3")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("Capsule")
+
+[node name="Presentation" type="Node2D" parent="."]
+script = ExtResource("2")

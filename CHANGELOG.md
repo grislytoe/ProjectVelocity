@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0-dev — M3 player controller
+
+- Fresh Dash presses reuse a continuously held keyboard/stick direction after selection is cleared; no direction release is required and no automatic Dash is queued.
+
+- Manual keyboard review confirmed movement, Double Jump and Dash. Arena reset now requires one continuous second of holding R, triggers once per hold and rearms on release; six regression checks cover its timing.
+
+- Data-driven typed CharacterBody2D with ground/air acceleration, variable jump, six-tick coyote time, one extra jump, wall slide/jump and eight-way Dash.
+- Fixed-tick movement state machine, terminal velocity, walkable/sliding slopes and lifecycle APIs; no Jump Buffer or Fast Fall gameplay.
+- Independent animation state machine and robot placeholder, local Dash indicator and isolated no-save arena with device-aware prompts.
+- Motor/state tests and actual collision replays at 30/60/144 FPS alongside M0–M2; save schema 2 and network protocol 1 unchanged.
+
 ## 0.2.0-dev — M2 input and device layer
 
 - Godot keyboard/gamepad action maps, physical-key defaults, independent profiles, capture/rebind/reset and deadzones.

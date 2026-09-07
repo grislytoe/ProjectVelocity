@@ -1,6 +1,7 @@
 # Known issues
 
-- M2 implements a reusable input/device layer, not player movement, ability state, pause/restart behavior or a settings UI. M3 has not started.
+- M3 implements the controller in a standalone developer arena; F5/main and Windows staging still use the foundation placeholder. Run the arena with F6. Race modes, hazards, checkpoint/death scheduling, pause UI and final art are later work.
+- Movement tuning is an initial baseline. Automated collision/replay checks do not replace subjective playtesting or prove cross-platform bitwise determinism. Final feel and physical-controller playtesting remain outstanding.
 - No physical controllers were available during M2. Synthetic events and Godot hotplug signals pass tests; real USB/Bluetooth hotplug, platform driver mappings and device-name detection require hardware validation.
 - Controller prompt family detection uses names and may need the explicit family override. Prompt descriptors are text/tokens; final glyph art is deferred.
 - One InputLayer and one save writer are supported per application. Concurrent processes writing the same save are not coordinated.

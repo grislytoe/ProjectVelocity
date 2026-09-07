@@ -11,14 +11,14 @@ Build/network identity lives in `core/build/build_info.gd`: `VERSION` (game vers
 | Directory | Responsibility |
 | --- | --- |
 | core/ | Bootstrap, build identity, profile data, application config, logging |
-| gameplay/ | Future movement, race rules, hazards; no service SDK calls |
+| gameplay/ | M3 controller, movement Resource, contact data and fixed-tick states; future race rules/hazards |
 | networking/ | Future transport, prediction, reconciliation, authoritative protocol |
 | platform_services/ | Future PlatformService, OnlineService, LobbyService, MultiplayerTransport and IdentityService contracts/adapters |
 | ui/ | Presentation and localization; never owns simulation |
 | save_system/ | Validated versioned JSON, sequential migrations, staging and backup recovery |
 | map_data/ | Future map definitions and modular sections |
 | audio/ | Future buses, audio settings, sound assets |
-| visuals/ | Future character presentation, animation and VFX |
+| visuals/ | Independent player animation state machine and procedural placeholder |
 | dev_tools/ | Validation tooling; future developer tools and benchmarks |
 | tests/ | Dependency-free bootstrap and isolated persistence integration tests |
 | docs/ | Master specification and milestone evidence |
@@ -40,10 +40,18 @@ Prefer typed Resources, small components, signals, explicit ownership and compos
 
 PlayerProfileData owns typed profile conversion, UUID v4 creation and nickname validation. SaveSchema owns JSON shape/value checks, settings/record foundations and sequential migration. SaveStore owns disk I/O through an injected directory; it never relies on UI or platform SDKs. Bootstrap constructs the store, loads/creates the profile, updates last launch and applies saved language. Future UI can inspect save_store.notification_key and read_only without parsing logs. No new autoload is required.
 
-Production uses user://saves. Tests inject unique OS-cache directories; --smoke-test automatically chooses an isolated store. Profile is the single owner of customization, language and last-input-device data. Settings/record containers are data-only. See SAVE_FORMAT.md for schema version 1, backup ordering, quarantine and future-version protection.
+Production uses user://saves. Tests inject unique OS-cache directories; --smoke-test automatically chooses an isolated store. Profile is the single owner of customization, language and last-input-device data. Settings/record containers are data-only. See SAVE_FORMAT.md for current schema version 2, backup ordering, quarantine and future-version protection.
 
 ## M2 input and devices
 
 core/input contains InputBindings (defaults/codecs), InputLayer (Godot event/map adapter and transient intent), InputFrame (consumer snapshot), InputPrompts (glyph-independent descriptors), and InputPreferences (debounced SaveStore adapter). Bootstrap composes these services; they do not own player/gameplay state or call network/platform SDKs. Standard ui_* actions support Godot Control navigation. See CONTROLS.md for lifecycle and ownership.
 
 Schema 2 adds independent keyboard/gamepad overrides, deadzones and prompt-family preferences; M1 saves migrate sequentially and retain their profile and legacy binding foundation. Tests inject synthetic device events and isolated stores. Physical controller validation remains outstanding.
+
+## M3 player controller
+
+`PlayerController` is the CharacterBody2D collision adapter. It accepts an injected InputLayer or InputFrame provider, samples once per physics tick, gathers floor/wall/slope contacts, advances PlayerMotor, and calls move_and_slide. PlayerMotor and its reusable state objects use a fixed 1/60 step and integer tick timers. They do not poll input, access SceneTree, write saves or call network services. Dash direction uses the existing pure M2 quantizer.
+
+`PlayerMovementConfig` is a typed Resource; `default_movement.tres` is the tuning entry point. Treat tuning as immutable during a run. PlayerAnimationMachine and PlayerPlaceholder consume state/events only. Cosmetic poses cannot change simulation. Lifecycle methods expose death/respawn/finish for later modes; M3 does not create hazards, checkpoints or race rules.
+
+The isolated `dev_tools/player_playground.tscn` composes default input, camera, test geometry and localized diagnostic HUD. It never initializes SaveStore and is excluded from staging exports with other dev_tools. See PLAYER_CONTROLLER.md for timing, transitions and tuning contracts; docs/M3_VALIDATION.md for evidence.
