@@ -44,6 +44,10 @@ foreach ($fps in @(30, 60, 144)) {
     $replayHashes += $Matches[1]
 }
 if (@($replayHashes | Select-Object -Unique).Count -ne 1) { throw "M3 physics differs between render rates" }
+Invoke-GodotCheck -Name "m4-tests" -Arguments @("--headless", "--path", ".", "--script", "tests/character_presentation_test.gd") -Marker "PROJECTVELOCITY_M4_OK"
+Invoke-GodotCheck -Name "m4-no-visuals" -Arguments @("--headless", "--path", ".", "--fixed-fps", "60", "--script", "tests/player_physics_test.gd", "--", "--without-presentation") -Marker "PROJECTVELOCITY_M3_PHYSICS_OK"
+$noVisuals = Get-Content (Join-Path $logRoot "m4-no-visuals.stdout.log") -Raw
+if ($noVisuals -notmatch 'M3_REPLAY_HASH=([0-9a-f]{64})' -or $Matches[1] -ne $replayHashes[0]) { throw "Presentation affects physics replay" }
 Invoke-GodotCheck -Name "boot" -Arguments @("--headless", "--path", ".", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
 git diff --cached --check
 if ($LASTEXITCODE -ne 0) { throw "Staged whitespace validation failed" }
@@ -56,4 +60,4 @@ if ($ExportWindows) {
     $Godot = Join-Path $projectRoot "builds/windows/ProjectVelocity.exe"
     Invoke-GodotCheck -Name "export-boot" -Arguments @("--headless", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
 }
-Write-Output "M0 + M1 + M2 + M3 validation passed. Physics replay identical at 30/60/144 FPS."
+Write-Output "M0 + M1 + M2 + M3 + M4 validation passed. Physics replay identical at 30/60/144 FPS and without presentation."

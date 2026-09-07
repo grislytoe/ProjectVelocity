@@ -32,3 +32,7 @@ Gameplay consumes InputFrame snapshots from one application InputLayer. Keep act
 ## Movement conventions
 
 Call controller simulation only from the fixed 60 Hz physics loop. Resource durations become integer tick budgets; never use rendering delta, wall-clock time or asynchronous timers for movement. Keep PlayerMovementConfig immutable during a run. Feed InputFrame and MovementContacts into the motor, return state/events, and apply collision feedback in the CharacterBody2D adapter. Presentation observes but never mutates simulation. New mechanics need both state-level checks and a real-body collision fixture when geometry matters. Render-rate replay equality is not a cross-platform determinism guarantee.
+
+## Presentation conventions
+
+Animations accept detached PlayerVisualFrame data, never a mutable motor/controller. Keep preselection separate and local-only. Treat RobotAppearance and shared config Resources as read-only; validate/copy profiles at the boundary and never load arbitrary cosmetic IDs as resource paths. Apply opponent opacity once at the common root, not independently to nested children. Keep art modules free of collisions. A visual transition must never trigger movement, consume an ability or schedule a gameplay respawn.

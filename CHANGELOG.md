@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0-dev — M4 animation and character presentation
+
+- Detached visual snapshots and an optional presentation observer; gameplay replay is unchanged with all visuals removed.
+- All 14 required cosmetic poses, modular beveled android parts, run cadence, reversal sequence, oriented Dash and short death disintegration.
+- Profile-driven body/accent RGB, future slot metadata, 100% local / 30% opponent policy, nickname and outline framework.
+- Readiness lights and shape cues, local-only Dash indicator, developer pose/color gallery and automated presentation tests.
+- Save schema 2, protocol 1 and M3 movement behavior unchanged; no networking or later milestone gameplay.
+
 ## 0.3.0-dev — M3 player controller
 
 - Fresh Dash presses reuse a continuously held keyboard/stick direction after selection is cleared; no direction release is required and no automatic Dash is queued.

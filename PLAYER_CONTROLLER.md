@@ -36,7 +36,7 @@ PlayerStateMachine owns Idle, Run, Jump, Fall, WallSlide, WallJump, Dash, Death,
 
 `die()` freezes movement and clears transient ability timers; `respawn_at(position)` resets motion/abilities/selection and grants 45 ticks of invulnerability; `finish_run()` freezes the finished actor. Respawn exits through one neutral simulation tick. Later gameplay owns the death delay, checkpoint choice and finish trigger. No timers for race modes, hazards or multiplayer are introduced.
 
-PlayerAnimationMachine is independent: Idle, Run, Jump, Fall, DoubleJump, WallSlide, WallJump, Dash, Landing, Death, Respawn, FinishVictory, Turnaround and Skid. FastFall is a reserved pose only. Procedural placeholders show run cadence proportional to speed, reversal Skid→Turnaround→Run, a max-speed outline, a distinct extra-jump ring, mirrored wall-facing and an eight-direction oriented Dash pose/streak. No squash/stretch. The selection arrow can be disabled with local_indicator for later remote actors.
+PlayerAnimationMachine is independent: Idle, Run, Jump, Fall, DoubleJump, WallSlide, WallJump, Dash, Landing, Death, Respawn, FinishVictory, Turnaround and Skid. FastFall is a reserved pose only. Procedural placeholders show run cadence proportional to speed, reversal Skid→Turnaround→Run, a max-speed trail, a distinct extra-jump ring, mirrored wall-facing and an eight-direction oriented Dash pose/streak. No squash/stretch. M4 uses detached PlayerVisualFrame snapshots and enforces remote indicator suppression via is_local. See CHARACTER_PRESENTATION.md for modular art, profile colors and opponent policy.
 
 ## Determinism and boundaries
 

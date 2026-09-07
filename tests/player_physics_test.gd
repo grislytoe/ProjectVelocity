@@ -24,6 +24,8 @@ func setup() -> void:
 	layer.watch_hardware = false
 	root.add_child(layer)
 	player = preload("res://gameplay/player/player.tscn").instantiate() as PlayerController
+	if OS.get_cmdline_user_args().has("--without-presentation"):
+		player.get_node("Presentation").free()
 	player.position = Vector2(100, 500)
 	player.input_provider = provide
 	player.input_layer = layer
