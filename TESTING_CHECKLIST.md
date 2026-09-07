@@ -1,6 +1,6 @@
 # Testing checklist
 
-Run dev_tools/validate.ps1 for the complete M0 + M1 + M2 + M3 suite; add -ExportWindows when matching export templates are installed. CI uses that switch on Windows.
+Run dev_tools/validate.ps1 for the complete M0 + M1 + M2 + M3 + M4 suite; add -ExportWindows when matching export templates are installed. CI uses that switch on Windows.
 
 ## Automated
 
@@ -50,3 +50,16 @@ Evidence: docs/M2_VALIDATION.md. No gameplay is required to run these tests.
 - [ ] Further movement-feel tuning and physical gamepad playtesting on target hardware.
 
 Evidence: docs/M3_VALIDATION.md. The M3 fixture never opens SaveStore. Motor tests are pure and physics tests construct isolated geometry in memory.
+
+## M4 presentation validation
+
+- [x] Every movement state maps to its explicit pose; temporary extra jump/landing/respawn poses expire or interrupt cleanly.
+- [x] Eight-direction Dash orientation, mirrored wall side, run cadence and rigid module transforms.
+- [x] Detached snapshots cannot mutate the motor; deleting all presentation nodes leaves the 720-tick replay hash unchanged.
+- [x] Profile color validation/copying, opaque material policy, unknown-slot fallback and invalid-profile preservation.
+- [x] Local/opponent alpha, outline and nickname policy; opponents ignore local preselection.
+- [x] Ability lights recover without replacing customized body RGB; gallery color/readiness controls use the same pipeline.
+- [x] Normal OpenGL gallery and playable arena smoke captures, inspected at reference window size.
+- [ ] Developer M4 pose/feel review and physical gamepad/target-platform checks.
+
+See docs/M4_VALIDATION.md. Gallery and tests never open a production save.

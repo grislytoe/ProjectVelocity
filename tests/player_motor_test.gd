@@ -187,15 +187,15 @@ func test_presentation() -> void:
 	motor.machine.transition(PlayerStateMachine.State.RUN)
 	motor.velocity.x = 600
 	motor.requested_horizontal = -1
-	animation.advance(motor)
+	animation.advance(PlayerVisualFrame.from_motor(motor))
 	check(animation.current == PlayerAnimationMachine.Pose.SKID, "reversal skid")
 	for tick: int in 5:
-		animation.advance(motor)
+		animation.advance(PlayerVisualFrame.from_motor(motor))
 	check(animation.current == PlayerAnimationMachine.Pose.TURNAROUND, "skid to turnaround")
 	for tick: int in 4:
-		animation.advance(motor)
+		animation.advance(PlayerVisualFrame.from_motor(motor))
 	check(animation.current == PlayerAnimationMachine.Pose.RUN, "turnaround to run")
 	motor.events = PlayerMotor.Event.DOUBLE_JUMPED
-	animation.advance(motor)
+	animation.advance(PlayerVisualFrame.from_motor(motor))
 	check(animation.current == PlayerAnimationMachine.Pose.DOUBLE_JUMP, "double jump distinct pose")
 	check(motor.velocity.x == 600, "presentation cannot steer motor")

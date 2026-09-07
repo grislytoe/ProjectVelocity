@@ -18,7 +18,7 @@ var _right_probe := KinematicCollision2D.new()
 var _down_probe := KinematicCollision2D.new()
 var _relocated: bool = true
 
-@onready var presentation: PlayerPlaceholder = $Presentation
+@onready var presentation: PlayerPlaceholder = get_node_or_null("Presentation") as PlayerPlaceholder
 
 
 func _ready() -> void:
@@ -67,7 +67,12 @@ func advance(frame: InputFrame) -> void:
 		double_jumped.emit()
 	if motor.machine.locked():
 		selected = Vector2.ZERO
-	presentation.present(motor, selected)
+	publish_visuals(selected)
+
+
+func publish_visuals(selected: Vector2 = Vector2.ZERO) -> void:
+	if is_instance_valid(presentation):
+		presentation.present(PlayerVisualFrame.from_motor(motor), selected)
 
 
 func collect_contacts() -> void:
@@ -109,6 +114,7 @@ func die(ignore_invulnerability: bool = false) -> bool:
 	motor.die()
 	velocity = Vector2.ZERO
 	clear_selection()
+	publish_visuals()
 	return true
 
 
@@ -121,9 +127,11 @@ func respawn_at(location: Vector2) -> void:
 	_relocated = true
 	clear_selection()
 	reset_physics_interpolation()
+	publish_visuals()
 
 
 func finish_run() -> void:
 	motor.finish()
 	velocity = Vector2.ZERO
 	clear_selection()
+	publish_visuals()

@@ -8,3 +8,6 @@
 - Recovery remains localized state for future UI. Same-directory rename plus flush is not a universal power-loss durability guarantee; unsupported saves stay read-only.
 - Quarantined corrupt files and interrupted test-cache folders can remain for diagnosis.
 - Linux export, Steam Deck hardware behavior and target-hardware performance are not validated. CI builds Windows staging with official templates.
+
+- M4 uses procedural modular placeholder art. Unknown cosmetic slot IDs use the base modules; an asset registry, final art and production customization UI are future work.
+- Opponent opacity/nickname support is a presentation framework tested using synthetic snapshots, not live multiplayer. Physical gamepad and subjective M4 pose review remain outstanding.

@@ -4,6 +4,7 @@ extends Node2D
 var player: PlayerController
 var layer: InputLayer
 var hud: Label
+var profile: PlayerProfileData
 const RESTART_HOLD_TICKS: int = PlayerMovementConfig.PHYSICS_HZ
 var _restart_ticks: int = 0
 
@@ -24,6 +25,8 @@ func _ready() -> void:
 	player.input_provider = sample_input
 	player.input_layer = layer
 	add_child(player)
+	if profile != null:
+		player.presentation.apply_profile(profile)
 	var camera := Camera2D.new()
 	player.add_child(camera)
 	var canvas := CanvasLayer.new()

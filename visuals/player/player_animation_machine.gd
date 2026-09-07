@@ -1,54 +1,67 @@
 class_name PlayerAnimationMachine
 extends RefCounted
-## Presentation state only. Never mutates movement or ability availability.
+## Cosmetic transitions consume detached values and never gate gameplay.
 
 enum Pose {
 	IDLE, RUN, JUMP, FALL, DOUBLE_JUMP, WALL_SLIDE, WALL_JUMP, DASH,
 	LANDING, DEATH, RESPAWN, FINISH_VICTORY, TURNAROUND, SKID, FAST_FALL_RESERVED,
 }
-
+const STATE_POSES: Dictionary = {
+	PlayerStateMachine.State.IDLE: Pose.IDLE, PlayerStateMachine.State.RUN: Pose.RUN,
+	PlayerStateMachine.State.JUMP: Pose.JUMP, PlayerStateMachine.State.FALL: Pose.FALL,
+	PlayerStateMachine.State.WALL_SLIDE: Pose.WALL_SLIDE,
+	PlayerStateMachine.State.WALL_JUMP: Pose.WALL_JUMP, PlayerStateMachine.State.DASH: Pose.DASH,
+	PlayerStateMachine.State.DEATH: Pose.DEATH, PlayerStateMachine.State.RESPAWN: Pose.RESPAWN,
+	PlayerStateMachine.State.FINISH: Pose.FINISH_VICTORY,
+}
 var current: Pose = Pose.IDLE
 var playback_speed: float = 1.0
 var phase: float = 0.0
+var age_ticks: int = 0
 var _remaining: int = 0
 var _braking: bool = false
 
 
-func advance(motor: PlayerMotor) -> void:
-	playback_speed = maxf(0.15, absf(motor.velocity.x) / motor.config.ground_max_speed)
-	phase += playback_speed * PlayerMovementConfig.STEP * 12.0
+func enter(pose: Pose, duration: int = 0) -> void:
+	if current != pose:
+		current = pose
+		age_ticks = 0
+		_remaining = duration
+
+
+func advance(frame: PlayerVisualFrame) -> void:
+	playback_speed = clampf(frame.speed_ratio, 0.15, 2.0)
+	phase += playback_speed * 0.2
+	age_ticks += 1
 	_remaining = maxi(0, _remaining - 1)
-	var state: PlayerStateMachine.State = motor.machine.current
-	var reversing: bool = motor.requested_horizontal * motor.velocity.x < 0.0 and absf(motor.velocity.x) > 100.0
-	if state == PlayerStateMachine.State.DEATH:
-		current = Pose.DEATH
+	var state: PlayerStateMachine.State = frame.state
+	var reversing: bool = frame.requested_horizontal * frame.velocity.x < 0 and absf(frame.velocity.x) > 100
+	if state in [PlayerStateMachine.State.DEATH, PlayerStateMachine.State.FINISH, PlayerStateMachine.State.DASH]:
+		enter(STATE_POSES[state])
 	elif state == PlayerStateMachine.State.RESPAWN:
-		current = Pose.RESPAWN
-	elif state == PlayerStateMachine.State.FINISH:
-		current = Pose.FINISH_VICTORY
-	elif state == PlayerStateMachine.State.DASH:
-		current = Pose.DASH
-	elif motor.events & PlayerMotor.Event.DOUBLE_JUMPED:
-		current = Pose.DOUBLE_JUMP
-		_remaining = 11
-	elif motor.events & PlayerMotor.Event.WALL_JUMPED:
-		current = Pose.WALL_JUMP
-		_remaining = 8
-	elif motor.events & PlayerMotor.Event.LANDED:
-		current = Pose.LANDING
-		_remaining = 6
+		enter(Pose.RESPAWN, 15)
+	elif frame.events & PlayerMotor.Event.DOUBLE_JUMPED:
+		enter(Pose.DOUBLE_JUMP, 11)
+	elif frame.events & PlayerMotor.Event.WALL_JUMPED:
+		enter(Pose.WALL_JUMP, 8)
+	elif frame.events & PlayerMotor.Event.JUMPED:
+		enter(Pose.JUMP)
+	elif frame.events & PlayerMotor.Event.LANDED:
+		enter(Pose.LANDING, 6)
 	elif state == PlayerStateMachine.State.WALL_SLIDE:
-		current = Pose.WALL_SLIDE
+		enter(Pose.WALL_SLIDE)
+	elif state == PlayerStateMachine.State.WALL_JUMP:
+		enter(Pose.WALL_JUMP)
+	elif current == Pose.RESPAWN and _remaining > 0:
+		pass
 	elif state in [PlayerStateMachine.State.JUMP, PlayerStateMachine.State.FALL]:
 		if _remaining == 0 or current not in [Pose.DOUBLE_JUMP, Pose.WALL_JUMP]:
-			current = Pose.JUMP if motor.velocity.y < 0.0 else Pose.FALL
-	elif _remaining == 0:
+			enter(STATE_POSES[state])
+	elif _remaining == 0 or current not in [Pose.SKID, Pose.TURNAROUND, Pose.LANDING]:
 		if current == Pose.SKID:
-			current = Pose.TURNAROUND
-			_remaining = 4
+			enter(Pose.TURNAROUND, 4)
 		elif reversing and not _braking:
-			current = Pose.SKID
-			_remaining = 5
+			enter(Pose.SKID, 5)
 		else:
-			current = Pose.RUN if state == PlayerStateMachine.State.RUN else Pose.IDLE
+			enter(STATE_POSES.get(state, Pose.IDLE))
 	_braking = reversing

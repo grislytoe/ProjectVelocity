@@ -55,3 +55,9 @@ Schema 2 adds independent keyboard/gamepad overrides, deadzones and prompt-famil
 `PlayerMovementConfig` is a typed Resource; `default_movement.tres` is the tuning entry point. Treat tuning as immutable during a run. PlayerAnimationMachine and PlayerPlaceholder consume state/events only. Cosmetic poses cannot change simulation. Lifecycle methods expose death/respawn/finish for later modes; M3 does not create hazards, checkpoints or race rules.
 
 The isolated `dev_tools/player_playground.tscn` composes default input, camera, test geometry and localized diagnostic HUD. It never initializes SaveStore and is excluded from staging exports with other dev_tools. See PLAYER_CONTROLLER.md for timing, transitions and tuning contracts; docs/M3_VALIDATION.md for evidence.
+
+## M4 character presentation
+
+The optional controller presentation child receives detached PlayerVisualFrame values; PlayerAnimationMachine no longer receives a PlayerMotor. RobotAppearance validates/copies profile customization, CharacterPresentationConfig owns cosmetic policy, and named RobotPart nodes provide rigid modular art. PlayerPlaceholder owns only transforms/drawing, including readiness cues and local-only preselection. Opponent alpha/nickname/outline are presentation policy; no multiplayer transport is implemented.
+
+Lifecycle notifications publish an immediate visual frame, but visual durations never control the lifecycle. CI compares actual movement with the entire presentation child removed. The developer gallery previews all 14 required poses, local/opponent pairs and in-memory color changes. See CHARACTER_PRESENTATION.md and docs/M4_VALIDATION.md.
