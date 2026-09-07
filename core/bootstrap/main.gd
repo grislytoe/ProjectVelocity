@@ -2,9 +2,12 @@ extends Control
 ## Placeholder composition root; gameplay and services are added in later milestones.
 
 var save_store: SaveStore
+var input_layer: InputLayer
+var input_preferences: InputPreferences
 var _smoke_directory: String = ""
 
 @onready var build_label: Label = %BuildLabel
+@onready var prompt_label: Label = %InputPrompt
 @onready var _logger: ProjectLogger = get_node("/root/AppLogger")
 
 
@@ -18,6 +21,15 @@ func _ready() -> void:
 			save_store = SaveStore.new()
 	save_store.open()
 	TranslationServer.set_locale(save_store.data.profile.language)
+	input_layer = InputLayer.new()
+	input_layer.configure(save_store.data.settings.controls.input, save_store.data.profile.last_input_device)
+	input_preferences = InputPreferences.new()
+	input_preferences.store = save_store
+	input_preferences.layer = input_layer
+	add_child(input_preferences)
+	input_layer.prompts_changed.connect(_update_prompts)
+	add_child(input_layer)
+	_update_prompts()
 	build_label.text = BuildInfo.label()
 	build_label.visible = BuildInfo.is_development() or OS.has_feature("staging")
 	_logger.info("ProjectVelocity %s started" % BuildInfo.label(), "bootstrap")
@@ -28,6 +40,7 @@ func _ready() -> void:
 func _run_smoke_test() -> void:
 	await get_tree().process_frame
 	await get_tree().physics_frame
+	input_preferences.flush()
 	var save_ok: bool = SaveSchema.validate(save_store.data) and (
 		save_store.notification_key.is_empty())
 	if not _smoke_directory.is_empty():
@@ -45,3 +58,13 @@ func _run_smoke_test() -> void:
 		return
 	print("PROJECTVELOCITY_BOOT_OK")
 	get_tree().quit(0)
+
+
+func _update_prompts() -> void:
+	prompt_label.text = tr("INPUT_PROMPTS") % [
+		input_layer.prompt("jump").get("label", ""), input_layer.prompt("dash").get("label", "")]
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and input_layer != null and prompt_label != null:
+		_update_prompts()

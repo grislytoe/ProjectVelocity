@@ -24,3 +24,7 @@ Before committing, inspect staged changes and run validation. Never commit crede
 ## Persistence conventions
 
 Validate untrusted Variant data before typed access. Keep migrations pure and sequential; test old fixtures and preserve identity. Inject storage paths into tests; never use the production user save. Stage and validate writes before replacement, keep a previous-good backup, and return localized recovery/error state instead of crashing on bad input. Never use nickname as identity. Persistence currently assumes a single writer.
+
+## Input conventions
+
+Gameplay consumes InputFrame snapshots from one application InputLayer. Keep actions separate from availability/cooldowns and from platform APIs. Register bindings through InputBindings/InputLayer, clear held state on rebind/focus loss/disconnect, and treat exposed configuration as read-only. Keep keyboard/gamepad overrides separate, return translation keys for errors, and let InputPreferences own debounced disk writes. Tests inject events and isolated saves; simulated hotplug is not evidence of physical driver compatibility.
