@@ -11,3 +11,6 @@
 
 - M4 uses procedural modular placeholder art. Unknown cosmetic slot IDs use the base modules; an asset registry, final art and production customization UI are future work.
 - Opponent opacity/nickname support is a presentation framework tested using synthetic snapshots, not live multiplayer. Physical gamepad and subjective M4 pose review remain outstanding.
+
+- M5 camera zones are authored axis-aligned world-space Resource rectangles. A map smaller than the visible frame is centered and necessarily exposes its backdrop. Camera collision, cinematics, shake and spectator switching are later work.
+- Rendered jitter was measured on the local OpenGL setup; subjective follow/zone comfort and other hardware still need review. Small external teleports should emit relocated or explicitly reset the camera.

@@ -61,3 +61,9 @@ The isolated `dev_tools/player_playground.tscn` composes default input, camera, 
 The optional controller presentation child receives detached PlayerVisualFrame values; PlayerAnimationMachine no longer receives a PlayerMotor. RobotAppearance validates/copies profile customization, CharacterPresentationConfig owns cosmetic policy, and named RobotPart nodes provide rigid modular art. PlayerPlaceholder owns only transforms/drawing, including readiness cues and local-only preselection. Opponent alpha/nickname/outline are presentation policy; no multiplayer transport is implemented.
 
 Lifecycle notifications publish an immediate visual frame, but visual durations never control the lifecycle. CI compares actual movement with the entire presentation child removed. The developer gallery previews all 14 required poses, local/opponent pairs and in-memory color changes. See CHARACTER_PRESENTATION.md and docs/M4_VALIDATION.md.
+
+## M5 local camera
+
+core/camera contains LocalPlayerCamera (explicit local target and Camera2D adapter), CameraFollowModel (fixed-step copied-value state), and CameraConfig/CameraBounds/CameraZone Resources. The composition root binds one local actor; no player enumeration or networking is involved. Camera updates run after movement and never alter authority. Player relocation is a generic signal, not a camera dependency.
+
+Engine physics interpolation is enabled for matching player/camera render timing. Camera2D native smoothing is disabled in favor of one tested fixed-step smoother. Bounds contain the visible world rectangle at current zoom; priority regions support offset, zoom, look-ahead and temporary position lock. See CAMERA.md and docs/M5_VALIDATION.md. Developer camera fixtures remain excluded from staging exports.

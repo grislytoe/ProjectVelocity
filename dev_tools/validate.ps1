@@ -49,6 +49,16 @@ Invoke-GodotCheck -Name "m4-no-visuals" -Arguments @("--headless", "--path", "."
 $noVisuals = Get-Content (Join-Path $logRoot "m4-no-visuals.stdout.log") -Raw
 if ($noVisuals -notmatch 'M3_REPLAY_HASH=([0-9a-f]{64})' -or $Matches[1] -ne $replayHashes[0]) { throw "Presentation affects physics replay" }
 Invoke-GodotCheck -Name "boot" -Arguments @("--headless", "--path", ".", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
+Invoke-GodotCheck -Name "m5-tests" -Arguments @("--headless", "--path", ".", "--script", "tests/camera_test.gd") -Marker "PROJECTVELOCITY_M5_OK"
+$cameraHashes = @()
+foreach ($fps in @(30, 60, 144)) {
+    Invoke-GodotCheck -Name "m5-physics-$fps" -Arguments @("--headless", "--path", ".", "--fixed-fps", "$fps", "--script", "tests/player_physics_test.gd", "--", "--with-camera") -Marker "PROJECTVELOCITY_M3_PHYSICS_OK"
+    $log = Get-Content (Join-Path $logRoot "m5-physics-$fps.stdout.log") -Raw
+    if ($log -notmatch 'M3_REPLAY_HASH=([0-9a-f]{64})' -or $Matches[1] -ne $replayHashes[0]) { throw "Camera affects gameplay" }
+    if ($log -notmatch 'M5_CAMERA_HASH=([0-9a-f]{64})') { throw "Missing camera hash" }
+    $cameraHashes += $Matches[1]
+}
+if (@($cameraHashes | Select-Object -Unique).Count -ne 1) { throw "Camera differs between render rates" }
 git diff --cached --check
 if ($LASTEXITCODE -ne 0) { throw "Staged whitespace validation failed" }
 git diff --check
@@ -60,4 +70,4 @@ if ($ExportWindows) {
     $Godot = Join-Path $projectRoot "builds/windows/ProjectVelocity.exe"
     Invoke-GodotCheck -Name "export-boot" -Arguments @("--headless", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
 }
-Write-Output "M0 + M1 + M2 + M3 + M4 validation passed. Physics replay identical at 30/60/144 FPS and without presentation."
+Write-Output "M0 + M1 + M2 + M3 + M4 + M5 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."

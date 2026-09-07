@@ -17,3 +17,5 @@ To play M3, open `dev_tools/player_playground.tscn` and press **F6**, or run `go
 Primary targets: Windows x64, Linux x64, SteamOS/Steam Deck. Initial CI exports Windows staging only.
 
 M4 adds modular android poses, profile-driven body/accent colors, opponent opacity/nickname/outline policy and readiness cues. Open `dev_tools/character_gallery.tscn` with **F6** for the interactive pose/color sheet. The playable M3 arena also uses the new presentation. See [CHARACTER_PRESENTATION.md](CHARACTER_PRESENTATION.md).
+
+M5 adds the local follow camera, smoothing/look-ahead, map bounds and camera zones. Open `dev_tools/camera_playground.tscn` with **F6** to inspect default, zoom and lock modes. The ordinary movement arena also uses the new camera. See [CAMERA.md](CAMERA.md).

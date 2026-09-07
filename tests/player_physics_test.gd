@@ -9,6 +9,8 @@ var failures: int = 0
 var trace: PackedStringArray = []
 var slope_start: Vector2
 var seen: Dictionary = {}
+var camera: LocalPlayerCamera
+var camera_trace: PackedStringArray = []
 
 
 func _initialize() -> void:
@@ -30,6 +32,10 @@ func setup() -> void:
 	player.input_provider = provide
 	player.input_layer = layer
 	root.add_child(player)
+	if OS.get_cmdline_user_args().has("--with-camera"):
+		camera = LocalPlayerCamera.new()
+		root.add_child(camera)
+		camera.follow_local(player)
 
 
 func check(value: bool, label: String) -> void:
@@ -40,6 +46,8 @@ func check(value: bool, label: String) -> void:
 
 
 func provide() -> InputFrame:
+	if camera != null:
+		camera_trace.append("%.4f:%.4f:%.6f" % [camera.model.center.x, camera.model.center.y, camera.model.zoom_value])
 	trace.append("%d:%.4f:%.4f:%.4f:%.4f:%d" % [tick, player.position.x, player.position.y,
 		player.velocity.x, player.velocity.y, player.motor.machine.current])
 	seen[player.motor.machine.current] = true
@@ -75,6 +83,8 @@ func provide() -> InputFrame:
 		player.finish_run()
 		check(player.motor.machine.current == PlayerStateMachine.State.FINISH, "finish API")
 		print("M3_REPLAY_HASH=" + "\n".join(trace).sha256_text())
+		if camera != null:
+			print("M5_CAMERA_HASH=" + "\n".join(camera_trace).sha256_text())
 		if failures == 0:
 			print("PROJECTVELOCITY_M3_PHYSICS_OK (%d checks; 720 ticks)" % checks)
 		quit(0 if failures == 0 else 1)

@@ -20,3 +20,6 @@ M4_BODY_COLOR,Body color,Цвет корпуса
 M4_ACCENT_COLOR,Accent color,Цвет акцентов
 M4_READY,Abilities ready,Способности готовы
 M4_GALLERY_FOOTER,Circle: extra jump / square: Dash. Filled = ready. Colors are not saved here.,Круг: второй прыжок / квадрат: рывок. Заливка = готовность. Цвета здесь не сохраняются.
+M5_START,Start / default follow,Старт / обычное слежение
+M5_RAMP,Ramp / zoom zone,Склон / зона масштаба
+M5_LOCK,Platform / locked camera,Платформа / фиксация камеры
