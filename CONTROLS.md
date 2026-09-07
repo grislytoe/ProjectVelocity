@@ -7,7 +7,7 @@ InputLayer is the application-wide Godot Input adapter, created by bootstrap. Ga
 | Action | Keyboard | Standard gamepad |
 | --- | --- | --- |
 | Movement | WASD | Left stick |
-| Dash selection | Arrow keys | Right stick |
+| Dash selection | WASD (same bindings as movement) | Left stick (same bindings as movement) |
 | Jump | Space | Bottom face button (Xbox/Deck A, PlayStation cross, Nintendo B) |
 | Dash trigger | Shift | RB / R1 / R |
 | Pause intent | Escape | Start / Options / + |
@@ -17,7 +17,7 @@ InputLayer is the application-wide Godot Input adapter, created by bootstrap. Ga
 | UI cancel | Escape | Right face button |
 | Focus next / previous | Tab / Shift+Tab | Right / left shoulder |
 
-Jump/pause/restart defaults are initial M2 choices; all are rebindable. No restart hold timer or pause behavior is implemented. Stick axes and face positions use Godot's standard mapping; no Steam Input dependency or rumble.
+Jump/pause/restart defaults are initial M2 choices; all are rebindable. The developer arena requires a continuous one-second restart hold; pause UI is not implemented. Stick axes and face positions use Godot's standard mapping; no Steam Input dependency or rumble.
 
 ## Profiles and bindings
 
@@ -34,7 +34,7 @@ Configuration is copied on configure()/rebind(). Treat exposed dictionaries as r
 
 ## Vectors and Dash
 
-Movement and Dash use configurable radial deadzones (defaults 0.2 and 0.25); outside the deadzone magnitude is rescaled to 0–1 and diagonal movement is clamped. Activity detection has a separate default threshold 0.3. Options accept finite thresholds 0.05–0.9.
+Movement and Dash read the same movement controls and use configurable radial deadzones (defaults 0.2 and 0.25); outside the deadzone magnitude is rescaled to 0–1 and diagonal movement is clamped. Activity detection has a separate default threshold 0.3. Options accept finite thresholds 0.05–0.9.
 
 Dash direction quantizes to exactly eight unit vectors, with neutral = zero. Sectors are centered every 45 degrees; midpoint ties advance to the next sector. Selection persists after releasing a direction. Dash trigger is an independent pressed edge and never fires from direction input alone. The gameplay consumer calls clear_dash_selection() after accepted Dash, death or respawn. After clearing, the next Dash pressed edge can reuse a continuously held keyboard/stick direction. Holding direction or the trigger alone does not auto-fire or queue a Dash on ability refresh. A new/changed direction still updates preselection without a trigger. Ability availability is never stored here.
 
@@ -54,4 +54,8 @@ InputPreferences persists profiles, deadzones, prompt family and last active dev
 
 tests/input_layer_test.gd sends synthetic InputEvents through Godot Input, tests vectors/edges, bindings, prompts, two-pad isolation, hotplug adapter and Godot signal routing, focus cleanup, persistence and v1→v2 migration. It uses isolated save paths.
 
-No physical gamepad was available on the implementation host. USB/Bluetooth hotplug, platform-specific controller naming and glyph expectations remain manual hardware checks; simulated tests do not claim driver/device coverage.
+The developer confirmed physical gamepad controls work during M5 review, before the shared movement/Dash layout change. The new layout still needs a brief manual check. USB/Bluetooth hotplug, platform-specific naming and other target devices remain separate hardware checks; synthetic tests do not claim that coverage.
+
+## Approved shared-aim control update
+
+The developer requested movement-bound Dash aim during M5 review, superseding the original separate arrows/right-stick layout. Rebinding move_left/right/up/down updates both movement and Dash aim. Legacy dash_left/right/up/down API names resolve to movement bindings for reads, prompts and rebinding. Old independent direction overrides remain valid in schema 2 and are preserved but ignored at runtime; no save migration or real-user save rewrite is needed. Arrows still navigate UI; the right stick does not select Dash. Shift/RB remain fresh-edge triggers, with no automatic activation on refresh.

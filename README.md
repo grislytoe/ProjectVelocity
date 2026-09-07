@@ -6,7 +6,7 @@ M0 establishes the engineering foundation; M1 adds versioned persistence; M2 add
 
 Open `project.godot` in Godot 4.7.2 and press F6/F5 to run the main scene. See [BUILD_AND_RUN.md](BUILD_AND_RUN.md) for reproducible validation and staging export.
 
-To play M3, open `dev_tools/player_playground.tscn` and press **F6**, or run `godot --path . dev_tools/player_playground.tscn`. A/D move, Space jumps, arrows select Dash, Shift triggers Dash, R resets. This developer scene uses default bindings and does not read/write a player save. F5 still runs the foundation main scene.
+To play M3, open `dev_tools/player_playground.tscn` and press **F6**, or run `godot --path . dev_tools/player_playground.tscn`. WASD selects movement and Dash direction, Space jumps, Shift triggers Dash, and holding R for one second resets. On gamepad, the left stick controls movement and Dash direction; RB/R1 triggers Dash. This developer scene uses default bindings and does not read/write a player save. F5 still runs the foundation main scene.
 
 - [Architecture and directory map](ARCHITECTURE.md)
 - [Coding standards](CODING_STANDARDS.md)

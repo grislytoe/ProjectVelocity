@@ -49,6 +49,7 @@ func _run() -> void:
 	_check(_layer.sample().movement.is_equal_approx(Vector2.RIGHT), "D moves right")
 	_send(InputBindings.key(KEY_W))
 	_check(is_equal_approx(_layer.sample().movement.length(), 1.0), "Diagonal speed normalized")
+	_check(_layer.sample().dash_direction.is_equal_approx(Vector2(1, -1).normalized()), "W+D shares diagonal movement and Dash aim")
 	_send(InputBindings.key(KEY_D), false)
 	_send(InputBindings.key(KEY_W), false)
 	_send(InputBindings.key(KEY_SPACE))
@@ -58,13 +59,13 @@ func _run() -> void:
 	_send(InputBindings.key(KEY_SHIFT))
 	_check(_layer.sample().dash_pressed, "Shift requests Dash")
 	_send(InputBindings.key(KEY_SHIFT), false)
-	_send(InputBindings.key(KEY_RIGHT))
-	_check(_layer.sample().dash_direction.is_equal_approx(Vector2.RIGHT), "Arrow selects Dash")
-	_send(InputBindings.key(KEY_RIGHT), false)
+	_send(InputBindings.key(KEY_D))
+	_check(_layer.sample().dash_direction.is_equal_approx(Vector2.RIGHT), "D selects Dash")
+	_send(InputBindings.key(KEY_D), false)
 	await process_frame
 	_check(_layer.sample().dash_direction == Vector2.RIGHT and not _layer.sample().dash_pressed,
 		"Selection persists without auto-firing")
-	_send(InputBindings.key(KEY_RIGHT))
+	_send(InputBindings.key(KEY_D))
 	_layer.sample()
 	_layer.clear_dash_selection()
 	_check(_layer.sample().dash_direction == Vector2.ZERO, "Held direction does not relatch after clear")
@@ -81,12 +82,17 @@ func _run() -> void:
 	_check(_layer.sample().dash_pressed and _layer.sample().dash_direction == Vector2.RIGHT,
 		"Further Dash press still reuses held keyboard direction")
 	_send(InputBindings.key(KEY_SHIFT), false)
-	_send(InputBindings.key(KEY_RIGHT), false)
+	_send(InputBindings.key(KEY_D), false)
 	_layer.sample()
-	_send(InputBindings.key(KEY_UP))
+	_send(InputBindings.key(KEY_W))
 	_check(_layer.sample().dash_direction == Vector2.UP, "New selection after clearing")
 	_layer.clear_transient_state()
 	_check(_layer.sample().movement == Vector2.ZERO, "Focus/state clear releases movement")
+	_send(InputBindings.key(KEY_RIGHT))
+	_check(_layer.sample().dash_direction == Vector2.ZERO, "Arrow no longer selects Dash")
+	_check(Input.is_action_pressed("ui_right"), "Arrow retains UI navigation")
+	_send(InputBindings.key(KEY_RIGHT), false)
+	_check(_layer.prompt("dash_up") == _layer.prompt("move_up"), "Dash aim prompt follows movement binding")
 	for sector: int in 8:
 		var expected: Vector2 = Vector2.RIGHT.rotated(sector * PI / 4.0)
 		_check(InputLayer.quantize_dash(expected).is_equal_approx(expected), "Eight-way sector center")
@@ -109,11 +115,12 @@ func _run() -> void:
 	_send("axis:0:1", true, 42)
 	_check(_layer.last_device == "controller" and _layer.active_pad == 42, "Stick selects active pad")
 	_check(_layer.sample().movement == Vector2.RIGHT, "Left stick maps movement")
+	_check(_layer.sample().dash_direction == Vector2.RIGHT, "Left stick also selects Dash")
 	_check(_layer.prompt("dash").label == "R1", "PlayStation prompt")
-	_send("axis:2:-1", true, 42)
-	_send("axis:3:1", true, 42)
+	_send("axis:0:-1", true, 42)
+	_send("axis:1:1", true, 42)
 	_check(_layer.sample().dash_direction.is_equal_approx(Vector2(-1, 1).normalized()),
-		"Right stick quantizes to diagonal")
+		"Left stick quantizes to diagonal")
 	_send("button:10", true, 42)
 	_check(_layer.sample().dash_pressed, "RB/R1 Dash")
 	_layer.clear_dash_selection()
@@ -121,6 +128,9 @@ func _run() -> void:
 	await process_frame
 	_check(_layer.sample().dash_direction == Vector2.ZERO and not _layer.sample().dash_pressed,
 		"Held stick alone does not auto-fire after clearing")
+	_send("axis:2:1", true, 42)
+	_send("axis:3:-1", true, 42)
+	_check(_layer.sample().dash_direction == Vector2.ZERO, "Right stick cannot change Dash aim")
 	_send("button:10", true, 42)
 	_check(_layer.sample().dash_pressed and _layer.sample().dash_direction.is_equal_approx(Vector2(-1, 1).normalized()),
 		"Fresh RB/R1 trigger reuses continuously held stick direction")
@@ -172,6 +182,22 @@ func _run() -> void:
 	_send(InputBindings.key(KEY_ENTER), false)
 	_layer.notification(NOTIFICATION_APPLICATION_FOCUS_OUT)
 	_check(not _layer.sample().jump_held, "Focus loss clears held intent")
+	_check(_layer.rebind("keyboard", "move_right", [InputBindings.key(KEY_L)]).ok, "Rebind movement without alias conflicts")
+	_send(InputBindings.key(KEY_L))
+	_check(_layer.sample().movement == Vector2.RIGHT and _layer.sample().dash_direction == Vector2.RIGHT,
+		"Rebound movement drives both movement and Dash aim")
+	_check(_layer.prompt("dash_right") == _layer.prompt("move_right"), "Rebound aim prompt stays synchronized")
+	_send(InputBindings.key(KEY_L), false)
+	_check(_layer.rebind("keyboard", "dash_right", [InputBindings.key(KEY_D)]).ok,
+		"Legacy direction rebind edits canonical movement action")
+	var legacy: Dictionary = _layer.config.duplicate(true)
+	legacy.profiles.keyboard.dash_right = [InputBindings.key(KEY_RIGHT)]
+	_check(_layer.configure(legacy), "Old direction overrides remain loadable")
+	_check(_layer.bindings("keyboard", "dash_right") == _layer.bindings("keyboard", "move_right"),
+		"Old direction override cannot restore separate aim")
+	_check(_layer.config.profiles.keyboard.dash_right == [InputBindings.key(KEY_RIGHT)],
+		"Compatibility handling preserves old saved data")
+	_layer.reset_profile("keyboard")
 
 	var directory: String = OS.get_cache_dir().path_join("project_velocity_m2-test-" + PlayerProfileData.new_uuid())
 	var store := SaveStore.new(directory)
