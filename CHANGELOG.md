@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-dev — M6 Test Playground
+
+- Twelve isolated stations for all implemented movement mechanics, walkable/steep slopes and high-speed thin-wall collision.
+- Developer teleport via dropdown, buttons, PageUp/PageDown and D-pad; station-specific held reset, force death/respawn/refill and collision drawing.
+- Localized hints, non-colliding rulers, eight-direction guide and live movement/contact/timer/peak diagnostics.
+- Real station integration at 30/60/144 FPS and normal-renderer smoke. No movement tuning, saves, networking or later mechanics changed.
+
 ## 0.5.0-dev — M5 local camera
 
 - Reduced zoom excursions by 30% after camera comfort feedback: 1.15 → 1.105 and 0.85 → 0.895; neutral framing and follow timing unchanged.

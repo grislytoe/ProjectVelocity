@@ -40,3 +40,7 @@ Animations accept detached PlayerVisualFrame data, never a mutable motor/control
 ## Camera conventions
 
 Bind the local target explicitly; never discover ownership by searching scene actors. Sample after physics movement, use one smoothing model and keep Camera2D in Physics callback mode with matching interpolation. Camera state cannot mutate its target. Reset interpolation on relocation. Treat tuning/map Resources as immutable during a tick and author unique zone IDs; invalid zones are ignored. Bounds account for visible extent and have precedence over zone modifiers. Rendered jitter evidence complements, rather than replaces, physics replay checks.
+
+## M6 developer tools
+
+Use stable station IDs and geometry data in the playground catalog. Queue navigation from UI callbacks and apply it before player physics; do not free collision objects while queries flush. Keep developer mutations under dev_tools and excluded from exports. Integration tests observe completed physics ticks, never count render frames as input ticks. Production movement remains authority; diagnostic readouts cannot drive it.

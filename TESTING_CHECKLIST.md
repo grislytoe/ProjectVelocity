@@ -78,3 +78,12 @@ See docs/M4_VALIDATION.md. Gallery and tests never open a production save.
 - [ ] Developer camera comfort review and physical gamepad/target-display checks.
 
 See CAMERA.md and docs/M5_VALIDATION.md. Negative-control errors are intentional diagnostic evidence, not part of the standard suite.
+
+## M6 Test Playground
+
+- Run `./dev_tools/validate.ps1`: all prior checks plus real M6 station integration at 30, 60 and 144 FPS.
+- Open `dev_tools/test_playground.tscn` and follow each station hint; compare tap/held Jump, late ledge Jump, the elevated Double Jump platform, wall slide/jump, eight Dash directions, terminal velocity, both slopes and high-speed thin-wall stopping.
+- Verify PageUp/PageDown, dropdown, mouse buttons and D-pad navigation; confirm respawn restores the active station with no camera sweep or leftover collision geometry.
+- Hold reset less than one second, then a full second, then keep holding. Only the complete first hold resets; release rearms. Check F6/F7/F8/F9 developer actions.
+- Inspect English/Russian labels and live input prompts. New physical D-pad navigation still requires manual acceptance.
+- Normal renderer: `godot --path . --script dev_tools/test_playground_smoke.gd`; inspect ignored screenshots. F5 and staging remain the foundation scene; no playground resources are exported.

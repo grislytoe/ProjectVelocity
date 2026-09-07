@@ -36,3 +36,5 @@ For a local GPU screenshot smoke test: godot --path . --script dev_tools/present
 Normal startup loads/creates user://saves/save.json. Use --smoke-test for automated startup: it creates and removes an isolated OS-cache save directory. Tests and render capture also inject isolated stores. No save/profile data is committed.
 
 M2 startup creates InputLayer and InputPreferences. Synthetic tests need no physical gamepad. See CONTROLS.md for mapping APIs and the remaining hardware validation checklist.
+
+M6 manual fixture: `godot --path . dev_tools/test_playground.tscn` (or open it and use editor F6). See TEST_PLAYGROUND.md for station controls. Normal-renderer capture script: `godot --path . --script dev_tools/test_playground_smoke.gd`. The standard validator includes M6 station integration; export still excludes all dev_tools/tests.
