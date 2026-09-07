@@ -44,6 +44,8 @@ Evidence: docs/M2_VALIDATION.md. No gameplay is required to run these tests.
 - [x] Real CharacterBody2D landing, double jump, wall contacts/jump, shallow/steep slopes and Dash collision/selection clearing.
 - [x] Identical 720-tick body replay hashes at 30, 60 and 144 render FPS.
 - [x] Normal OpenGL arena startup and screenshot via dev_tools/player_presentation_smoke.gd.
-- [ ] Subjective tuning review and physical keyboard/gamepad playtesting on target hardware.
+- [x] Developer keyboard playtest: movement, Double Jump and Dash work correctly.
+- [x] Reset requires 60 uninterrupted physics ticks; short/released holds cancel and a continued hold cannot retrigger.
+- [ ] Further movement-feel tuning and physical gamepad playtesting on target hardware.
 
 Evidence: docs/M3_VALIDATION.md. The M3 fixture never opens SaveStore. Motor tests are pure and physics tests construct isolated geometry in memory.

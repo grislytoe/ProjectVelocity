@@ -2,7 +2,7 @@
 
 ## Running and composing
 
-Open `dev_tools/player_playground.tscn` with F6, or run `godot --path . dev_tools/player_playground.tscn`. The arena contains a flat acceleration lane, ledges, a wall pair, elevated platforms, a 28-degree walkable ramp and a 66-degree sliding ramp. R is an immediate developer reset; leaving the fixture below its bounds also resets at a physics tick. Device prompts follow M2. No save is opened; bindings are defaults for this isolated fixture. Production consumers can inject their configured InputLayer.
+Open `dev_tools/player_playground.tscn` with F6, or run `godot --path . dev_tools/player_playground.tscn`. The arena contains a flat acceleration lane, ledges, a wall pair, elevated platforms, a 28-degree walkable ramp and a 66-degree sliding ramp. Hold R continuously for one second (60 physics ticks) to reset once. Release R before another reset; leaving the fixture below its bounds also resets at a physics tick. Device prompts follow M2. No save is opened; bindings are defaults for this isolated fixture. Production consumers can inject their configured InputLayer.
 
 Instantiate `gameplay/player/player.tscn`, assign `input_layer` (or a Callable `input_provider` returning InputFrame), and optionally assign a separate PlayerMovementConfig Resource before adding it to the tree. Collision layer 2 is the player; mask 1 is level geometry. The capsule is 32×64 px, about 6% of the 1080px reference view. The adapter requires 60 Hz and rejects invalid tuning. Never call `advance()` from rendering or an arbitrary timer: move_and_slide uses Godot's physics delta.
 

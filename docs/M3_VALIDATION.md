@@ -11,3 +11,5 @@ Normal renderer smoke: `godot --path . --script dev_tools/player_presentation_sm
 CI runs the same complete suite plus an official-template Windows staging export and exported executable boot. CI results are attached to the M3 pull request; local export templates are absent, so exported-build acceptance is checked by CI. The staging executable intentionally retains the foundation main scene; the developer arena is excluded with dev_tools.
 
 Physical gamepad testing was explicitly deferred by the developer because no controller is available. No new dependencies, networking, race mode, hazards, menus or later milestone implementation is included.
+
+Follow-up: the developer confirmed keyboard movement, Double Jump and Dash in manual testing. Reset now requires one continuous second (60 physics ticks), fires once per hold and rearms on release. `tests/player_restart_test.gd` adds six checks through the actual arena/InputLayer adapter, including interrupted holds, the exact threshold, repeat prevention and out-of-bounds recovery. It is part of the complete validator. Further smoothness tuning remains a separate review item.

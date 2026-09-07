@@ -4,7 +4,8 @@ extends Node2D
 var player: PlayerController
 var layer: InputLayer
 var hud: Label
-var _restart_held: bool = false
+const RESTART_HOLD_TICKS: int = PlayerMovementConfig.PHYSICS_HZ
+var _restart_ticks: int = 0
 
 
 func _ready() -> void:
@@ -35,9 +36,10 @@ func _ready() -> void:
 
 func sample_input() -> InputFrame:
 	var frame: InputFrame = layer.sample()
-	if (frame.restart_held and not _restart_held) or player.position.y > 1600:
+	# One activation per uninterrupted hold; release rearms the action.
+	_restart_ticks = mini(_restart_ticks + 1, RESTART_HOLD_TICKS + 1) if frame.restart_held else 0
+	if _restart_ticks == RESTART_HOLD_TICKS or player.position.y > 1600:
 		player.respawn_at(Vector2(150, 500))
-	_restart_held = frame.restart_held
 	return frame
 
 

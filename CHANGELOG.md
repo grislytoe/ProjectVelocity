@@ -2,6 +2,8 @@
 
 ## 0.3.0-dev — M3 player controller
 
+- Manual keyboard review confirmed movement, Double Jump and Dash. Arena reset now requires one continuous second of holding R, triggers once per hold and rearms on release; six regression checks cover its timing.
+
 - Data-driven typed CharacterBody2D with ground/air acceleration, variable jump, six-tick coyote time, one extra jump, wall slide/jump and eight-way Dash.
 - Fixed-tick movement state machine, terminal velocity, walkable/sliding slopes and lifecycle APIs; no Jump Buffer or Fast Fall gameplay.
 - Independent animation state machine and robot placeholder, local Dash indicator and isolated no-save arena with device-aware prompts.

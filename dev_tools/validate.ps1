@@ -35,6 +35,7 @@ Invoke-GodotCheck -Name "tests" -Arguments @("--headless", "--path", ".", "--scr
 Invoke-GodotCheck -Name "m1-tests" -Arguments @("--headless", "--path", ".", "--script", "tests/save_foundation_test.gd") -Marker "PROJECTVELOCITY_M1_TESTS_OK"
 Invoke-GodotCheck -Name "m2-tests" -Arguments @("--headless", "--path", ".", "--script", "tests/input_layer_test.gd") -Marker "PROJECTVELOCITY_M2_TESTS_OK"
 Invoke-GodotCheck -Name "m3-motor" -Arguments @("--headless", "--path", ".", "--script", "tests/player_motor_test.gd") -Marker "PROJECTVELOCITY_M3_MOTOR_OK"
+Invoke-GodotCheck -Name "m3-restart" -Arguments @("--headless", "--path", ".", "--script", "tests/player_restart_test.gd") -Marker "PROJECTVELOCITY_M3_RESTART_OK"
 $replayHashes = @()
 foreach ($fps in @(30, 60, 144)) {
     Invoke-GodotCheck -Name "m3-physics-$fps" -Arguments @("--headless", "--path", ".", "--fixed-fps", "$fps", "--script", "tests/player_physics_test.gd") -Marker "PROJECTVELOCITY_M3_PHYSICS_OK"
