@@ -13,3 +13,5 @@ CI runs the same complete suite plus an official-template Windows staging export
 Physical gamepad testing was explicitly deferred by the developer because no controller is available. No new dependencies, networking, race mode, hazards, menus or later milestone implementation is included.
 
 Follow-up: the developer confirmed keyboard movement, Double Jump and Dash in manual testing. Reset now requires one continuous second (60 physics ticks), fires once per hold and rearms on release. `tests/player_restart_test.gd` adds six checks through the actual arena/InputLayer adapter, including interrupted holds, the exact threshold, repeat prevention and out-of-bounds recovery. It is part of the complete validator. Further smoothness tuning remains a separate review item.
+
+Held-aim follow-up: five additional input checks cover repeated Shift presses with continuously held arrows, repeated RB/R1 with a held stick, and absence of automatic activation from held input. The input suite now has 129 checks. Selection is still cleared on successful activation; a fresh Dash edge can read the current held direction again. Ability refresh and movement timing are unchanged.

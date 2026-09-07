@@ -172,15 +172,17 @@ func sample() -> InputFrame:
 	if not _capture_action.is_empty() or (last_device == "controller" and active_pad < 0):
 		return frame
 	frame.movement = _vector("move", float(config.deadzones.movement))
+	frame.dash_pressed = Input.is_action_just_pressed(action_name("dash"))
 	var direction: Vector2 = quantize_dash(_vector("dash", float(config.deadzones.dash)))
-	if not direction.is_zero_approx() and not direction.is_equal_approx(_last_dash_vector):
+	# A fresh trigger may reuse held aim after the previous successful Dash cleared selection.
+	if not direction.is_zero_approx() and (
+		frame.dash_pressed or not direction.is_equal_approx(_last_dash_vector)):
 		_selected_dash = direction
 	_last_dash_vector = direction
 	frame.dash_direction = _selected_dash
 	frame.jump_pressed = Input.is_action_just_pressed(action_name("jump"))
 	frame.jump_held = Input.is_action_pressed(action_name("jump"))
 	frame.jump_released = Input.is_action_just_released(action_name("jump"))
-	frame.dash_pressed = Input.is_action_just_pressed(action_name("dash"))
 	frame.pause_pressed = Input.is_action_just_pressed(action_name("pause"))
 	frame.restart_held = Input.is_action_pressed(action_name("restart"))
 	return frame

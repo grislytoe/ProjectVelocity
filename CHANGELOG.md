@@ -2,6 +2,8 @@
 
 ## 0.3.0-dev — M3 player controller
 
+- Fresh Dash presses reuse a continuously held keyboard/stick direction after selection is cleared; no direction release is required and no automatic Dash is queued.
+
 - Manual keyboard review confirmed movement, Double Jump and Dash. Arena reset now requires one continuous second of holding R, triggers once per hold and rearms on release; six regression checks cover its timing.
 
 - Data-driven typed CharacterBody2D with ground/air acceleration, variable jump, six-tick coyote time, one extra jump, wall slide/jump and eight-way Dash.

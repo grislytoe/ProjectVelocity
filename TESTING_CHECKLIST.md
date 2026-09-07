@@ -26,6 +26,7 @@ All tests use unique OS cache paths, never user://saves. Capture stdout/stderr; 
 
 - [x] Defaults, keyboard/pad profile separation, input-action presses/holds/releases and normalized vectors.
 - [x] Deadzone filtering, eight Dash directions, selection persistence and explicit clearing without auto-fire.
+- [x] Fresh Dash presses reuse held keyboard/stick aim after successful Dash clearing; held trigger/direction alone never auto-repeat.
 - [x] Rebind conflicts/types, capture, reset, UI actions and prompt refresh.
 - [x] Meaningful last-device activity, ignored drift, per-pad isolation and disconnect fallback.
 - [x] Synthetic hotplug/reconnect and Godot joy_connection_changed signal routing.
