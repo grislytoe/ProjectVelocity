@@ -1,5 +1,5 @@
 # Next steps
 
-1. Review the M2 PR into dev; developer performs the final merge.
+1. Review the M3 controller PR into dev and play the isolated arena; do not merge automatically.
 2. Run the physical-controller checks in CONTROLS.md (no controller was available during implementation).
-3. Wait for the next explicit milestone request. M3 has not started.
+3. Wait for explicit approval and the next milestone request. Do not begin M4.

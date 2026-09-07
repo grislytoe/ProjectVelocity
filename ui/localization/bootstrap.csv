@@ -12,3 +12,5 @@ INPUT_MOUSE_BUTTON,Mouse %d,Мышь %d
 INPUT_PAD_BUTTON,Button %d,Кнопка %d
 INPUT_BINDING_INVALID,Invalid binding,Недопустимое назначение
 INPUT_BINDING_CONFLICT,Binding is already used,Кнопка уже назначена
+M3_PLAYGROUND,M3 / Controller laboratory,M3 / Лаборатория контроллера
+M3_CONTROLS,%s/%s move · %s jump · %s… dash direction · %s dash · %s reset,%s/%s движение · %s прыжок · %s… направление рывка · %s рывок · %s сброс
