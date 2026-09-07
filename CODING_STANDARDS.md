@@ -36,3 +36,7 @@ Call controller simulation only from the fixed 60 Hz physics loop. Resource dura
 ## Presentation conventions
 
 Animations accept detached PlayerVisualFrame data, never a mutable motor/controller. Keep preselection separate and local-only. Treat RobotAppearance and shared config Resources as read-only; validate/copy profiles at the boundary and never load arbitrary cosmetic IDs as resource paths. Apply opponent opacity once at the common root, not independently to nested children. Keep art modules free of collisions. A visual transition must never trigger movement, consume an ability or schedule a gameplay respawn.
+
+## Camera conventions
+
+Bind the local target explicitly; never discover ownership by searching scene actors. Sample after physics movement, use one smoothing model and keep Camera2D in Physics callback mode with matching interpolation. Camera state cannot mutate its target. Reset interpolation on relocation. Treat tuning/map Resources as immutable during a tick and author unique zone IDs; invalid zones are ignored. Bounds account for visible extent and have precedence over zone modifiers. Rendered jitter evidence complements, rather than replaces, physics replay checks.

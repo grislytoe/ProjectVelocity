@@ -16,13 +16,20 @@ static func key(code: int, modifiers: int = 0) -> String:
 	return "key:%d:%d" % [code, modifiers]
 
 
+static func canonical_action(action: String) -> String:
+	# Legacy direction names remain readable, but always edit/use movement bindings.
+	if action in ["dash_left", "dash_right", "dash_up", "dash_down"]:
+		return "move_" + action.trim_prefix("dash_")
+	return action
+
+
 static func defaults(profile: String) -> Dictionary:
 	if profile == "keyboard":
 		return {
 			"move_left": [key(KEY_A)], "move_right": [key(KEY_D)],
 			"move_up": [key(KEY_W)], "move_down": [key(KEY_S)],
-			"dash_left": [key(KEY_LEFT)], "dash_right": [key(KEY_RIGHT)],
-			"dash_up": [key(KEY_UP)], "dash_down": [key(KEY_DOWN)],
+			"dash_left": [key(KEY_A)], "dash_right": [key(KEY_D)],
+			"dash_up": [key(KEY_W)], "dash_down": [key(KEY_S)],
 			"jump": [key(KEY_SPACE)], "dash": [key(KEY_SHIFT)],
 			"pause": [key(KEY_ESCAPE)], "restart": [key(KEY_R)],
 			"ui_left": [key(KEY_LEFT)], "ui_right": [key(KEY_RIGHT)],
@@ -33,8 +40,8 @@ static func defaults(profile: String) -> Dictionary:
 	return {
 		"move_left": ["axis:0:-1"], "move_right": ["axis:0:1"],
 		"move_up": ["axis:1:-1"], "move_down": ["axis:1:1"],
-		"dash_left": ["axis:2:-1"], "dash_right": ["axis:2:1"],
-		"dash_up": ["axis:3:-1"], "dash_down": ["axis:3:1"],
+		"dash_left": ["axis:0:-1"], "dash_right": ["axis:0:1"],
+		"dash_up": ["axis:1:-1"], "dash_down": ["axis:1:1"],
 		"jump": ["button:0"], "dash": ["button:10"],
 		"pause": ["button:6"], "restart": ["button:3"],
 		"ui_left": ["button:13", "axis:0:-1"], "ui_right": ["button:14", "axis:0:1"],

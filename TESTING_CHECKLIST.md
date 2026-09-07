@@ -1,6 +1,6 @@
 # Testing checklist
 
-Run dev_tools/validate.ps1 for the complete M0 + M1 + M2 + M3 + M4 suite; add -ExportWindows when matching export templates are installed. CI uses that switch on Windows.
+Run dev_tools/validate.ps1 for the complete M0–M5 suite; add -ExportWindows when matching export templates are installed. CI uses that switch on Windows.
 
 ## Automated
 
@@ -27,6 +27,8 @@ All tests use unique OS cache paths, never user://saves. Capture stdout/stderr; 
 - [x] Defaults, keyboard/pad profile separation, input-action presses/holds/releases and normalized vectors.
 - [x] Deadzone filtering, eight Dash directions, selection persistence and explicit clearing without auto-fire.
 - [x] Fresh Dash presses reuse held keyboard/stick aim after successful Dash clearing; held trigger/direction alone never auto-repeat.
+- [x] Shared WASD/left-stick movement and Dash aim, diagonal input, movement rebindings, synchronized prompts and compatibility with saved separate-direction overrides.
+- [x] Developer physical gamepad control check passed before the shared-aim layout update; hotplug/naming coverage remains separate.
 - [x] Rebind conflicts/types, capture, reset, UI actions and prompt refresh.
 - [x] Meaningful last-device activity, ignored drift, per-pad isolation and disconnect fallback.
 - [x] Synthetic hotplug/reconnect and Godot joy_connection_changed signal routing.
@@ -63,3 +65,16 @@ Evidence: docs/M3_VALIDATION.md. The M3 fixture never opens SaveStore. Motor tes
 - [ ] Developer M4 pose/feel review and physical gamepad/target-platform checks.
 
 See docs/M4_VALIDATION.md. Gallery and tests never open a production save.
+
+## M5 camera validation
+
+- [x] Default framing and zoom limits at 720p/1080p/1440p/2160p logical sizes.
+- [x] Follow easing, velocity look-ahead caps, stop/reversal and viewport-aware bounds, including undersized maps.
+- [x] Zone priority/ID ordering, hysteresis, offset, zoom transitions, temporary lock and restoration on exit.
+- [x] Explicit local target, old-target disconnect, respawn snap and enabled engine interpolation.
+- [x] Identical camera traces at 30/60/144 FPS; gameplay trace remains identical without the camera.
+- [x] Normal-renderer moving marker: 0px jitter; intentional disabled-interpolation control: 7px (expected failure).
+- [x] Default, zoom and locked fixture captures inspected with framing checks.
+- [ ] Developer camera comfort review and physical gamepad/target-display checks.
+
+See CAMERA.md and docs/M5_VALIDATION.md. Negative-control errors are intentional diagnostic evidence, not part of the standard suite.

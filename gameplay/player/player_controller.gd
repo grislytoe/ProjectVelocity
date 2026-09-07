@@ -4,6 +4,7 @@ extends CharacterBody2D
 
 signal dash_started
 signal double_jumped
+signal relocated(position: Vector2)
 
 @export var movement_config: PlayerMovementConfig = preload("res://gameplay/player/default_movement.tres")
 @export var simulation_enabled: bool = true
@@ -128,6 +129,7 @@ func respawn_at(location: Vector2) -> void:
 	clear_selection()
 	reset_physics_interpolation()
 	publish_visuals()
+	relocated.emit(global_position)
 
 
 func finish_run() -> void:

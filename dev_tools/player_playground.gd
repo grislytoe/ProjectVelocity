@@ -5,6 +5,7 @@ var player: PlayerController
 var layer: InputLayer
 var hud: Label
 var profile: PlayerProfileData
+var camera: LocalPlayerCamera
 const RESTART_HOLD_TICKS: int = PlayerMovementConfig.PHYSICS_HZ
 var _restart_ticks: int = 0
 
@@ -27,8 +28,10 @@ func _ready() -> void:
 	add_child(player)
 	if profile != null:
 		player.presentation.apply_profile(profile)
-	var camera := Camera2D.new()
-	player.add_child(camera)
+	camera = LocalPlayerCamera.new()
+	camera.map_bounds = CameraBounds.new()
+	add_child(camera)
+	camera.follow_local(player)
 	var canvas := CanvasLayer.new()
 	add_child(canvas)
 	hud = Label.new()

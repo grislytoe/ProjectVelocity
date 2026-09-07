@@ -45,6 +45,7 @@ func configure(value: Dictionary, previous_device: String = "keyboard_mouse") ->
 
 
 func bindings(profile: String, action: String) -> Array:
+	action = InputBindings.canonical_action(action)
 	var overrides: Dictionary = config.profiles.get(profile, {})
 	return overrides.get(action, InputBindings.defaults(profile).get(action, [])).duplicate()
 
@@ -173,7 +174,7 @@ func sample() -> InputFrame:
 		return frame
 	frame.movement = _vector("move", float(config.deadzones.movement))
 	frame.dash_pressed = Input.is_action_just_pressed(action_name("dash"))
-	var direction: Vector2 = quantize_dash(_vector("dash", float(config.deadzones.dash)))
+	var direction: Vector2 = quantize_dash(_vector("move", float(config.deadzones.dash)))
 	# A fresh trigger may reuse held aim after the previous successful Dash cleared selection.
 	if not direction.is_zero_approx() and (
 		frame.dash_pressed or not direction.is_equal_approx(_last_dash_vector)):
@@ -226,11 +227,14 @@ func cancel_rebind() -> void:
 func rebind(profile: String, action: String, tokens: Array) -> Dictionary:
 	if profile not in InputBindings.PROFILES or action not in InputBindings.ACTIONS:
 		return {"ok": false, "message_key": "INPUT_BINDING_INVALID"}
+	action = InputBindings.canonical_action(action)
 	var proposed: Dictionary = config.duplicate(true)
 	proposed.profiles[profile][action] = tokens.duplicate()
 	if not InputBindings.valid_config(proposed):
 		return {"ok": false, "message_key": "INPUT_BINDING_INVALID"}
 	for other: String in InputBindings.ACTIONS:
+		if other != InputBindings.canonical_action(other):
+			continue
 		if other == action or other.begins_with("ui_") != action.begins_with("ui_"):
 			continue
 		for token: String in tokens:

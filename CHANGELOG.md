@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0-dev — M5 local camera
+
+- Reduced zoom excursions by 30% after camera comfort feedback: 1.15 → 1.105 and 0.85 → 0.895; neutral framing and follow timing unchanged.
+
+- Developer-requested controls: movement and Dash aim share WASD/left stick, including rebindings; Shift/RB still trigger separately. Existing saved direction overrides remain readable but cannot restore separate aim.
+
+- Configurable Camera2D follow with capped velocity look-ahead, exponential easing and 5–7% reference framing.
+- Map bounds accounting for viewport/zoom; prioritized zone Resources for zoom, offset, look-ahead and temporary lock, with exit hysteresis.
+- Matched player/camera physics interpolation, post-controller camera sampling and immediate respawn/resize snap.
+- Camera unit/replay tests, developer zone fixture and rendered jitter measurement; approved movement traces unchanged.
+
 ## 0.4.0-dev — M4 animation and character presentation
 
 - Detached visual snapshots and an optional presentation observer; gameplay replay is unchanged with all visuals removed.

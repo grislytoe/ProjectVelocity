@@ -262,9 +262,9 @@ Provide a visually distinguishable Double Jump animation/effect.
 One Dash is available before refresh.
 Dash directions are limited to exactly eight.
 Keyboard default:
-WASD = movement. Arrow keys = Dash direction. Shift = Dash trigger.
+WASD = movement and Dash direction. Shift = Dash trigger. (Developer-approved shared-aim update during M5.)
 Controller:
-Left Stick = movement. Right Stick = Dash direction. RB/R1 = Dash trigger.
+Left Stick = movement and Dash direction. RB/R1 = Dash trigger. (Developer-approved shared-aim update during M5.)
 Right-stick vector must quantize to eight directions.
 Dash:
 clears current velocity;
