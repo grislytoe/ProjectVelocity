@@ -67,3 +67,7 @@ Lifecycle notifications publish an immediate visual frame, but visual durations 
 core/camera contains LocalPlayerCamera (explicit local target and Camera2D adapter), CameraFollowModel (fixed-step copied-value state), and CameraConfig/CameraBounds/CameraZone Resources. The composition root binds one local actor; no player enumeration or networking is involved. Camera updates run after movement and never alter authority. Player relocation is a generic signal, not a camera dependency.
 
 Engine physics interpolation is enabled for matching player/camera render timing. Camera2D native smoothing is disabled in favor of one tested fixed-step smoother. Bounds contain the visible world rectangle at current zoom; priority regions support offset, zoom, look-ahead and temporary position lock. See CAMERA.md and docs/M5_VALIDATION.md. Developer camera fixtures remain excluded from staging exports.
+
+## M6 developer playground
+
+`dev_tools/test_playground.tscn` is the dedicated twelve-station movement fixture. `PlaygroundStation` owns the geometry catalog; `TestPlayground` owns station lifecycle, navigation, diagnostics and a single explicit controller/input/camera. Old collision geometry is removed before the next simulation step. Controller state/input and camera interpolation reset on relocation. Production movement, saves and input schemas are unchanged. See [TEST_PLAYGROUND.md](TEST_PLAYGROUND.md) for station layout and commands. The entire tool and its tests are excluded from staging exports.

@@ -23,3 +23,36 @@ M4_GALLERY_FOOTER,Circle: extra jump / square: Dash. Filled = ready. Colors are 
 M5_START,Start / default follow,Старт / обычное слежение
 M5_RAMP,Ramp / zoom zone,Склон / зона масштаба
 M5_LOCK,Platform / locked camera,Платформа / фиксация камеры
+M6_PREVIOUS,Previous · PgUp,Назад · PgUp
+M6_NEXT,Next · PgDn,Далее · PgDn
+M6_RESET,Respawn · F7,Возврат · F7
+M6_DEATH,Force death · F6,Смерть · F6
+M6_RESTORE,Refill · F8,Способности · F8
+M6_COLLISION,Collisions · F9,Коллизии · F9
+M6_SPAWN,START,СТАРТ
+M6_GROUND,01 / Ground movement,01 / Движение по земле
+M6_AIR,02 / Air control,02 / Управление в воздухе
+M6_VARIABLE,03 / Variable Jump,03 / Высота прыжка
+M6_COYOTE,04 / Coyote Time,04 / Coyote Time
+M6_DOUBLE,05 / Double Jump,05 / Двойной прыжок
+M6_WALL_SLIDE,06 / Wall slide,06 / Скольжение по стене
+M6_WALL_JUMP,07 / Wall jump,07 / Прыжок от стены
+M6_DASH,08 / Eight-direction Dash,08 / Рывок в 8 направлениях
+M6_TERMINAL,09 / Terminal velocity,09 / Предельная скорость падения
+M6_SLOPE,10 / Walkable slope,10 / Пологий склон
+M6_STEEP,11 / Steep slope,11 / Крутой склон
+M6_SPEED,12 / High-speed lane,12 / Скоростная дорожка
+M6_GROUND_HINT,Accelerate / release / reverse. Compare peak horizontal speed and braking distance.,Разгон / отпускание / разворот. Сравните пик скорости и тормозной путь.
+M6_AIR_HINT,Jump across the gap; steer and release in midair. Lower landing pad at x=750.,Прыгните через разрыв; меняйте направление и отпускайте движение в воздухе. Нижняя площадка x=750.
+M6_VARIABLE_HINT,Tap then hold Jump. Compare peak rise; rulers show height above the floor in pixels.,Нажмите кратко и затем удерживайте прыжок. Сравните высоту; шкала в пикселях над полом.
+M6_COYOTE_HINT,Run off x=300 and jump within 6 ticks. Floor below catches failed attempts. No Jump Buffer.,Сбегите с края x=300 и прыгните за 6 тиков. Нижний пол ловит промахи. Буфера прыжка нет.
+M6_DOUBLE_HINT,Reach the platform 270 px above the floor using a second jump. Landing restores the charge.,Доберитесь на платформу на 270 пикселей выше пола вторым прыжком. Посадка возвращает заряд.
+M6_WALL_SLIDE_HINT,Spawn beside the wall. Descend without pushing; compare fall speed to the 100 px/s wall limit.,Старт у стены. Спускайтесь без нажатий; сравните скорость с пределом стены 100 пикс/с.
+M6_WALL_JUMP_HINT,Jump away from the wall toward the left platform. Observe the 9-tick steering lock.,Оттолкнитесь от стены к левой платформе. Наблюдайте блокировку направления на 9 тиков.
+M6_DASH_HINT,Movement selects direction. Press Dash for each attempt; floor/wall contact refills. F8 refills in air.,Движение задаёт направление. Нажимайте рывок каждый раз; пол/стена возвращают заряд. F8 — заряд в воздухе.
+M6_TERMINAL_HINT,Free fall from height. Peak fall should reach 1400 px/s. Respawn to repeat.,Свободное падение с высоты. Пик скорости должен достигнуть 1400 пикс/с. Возврат повторяет тест.
+M6_SLOPE_HINT,Run up and down the 26.6-degree slope and both seams. Check grounded contact and camera stability.,Пройдите склон 26.6 градуса вверх/вниз и оба стыка. Проверьте контакт с полом и камеру.
+M6_STEEP_HINT,The 63.4-degree slope must slide; it is not walkable ground. Compare contacts and descent.,Склон 63.4 градуса должен вызывать скольжение; это не пол. Сравните контакты и спуск.
+M6_SPEED_HINT,6000 px lane with 200 px rulers. Dash into the 8 px wall at x=5600; no tunneling. Offline only.,Дорожка 6000 пикселей с шагом 200. Рывок в стену 8 пикселей при x=5600 без проскока. Только офлайн.
+M6_CONTROLS,Move: WASD / left stick · Jump: %s · Dash: %s · Hold %s 1 s: reset · Stations: PgUp/PgDn or D-pad left/right,Движение: WASD / левый стик · Прыжок: %s · Рывок: %s · %s 1 с: сброс · Станции: PgUp/PgDn или крестовина влево/вправо
+M6_DIAGNOSTICS,"%s | pos %.0f / %.0f | v %.0f / %.0f | floor %s wall %s | jump %s dash %s\ncoyote %d dash %d wall lock %d end lag %d ticks | elapsed %d | peak X %.0f fall %.0f rise %.0f px | reset %.2f s","%s | поз %.0f / %.0f | v %.0f / %.0f | пол %s стена %s | прыжок %s рывок %s\ncoyote %d рывок %d стена %d задержка %d тиков | прошло %d | пик X %.0f падение %.0f высота %.0f пикс | сброс %.2f с"

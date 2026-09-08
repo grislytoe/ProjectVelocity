@@ -59,6 +59,9 @@ foreach ($fps in @(30, 60, 144)) {
     $cameraHashes += $Matches[1]
 }
 if (@($cameraHashes | Select-Object -Unique).Count -ne 1) { throw "Camera differs between render rates" }
+foreach ($fps in @(30, 60, 144)) {
+    Invoke-GodotCheck -Name "m6-playground-$fps" -Arguments @("--headless", "--path", ".", "--fixed-fps", "$fps", "--script", "tests/test_playground_test.gd") -Marker "PROJECTVELOCITY_M6_OK"
+}
 git diff --cached --check
 if ($LASTEXITCODE -ne 0) { throw "Staged whitespace validation failed" }
 git diff --check
@@ -70,4 +73,4 @@ if ($ExportWindows) {
     $Godot = Join-Path $projectRoot "builds/windows/ProjectVelocity.exe"
     Invoke-GodotCheck -Name "export-boot" -Arguments @("--headless", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
 }
-Write-Output "M0 + M1 + M2 + M3 + M4 + M5 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."
+Write-Output "M0 + M1 + M2 + M3 + M4 + M5 + M6 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."
