@@ -64,7 +64,7 @@ func populate(id: String, actor: PlayerController, spawn: Vector2) -> void:
 				turret.config = TurretConfig.new()
 				if id == "HAZARD_CAPS":
 					# Slow rounds + short cadence make both projectile caps observable.
-					turret.config.projectile_speed = 90
+					turret.config.projectile_speed = 135
 					turret.config.cooldown = 0.05
 					turret.config.minimum_cooldown = 0.1
 					turret.config.telegraph_duration = 0.25

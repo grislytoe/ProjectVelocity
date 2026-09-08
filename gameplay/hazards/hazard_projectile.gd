@@ -45,6 +45,11 @@ func activate(id: StringName, origin: Vector2, direction: Vector2,
 	_geometry.clear_exceptions()
 	_actors.clear_exceptions()
 	active = true
+	# Presentation only: match the designated actor, never alter collision/target authority.
+	var actor: PlayerController = pool.target(id)
+	self_modulate = Color.WHITE
+	if actor != null and is_instance_valid(actor.presentation):
+		self_modulate.a = actor.presentation.modulate.a
 	visible = true
 	set_physics_process(true)
 	reset_physics_interpolation()
@@ -54,6 +59,7 @@ func activate(id: StringName, origin: Vector2, direction: Vector2,
 func recycle() -> void:
 	active = false
 	visible = false
+	self_modulate = Color.WHITE
 	target_player_id = &""
 	source_id = 0
 	velocity = Vector2.ZERO

@@ -75,3 +75,12 @@ Offline two-player authority and procedural visuals are intentional. Human gamep
 physical gamepad follow-up, Linux/Steam Deck and low-end target performance remain manual.
 See HAZARD_MODULES.md / KNOWN_ISSUES.md for authoring and simulation limits. No new
 dependencies, network transport, save/protocol migration, M10 or automatic merge.
+
+## M9 review — build 11
+
+Developer requested 50% faster turret projectiles and opponent-matching transparency.
+Default speed is now 1224 px/s; the deliberately slow caps fixture increases to 135 px/s.
+Opacity is copied from the designated actor's presentation at launch (30% for opponent,
+100% local), remains cosmetic and resets before reuse. Three new assertions cover speed,
+opponent alpha and opponent-to-local reuse; updated M9 suite has 530 checks.
+Current M9 hash: 6ccebac3b8552e612ba623e09692c3855e0bcda60d8958a517b3607db01599d1.

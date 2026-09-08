@@ -57,7 +57,7 @@ The base config owns barrel placement. Both barrels can fire in one physics tick
 
 Defaults: detection_range 1100, fire_range 900, aim_turn_speed 3 rad/s,
 aim_tolerance 0.06 rad, telegraph_duration 0.5 s, cooldown 1 s,
-minimum_cooldown 0.25 s, projectile_speed 816 px/s (120% of 680 base run speed),
+minimum_cooldown 0.25 s, projectile_speed 1224 px/s (M9 review: original 816 increased by 50%),
 projectile_radius 5, projectile_lifetime 5 s, aim_lead_factor 0.7,
 maximum_lead_time 0.5 s, maximum_lead_distance 180 px. All values are Resource fields.
 Effective cooldown is max(cooldown, minimum_cooldown). Fire range cannot exceed detection.
@@ -87,6 +87,8 @@ Each active round stores target_player_id, source turret ID, velocity, radius an
 It is ballistic, not homing. Swept circles query geometry and the designated player capsule,
 ignoring all other player-layer bodies. Geometry limits the target sweep so shots cannot
 kill through a wall, including at high speed. Other players remain visible and unharmed.
+Round opacity matches the designated player presentation at launch (local 100%, opponent
+30% by default), and resets on pool return.
 An invulnerable hit is unconfirmed: the round continues unless geometry blocks it.
 
 Return on world collision, confirmed target hit, lifetime expiry, target death/Finish,

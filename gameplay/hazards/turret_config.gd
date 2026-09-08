@@ -9,7 +9,7 @@ extends Resource
 @export var telegraph_duration: float = 0.5
 @export var cooldown: float = 1.0
 @export var minimum_cooldown: float = 0.25
-@export var projectile_speed: float = 816.0 # 680 base run speed * 1.2
+@export var projectile_speed: float = 1224.0 # M9 review: original 816 * 1.5
 @export var projectile_radius: float = 5.0
 @export var projectile_lifetime: float = 5.0
 @export var aim_lead_factor: float = 0.7

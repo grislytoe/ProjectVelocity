@@ -93,7 +93,7 @@ func run() -> void:
 func test_configs() -> void:
 	var turret := TurretConfig.new()
 	check(turret.validate() and is_equal_approx(turret.projectile_speed,
-		PlayerMovementConfig.new().ground_max_speed * 1.2), "Default speed is 120 percent of base run")
+		PlayerMovementConfig.new().ground_max_speed * 1.2 * 1.5), "Review increases projectile speed by 50 percent")
 	turret.fire_range = turret.detection_range + 1
 	check(not turret.validate(), "Reject fire range outside detection")
 	turret = TurretConfig.new()
@@ -249,12 +249,15 @@ func test_pool() -> void:
 	check(not pool.register_player(&"duplicate", a) and not pool.register_player(&"a", b), "Duplicate identities/actors rejected")
 	check(a.input_layer == null and b.input_layer == null, "Two actors do not require physical InputLayer")
 	var config := TurretConfig.new()
+	b.presentation.is_local = false
 	revive(a, Vector2(400, 0))
 	revive(b, Vector2(100, 0))
 	await ticks(2)
 	var shot: HazardProjectile = pool.fire(&"a", Vector2.ZERO, Vector2.RIGHT, config, 1)
+	check(shot.self_modulate.a == 1.0 and is_equal_approx(shot.velocity.length(), 1224),
+		"Local target round is opaque and uses faster default speed")
 	check(shot.global_transform == Transform2D.IDENTITY, "World-space projectile ignores transformed pool parent")
-	await ticks(12)
+	await ticks(8)
 	check(not dead(b) and shot.active, "Projectile crosses nondesignated real player without killing or retiring")
 	await ticks(22)
 	check(dead(a) and not shot.active and pool.active_count() == 0, "Confirmed designated collision returns round")
@@ -262,11 +265,14 @@ func test_pool() -> void:
 		and shot.remaining_ticks == 0 and not shot.visible, "Returned round clears all target/motion/lifetime/visual state")
 	revive(a, Vector2(400, 0), 45)
 	var reuse: HazardProjectile = pool.fire(&"b", Vector2.ZERO, Vector2.RIGHT, config, 2)
+	check(is_equal_approx(reuse.self_modulate.a, 0.3)
+		and reuse.self_modulate.a == b.presentation.modulate.a, "Opponent round matches actor opacity")
 	check(reuse == shot and reuse.target_player_id == &"b", "Same pooled object binds a different target")
 	await ticks(10)
 	check(dead(b) and pool.active_count() == 0, "Reused collider clears prior exceptions")
 	revive(a, Vector2(100, 0), 45)
 	shot = pool.fire(&"a", Vector2.ZERO, Vector2.RIGHT, config, 1)
+	check(shot == reuse and shot.self_modulate.a == 1.0, "Reusing opponent round for local target restores opacity")
 	await ticks(12)
 	check(not dead(a) and shot.active, "Unconfirmed invulnerable target hit does not consume round")
 	pool.retire_target(&"a")

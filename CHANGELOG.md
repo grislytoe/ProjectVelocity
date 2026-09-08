@@ -2,6 +2,9 @@
 
 ## 0.9.0-dev — M9 Hazard Modules
 
+- Review: increase turret projectile speed by 50% (816 → 1224 px/s; cap fixture 90 → 135).
+  Opponent-target rounds match opponent opacity (30%); pool reuse restores local opacity.
+
 - Reused M7 DeathZone/lifecycle for static/timed/local-trigger spikes, static/path saws
   and permanent/cyclic lasers with nonlethal warnings and reserved respawn clearance.
 - Added independent dual-barrel per-player turret states, bounded velocity lead, LOS,
