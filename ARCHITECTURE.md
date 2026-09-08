@@ -85,3 +85,19 @@ remains an observer. RespawnSafety retains moving-body rejection and adds explic
 support opt-out for temporary platforms and pads. See PLATFORM_MODULES.md for configuration,
 collision, timing and future authoring contracts. The developer catalog now has 16 stations.
 Milestone task/branch/manual-merge policy is recorded in WORKFLOW.md.
+
+## M9 hazard modules
+
+`gameplay/hazards` contains Resource-driven spikes, saws, lasers and dual-barrel turrets.
+Fatal areas extend the M7 DeathZone, including its persistent invulnerability recheck.
+Inactive volumes stay reserved for RespawnSafety. No separate death or animation authority
+is introduced. The M8 movement/contact refresh behavior is unchanged.
+
+One explicitly composed HazardWorld owns a two-player registry, per-player engagement
+leases and a fixed-capacity projectile pool. TurretChannel owns one barrel's fixed-tick
+state; TurretConfig lead calculation accepts only value data. Projectiles sweep geometry
+and designated-player collision shapes, then return to the pool. Lifecycle signals revoke
+old target generations and rounds; station teardown destroys the complete authority.
+Physical InputLayer ownership is independent of the targeting registry. Future host
+authority can call this boundary; M9 contains no network transport. See HAZARD_MODULES.md.
+The developer catalog has 22 stations, with a neutral-input second player in turret tests.

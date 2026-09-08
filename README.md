@@ -25,4 +25,6 @@ M6 adds the dedicated [Test Playground](TEST_PLAYGROUND.md): open `dev_tools/tes
 M7 checkpoint/death/finish primitives are available in dev_tools/lifecycle_playground.tscn. See CHECKPOINTS_AND_LIFECYCLE.md for scope and manual controls. Main/staging still boots the foundation scene.
 
 M8 adds modular platforms and Jump Pads to stations 13–16 of the developer playground.
+M9 adds the complete offline hazard set, independent turret channels and capped projectile
+pooling in stations 17–22. See HAZARD_MODULES.md and docs/M9_VALIDATION.md.
 See PLATFORM_MODULES.md for Resource authoring and WORKFLOW.md for milestone task/branch rules.

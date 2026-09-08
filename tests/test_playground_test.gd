@@ -44,7 +44,7 @@ func run() -> void:
 	observer.process_physics_priority = 200
 	root.add_child(observer)
 	arena.player.input_provider = func() -> InputFrame: return frame
-	check(arena.stations.size() == 16, "All sixteen stations available; original twelve retained")
+	check(arena.stations.size() == 22, "All twenty-two stations available; original sixteen retained")
 	var exports := ConfigFile.new()
 	check(exports.load("res://export_presets.cfg") == OK and
 		"dev_tools/*" in String(exports.get_value("preset.0", "exclude_filter", "")),

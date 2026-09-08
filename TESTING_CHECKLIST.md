@@ -106,3 +106,23 @@ See CAMERA.md and docs/M5_VALIDATION.md. Negative-control errors are intentional
 - Run platform_modules_test.gd with normal renderer and test_playground_smoke.gd for Russian HUD captures.
 - Manually review feel, moving-platform seams/return journey, diagonal pad and gamepad navigation.
 - Keep saves isolated; no platform fixture constructs SaveStore.
+
+## M9
+
+- Full `dev_tools/validate.ps1`: M0–M8 regression plus hazard_modules_test at 30/60/144 FPS.
+- Exercise static/timed/local-sensor spikes, static/path saws, permanent/cyclic lasers and
+  the existing DeathZone with actual collision bodies, warning phases and invulnerability.
+- Verify inactive hazards reject unsafe respawn anchors; M7 falls back to clear static Start.
+- Verify separate turret IDs/targets, two simultaneous barrels, LOS geometry, range loss,
+  full warning, limited lead, minimum cooldown and target death/Finish cancellation.
+- Fill five rounds per target and ten globally; override global and engagement caps;
+  confirm skipped shots enter cooldown without deferred bursts. Destroy engaging turrets.
+- Sweep fast projectiles through another player, toward the designated capsule and toward
+  a 2px wall. Check immunity, reuse exceptions/IDs, lifetime expiry and target removal.
+- Repeat pool fill/expiry 50 times and station teardown 12 times. Check stable object IDs,
+  cleared signal connections and absence of ObjectDB/resource leak warnings on exit.
+- Normal renderer: `tests/hazard_modules_test.gd` and `dev_tools/hazard_playground_smoke.gd`;
+  inspect `builds/m9-station-16.png` through `-21.png` (ignored local artifacts).
+- Manual review: stations 17–22, both channel colors, trigger sensor, warning timing,
+  projectile readability, dropdown/PgUp/PgDn/D-pad, held R/top-face once per second hold.
+- No test may initialize production SaveStore; staging remains the foundation scene.
