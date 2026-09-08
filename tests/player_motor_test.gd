@@ -102,6 +102,7 @@ func run() -> void:
 	motor.step(frame(1, false, true), air)
 	check(motor.velocity.x > -config.wall_jump_horizontal_force, "wall lock expires")
 	test_dash()
+	test_surface_dash()
 	test_lifecycle()
 	var slope := MovementContacts.new()
 	slope.steep_normal = Vector2(-0.8660254, -0.5)
@@ -199,3 +200,19 @@ func test_presentation() -> void:
 	animation.advance(PlayerVisualFrame.from_motor(motor))
 	check(animation.current == PlayerAnimationMachine.Pose.DOUBLE_JUMP, "double jump distinct pose")
 	check(motor.velocity.x == 600, "presentation cannot steer motor")
+
+
+func test_surface_dash() -> void:
+	for surface: MovementContacts in [floor_contact, wall]:
+		var motor := PlayerMotor.new(config)
+		motor.step(frame(0, false, false, Vector2.RIGHT), surface)
+		for tick: int in 60:
+			motor.step(frame(0, false, false, Vector2.RIGHT), surface)
+		check(not motor.dash_available and motor.machine.current != PlayerStateMachine.State.DASH,
+			"Continuous surface cannot refresh Dash")
+		motor.step(frame(), air)
+		check(not motor.dash_available, "Detachment alone does not refill")
+		motor.step(frame(), surface)
+		check(motor.dash_available, "New contact refills Dash")
+		motor.step(frame(0, false, false, Vector2.RIGHT), surface)
+		check(motor.events & PlayerMotor.Event.DASH_STARTED, "New press after recontact works")

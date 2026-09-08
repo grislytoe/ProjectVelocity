@@ -44,7 +44,7 @@ func run() -> void:
 	observer.process_physics_priority = 200
 	root.add_child(observer)
 	arena.player.input_provider = func() -> InputFrame: return frame
-	check(arena.stations.size() == 12, "All twelve stations available")
+	check(arena.stations.size() == 16, "All sixteen stations available; original twelve retained")
 	var exports := ConfigFile.new()
 	check(exports.load("res://export_presets.cfg") == OK and
 		"dev_tools/*" in String(exports.get_value("preset.0", "exclude_filter", "")),
@@ -178,6 +178,7 @@ func run() -> void:
 	await ticks(20)
 	check(arena.player.position.x < 5585, "High speed cannot tunnel through 8 px wall")
 	await test_navigation()
+	await test_surface_dash()
 	await test_reset()
 	arena.free()
 	if failures == 0:
@@ -205,7 +206,7 @@ func test_navigation() -> void:
 	key.pressed = true
 	arena._unhandled_input(key)
 	await ticks(2)
-	check(arena.station_index == 11, "Keyboard navigation wraps backward")
+	check(arena.station_index == arena.stations.size() - 1, "Keyboard navigation wraps backward")
 	var pad := InputEventJoypadButton.new()
 	pad.button_index = JOY_BUTTON_DPAD_RIGHT
 	pad.pressed = true
@@ -252,3 +253,18 @@ func test_reset() -> void:
 	arena.player.position = Vector2(99999, 99999)
 	arena.sample_input()
 	check(arena.player.position == arena.stations[4].spawn, "Out-of-bounds returns to current station")
+
+
+func test_surface_dash() -> void:
+	for index: int in [0, 5]:
+		await select(index)
+		await ticks(20)
+		var started: int = 0
+		for tick: int in 60:
+			frame.dash_direction = Vector2.RIGHT
+			frame.dash_pressed = tick % 2 == 0
+			await ticks(1)
+			if arena.player.motor.events & PlayerMotor.Event.DASH_STARTED:
+				started += 1
+		check(started == 1 and not arena.player.motor.dash_available,
+			"Real floor/wall requires detach before another Dash")

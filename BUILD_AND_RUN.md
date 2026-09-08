@@ -21,7 +21,7 @@ The validator imports assets, parses all bootstrap/test scripts, runs M0 bootstr
 
 ## Build identity
 
-Version 0.2.0-dev and build number 3 live in core/build/build_info.gd. Keep project.godot's application version synchronized; tests enforce this. OS.is_debug_build() is the authoritative development flag. The staging export adds the staging feature; its label is STAGING. Release-mode engine binaries disable development debug logging; release exports require developer review and are not part of M0.
+Version 0.8.0-dev and build number 9 live in core/build/build_info.gd. Keep project.godot's application version synchronized; tests enforce this. OS.is_debug_build() is the authoritative development flag. The staging export adds the staging feature; its label is STAGING. Release-mode engine binaries disable development debug logging; release exports require developer review and are not part of M0.
 
 ## CI
 
@@ -40,3 +40,8 @@ M2 startup creates InputLayer and InputPreferences. Synthetic tests need no phys
 M6 manual fixture: `godot --path . dev_tools/test_playground.tscn` (or open it and use editor F6). See TEST_PLAYGROUND.md for station controls. Normal-renderer capture script: `godot --path . --script dev_tools/test_playground_smoke.gd`. The standard validator includes M6 station integration; export still excludes all dev_tools/tests.
 
 M7 manual review: run dev_tools/lifecycle_playground.tscn (F6), or use the M7 button in the M6 playground. Build identity: 0.7.0-dev / build 8. Normal-renderer smoke: godot --path . --script tests/checkpoint_respawn_test.gd -- --render-smoke (isolated; no saves).
+
+M8 is integrated into dev_tools/test_playground.tscn, stations 13–16. Build 0.8.0-dev / 9.
+The full validator now covers M0–M8. Normal-renderer platform check: godot --path . --fixed-fps 60 --script tests/platform_modules_test.gd.
+On Windows use Start-Process with -PassThru, -WindowStyle Hidden, redirected logs and WaitForExit as in validate.ps1.
+See WORKFLOW.md: all milestones use this main project folder, separate tasks and feature branches.

@@ -123,7 +123,7 @@ func run() -> void:
 	check(lifecycle.checkpoint(&"b", Vector2(940, 566)), "Remaining mandatory accepted")
 	check(lifecycle.finish() and not lifecycle.finish() and not player.die(true), "Validated finish once; finished actor immune")
 	var opponent: PlayerController = preload("res://gameplay/player/player.tscn").instantiate() as PlayerController
-	opponent.position = Vector2(240, 566)
+	opponent.position = Vector2(240, 250)
 	arena.add_child(opponent)
 	opponent.presentation.is_local = false
 	var opponent_life := PlayerLifecycle.new()
@@ -137,7 +137,7 @@ func run() -> void:
 	walking.movement.x = 1
 	opponent.input_provider = func() -> InputFrame: return walking
 	await ticks(25)
-	check(opponent_life.progress.reached == [&"a"], "Real Area2D entry activates checkpoint for second player")
+	check(opponent_life.progress.reached == [&"a"], "Tall checkpoint catches second player above former trigger")
 	check(lifecycle.progress.can_finish() and not opponent_life.progress.can_finish(), "Independent physical players retain distinct progress")
 	opponent.input_provider = func() -> InputFrame: return InputFrame.new()
 	opponent.position = Vector2(1330, 566)

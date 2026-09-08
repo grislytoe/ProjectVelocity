@@ -27,6 +27,8 @@ static func valid(player: PlayerController, position: Vector2) -> bool:
 		var body: Object = hit.collider
 		if not body is StaticBody2D or body is AnimatableBody2D:
 			return false
+		if (body as Node).is_in_group("unsafe_respawn_support"):
+			return false
 		var floor_body := body as StaticBody2D
 		if not floor_body.constant_linear_velocity.is_zero_approx() or not is_zero_approx(floor_body.constant_angular_velocity):
 			return false

@@ -10,7 +10,7 @@ func run() -> void:
 	TranslationServer.set_locale("ru")
 	var arena: TestPlayground = preload("res://dev_tools/test_playground.tscn").instantiate() as TestPlayground
 	root.add_child(arena)
-	for index: int in [0, 4, 7, 8, 9, 11]:
+	for index: int in [0, 4, 7, 8, 9, 11, 12, 13, 14, 15]:
 		arena.request_station(index)
 		for tick: int in 12:
 			await physics_frame
@@ -21,6 +21,6 @@ func run() -> void:
 			push_error("Cannot save playground screenshot")
 			quit(1)
 			return
-	print("PROJECTVELOCITY_M6_RENDER_OK (6 stations; Russian HUD)")
+	print("PROJECTVELOCITY_M6_RENDER_OK (10 stations; Russian HUD)")
 	arena.free()
 	quit()

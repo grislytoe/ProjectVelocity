@@ -65,3 +65,18 @@
 - Add reusable DeathZone and independently owned 0.45-second death recovery with static respawn validation, Start fallback, blocked-spawn retry and existing 0.75-second immunity/presentation.
 - Add transport-free synchronized-ready tick gate and actor start barrier, isolated M7 fixtures and automated physics tests.
 - Preserve M6 stations, movement/camera replays, controls, profile schema and protocol. Build 8; stacked PR targets unmerged M6.
+
+## 0.8.0-dev — M8 Platform Modules
+
+- Reusable static/one-way, path-moving, breakable/temporary and Jump Pad scenes with typed Resource configs.
+- Fixed-tick route sampling with speed, point waits, reverse, looping and ping-pong traversal.
+- Contact-driven warning/disappearance and clearance-aware optional restoration; controller-owned pad launch.
+- Four appended playground stations; preserved M3 slope policy and moving-support respawn rejection.
+- Physics integration and render-rate traces; build 9, save schema 2 and protocol 1 unchanged.
+- Persist main-folder/separate-task workflow and user-only merge authorization in WORKFLOW.md.
+
+### M8 manual review follow-up
+
+- Prevent repeated Dash refresh during uninterrupted floor/wall contact; require detachment and new contact. Preserve Double Jump refresh.
+- Increase checkpoint trigger height from 90 to 450 px upward and marker height fivefold; keep respawn anchors unchanged.
+- Add pure-motor and real floor/wall regression checks plus airborne checkpoint activation coverage.

@@ -15,6 +15,11 @@
 - M5 camera zones are authored axis-aligned world-space Resource rectangles. A map smaller than the visible frame is centered and necessarily exposes its backdrop. Camera collision, cinematics, shake and spectator switching are later work.
 - Rendered jitter was measured on the local OpenGL setup; the developer accepted follow/zone comfort after the 30% zoom reduction. Other hardware still needs review. Small external teleports should emit relocated or explicitly reset the camera.
 
-- M6 introduces offline test fixtures only. New D-pad station navigation and subjective station usability await manual review. Future hazards/platform mechanics and network synchronization have no implementation or test stations yet; the long lane is geometry for later reuse. Development scenes are intentionally absent from the Windows staging build.
+- M6 introduces offline test fixtures only. New D-pad station navigation and subjective station usability await manual review. Future hazards and network synchronization have no implementation or test stations yet; the long lane is geometry for later reuse. Development scenes are intentionally absent from the Windows staging build.
 
 - M7 respawn validation deliberately requires static support; moving geometry must use an appropriate physics body rather than animating StaticBody2D. If Start and checkpoint are both blocked, recovery waits safely and displays a message. Production map-wide authoring validation and actual online transport are not implemented.
+
+- M8 platform routes are local fixed-tick simulation; no synchronized online clock/state replication yet.
+- Pad flight resumes ordinary M3 variable-height gravity/air control after the impulse. Final feel and physical-controller review remain manual.
+- Moving platforms carry riders but do not implement crushing damage. Authors must leave player clearance along routes.
+- Platform art is procedural placeholder geometry; final art and an editor UI are deferred. Temporary restore clearance uses a conservative convex hull.

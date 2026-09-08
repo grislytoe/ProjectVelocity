@@ -26,5 +26,5 @@ func _entered(body: Node2D) -> void:
 
 
 func _draw() -> void:
-	draw_line(Vector2(0, 32), Vector2(0, -70), Color.CYAN, 4)
-	draw_circle(Vector2(0, -65), 12, Color.CYAN, local_active, -1 if local_active else 2)
+	draw_line(Vector2(0, 212), Vector2(0, -298), Color.CYAN, 4)
+	draw_circle(Vector2(0, -293), 12, Color.CYAN, local_active, -1 if local_active else 2)

@@ -2,6 +2,8 @@ class_name PlayerMotor
 extends RefCounted
 ## Fixed-tick movement simulation: no SceneTree, rendering, Input polling or network calls.
 
+enum SurfaceContact { FLOOR = 1, WALL_RIGHT = 2, WALL_LEFT = 4 }
+
 enum Event {
 	JUMPED = 1, DOUBLE_JUMPED = 2, WALL_JUMPED = 4, DASH_STARTED = 8,
 	DASH_ENDED = 16, LANDED = 32,
@@ -23,6 +25,8 @@ var events: int = 0
 var requested_horizontal: float = 0.0
 var wall_side: float = 0.0
 var _was_grounded: bool = false
+var _surface_contacts: int = 0
+var _spent_contacts: int = 0
 
 
 func _init(movement_config: PlayerMovementConfig) -> void:
@@ -38,11 +42,17 @@ func step(frame: InputFrame, contacts: MovementContacts) -> void:
 		machine.tick(self, frame, contacts)
 		decay_timers()
 		return
+	_surface_contacts = SurfaceContact.FLOOR if contacts.grounded or not contacts.steep_normal.is_zero_approx() else 0
+	if contacts.has_wall():
+		_surface_contacts |= SurfaceContact.WALL_RIGHT if contacts.wall_normal.x < 0 else SurfaceContact.WALL_LEFT
+	# A surface can refresh only once until its contact is actually lost.
+	_spent_contacts &= _surface_contacts
 	if contacts.grounded:
 		coyote_ticks = PlayerMovementConfig.ticks(config.coyote_time) + 1
 	if contacts.grounded or contacts.has_wall() or not contacts.steep_normal.is_zero_approx():
 		double_jump_available = true
-		dash_available = true
+		if (_surface_contacts & ~_spent_contacts) != 0:
+			dash_available = true
 	classify(contacts)
 	if machine.current != PlayerStateMachine.State.DASH and end_lag_ticks == 0:
 		if frame.dash_pressed and dash_available and frame.dash_direction.is_finite() and (
@@ -99,7 +109,6 @@ func jump(contacts: MovementContacts) -> void:
 			-config.wall_jump_vertical_force)
 		wall_lock_ticks = PlayerMovementConfig.ticks(config.wall_jump_input_lock_time)
 		double_jump_available = true
-		dash_available = true
 		events |= Event.WALL_JUMPED
 		machine.transition(PlayerStateMachine.State.WALL_JUMP)
 	else:
@@ -120,6 +129,7 @@ func start_dash(direction: Vector2) -> void:
 	velocity = dash_vector * config.dash_speed
 	dash_ticks = PlayerMovementConfig.ticks(config.dash_duration)
 	dash_available = false
+	_spent_contacts = _surface_contacts
 	coyote_ticks = 0
 	wall_lock_ticks = 0
 	events |= Event.DASH_STARTED
@@ -169,4 +179,18 @@ func clear_temporary() -> void:
 	end_lag_ticks = 0
 	dash_vector = Vector2.ZERO
 	_was_grounded = false
+	_surface_contacts = 0
+	_spent_contacts = 0
 	events = 0
+
+
+func launch(impulse: Vector2) -> void:
+	if machine.locked() or not impulse.is_finite():
+		return
+	var tick_events: int = events
+	if machine.current == PlayerStateMachine.State.DASH:
+		tick_events |= Event.DASH_ENDED
+	clear_temporary()
+	events = tick_events
+	velocity = impulse
+	machine.transition(PlayerStateMachine.State.JUMP if velocity.y < 0 else PlayerStateMachine.State.FALL)

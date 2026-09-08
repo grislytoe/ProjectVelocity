@@ -64,3 +64,11 @@ M7_FINISH,FINISH,ФИНИШ
 M7_START,Ready — start in 3 seconds,Готовность — старт через 3 секунды
 M7_GO,GO!,СТАРТ!
 M7_HINT,M7: cyan checkpoints → jump red hazard → yellow finish. F6 death / hold R 1s restart / Esc M6,M7: голубые чекпоинты → прыжок над красной зоной → жёлтый финиш. F6 смерть / R 1с рестарт / Esc M6
+M6_ONE_WAY,13 · One-way platform,13 · Односторонняя платформа
+M6_ONE_WAY_HINT,Jump through the green surface from below and land on top.,Прыгните сквозь платформу снизу и приземлитесь сверху.
+M6_MOVING,14 · Moving platform,14 · Движущаяся платформа
+M6_MOVING_HINT,Ride the route with waits and reversal. Respawn remains on static ground.,Проедьте маршрут с остановками и возвратом. Возрождение только на статическом полу.
+M6_BREAKABLE,15 · Temporary platform,15 · Исчезающая платформа
+M6_BREAKABLE_HINT,Land to arm: amber warning then disappearance. Restoration waits for clearance.,Приземлитесь: жёлтый сигнал и исчезновение. Восстановление ждёт освобождения объёма.
+M6_JUMP_PAD,16 · Jump Pads,16 · Прыжковые панели
+M6_JUMP_PAD_HINT,Land on the first pad for upward launch; the second launches diagonally.,Приземлитесь на первую панель для запуска вверх; вторая запускает по диагонали.

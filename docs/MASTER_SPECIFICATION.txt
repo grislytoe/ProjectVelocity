@@ -1135,3 +1135,6 @@ README.md ARCHITECTURE.md NETWORKING.md CONTROLS.md MAP_FORMAT.md SAVE_FORMAT.md
 CODING_STANDARDS.md DEPENDENCIES.md CHANGELOG.md BUILD_AND_RUN.md
 TESTING_CHECKLIST.md KNOWN_ISSUES.md NEXT_STEPS.md
 Documentation must reflect actual implementation.
+DEVELOPER-APPROVED M8 REVIEW UPDATE (2026-09-08)
+Dash: after using Dash while touching a floor or wall, that uninterrupted surface contact cannot restore another Dash. Detach and make a new contact to refresh; repeated trigger presses must not permit continuous ground/wall Dash. Double Jump refresh is unchanged.
+Checkpoint trigger and visual height increased fivefold; preserve safe respawn anchors.
