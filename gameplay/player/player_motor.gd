@@ -170,3 +170,15 @@ func clear_temporary() -> void:
 	dash_vector = Vector2.ZERO
 	_was_grounded = false
 	events = 0
+
+
+func launch(impulse: Vector2) -> void:
+	if machine.locked() or not impulse.is_finite():
+		return
+	var tick_events: int = events
+	if machine.current == PlayerStateMachine.State.DASH:
+		tick_events |= Event.DASH_ENDED
+	clear_temporary()
+	events = tick_events
+	velocity = impulse
+	machine.transition(PlayerStateMachine.State.JUMP if velocity.y < 0 else PlayerStateMachine.State.FALL)

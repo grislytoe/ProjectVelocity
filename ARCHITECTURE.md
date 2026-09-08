@@ -75,3 +75,13 @@ Engine physics interpolation is enabled for matching player/camera render timing
 ## M7 lifecycle composition
 
 The gameplay/race layer owns per-player CheckpointProgress, PlayerLifecycle, shape-based RespawnSafety, reusable DeathZone, CheckpointTrigger, FinishTrigger and transport-free ReadyStart/StartBarrier. PlayerController adds only a death signal and an explicit start lock; unbound M0–M6 movement/replays are preserved. M4 presentation remains an observer and M5 relocation resets are reused. See CHECKPOINTS_AND_LIFECYCLE.md for contracts and map authoring.
+
+## M8 platform modules
+
+Gameplay/platforms owns data-driven static, one-way, moving, temporary and Jump Pad scenes.
+PlatformRoute samples absolute 60 Hz ticks; AnimatableBody2D supplies rider transport.
+The post-movement surface contact hook delegates pad impulses to PlayerMotor; presentation
+remains an observer. RespawnSafety retains moving-body rejection and adds explicit unsafe
+support opt-out for temporary platforms and pads. See PLATFORM_MODULES.md for configuration,
+collision, timing and future authoring contracts. The developer catalog now has 16 stations.
+Milestone task/branch/manual-merge policy is recorded in WORKFLOW.md.

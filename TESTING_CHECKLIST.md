@@ -95,3 +95,14 @@ See CAMERA.md and docs/M5_VALIDATION.md. Negative-control errors are intentional
 - Run tests/checkpoint_respawn_test.gd with normal renderer and -- --render-smoke; inspect builds/m7-lifecycle.png.
 - Manually play dev_tools/lifecycle_playground.tscn: barrier, cyan checkpoint feedback, red hazard jump, death scatter/ring, yellow Finish, held R/top-face reset, Escape to all twelve M6 stations.
 - No tests may open real-user profile storage. Windows export/boot runs in CI; Linux/Steam Deck/hardware gamepad remain manual coverage.
+
+## M8
+
+- Full dev_tools/validate.ps1 includes platform_modules_test.gd at 30/60/144 FPS and compares M8 hashes.
+- Test absolute routes/waits/reverse/loop/stop, invalid configs, one-way passage/landing,
+  horizontal/vertical carry and jump-off, temporary activation/disappearance/occupied restore,
+  permanent break, Dash-to-pad launch, lifecycle locks and unsafe respawn support.
+- Check real interactions on all four M8 playground stations; M6 still checks every station's navigation/localization.
+- Run platform_modules_test.gd with normal renderer and test_playground_smoke.gd for Russian HUD captures.
+- Manually review feel, moving-platform seams/return journey, diagonal pad and gamepad navigation.
+- Keep saves isolated; no platform fixture constructs SaveStore.

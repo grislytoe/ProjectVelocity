@@ -65,6 +65,14 @@ foreach ($fps in @(30, 60, 144)) {
 foreach ($fps in @(30, 60, 144)) {
     Invoke-GodotCheck -Name "m7-lifecycle-$fps" -Arguments @("--headless", "--path", ".", "--fixed-fps", "$fps", "--script", "tests/checkpoint_respawn_test.gd") -Marker "PROJECTVELOCITY_M7_OK"
 }
+$platformHashes = @()
+foreach ($fps in @(30, 60, 144)) {
+    Invoke-GodotCheck -Name "m8-platforms-$fps" -Arguments @("--headless", "--path", ".", "--fixed-fps", "$fps", "--script", "tests/platform_modules_test.gd") -Marker "PROJECTVELOCITY_M8_OK"
+    $log = Get-Content (Join-Path $logRoot "m8-platforms-$fps.stdout.log") -Raw
+    if ($log -notmatch 'M8_REPLAY_HASH=([0-9a-f]{64})') { throw "Missing platform replay hash" }
+    $platformHashes += $Matches[1]
+}
+if (@($platformHashes | Select-Object -Unique).Count -ne 1) { throw "Platforms differ between render rates" }
 git diff --cached --check
 if ($LASTEXITCODE -ne 0) { throw "Staged whitespace validation failed" }
 git diff --check
@@ -76,4 +84,4 @@ if ($ExportWindows) {
     $Godot = Join-Path $projectRoot "builds/windows/ProjectVelocity.exe"
     Invoke-GodotCheck -Name "export-boot" -Arguments @("--headless", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
 }
-Write-Output "M0 + M1 + M2 + M3 + M4 + M5 + M6 + M7 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."
+Write-Output "M0 + M1 + M2 + M3 + M4 + M5 + M6 + M7 + M8 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."

@@ -44,3 +44,8 @@ Bind the local target explicitly; never discover ownership by searching scene ac
 ## M6 developer tools
 
 Use stable station IDs and geometry data in the playground catalog. Queue navigation from UI callbacks and apply it before player physics; do not free collision objects while queries flush. Keep developer mutations under dev_tools and excluded from exports. Integration tests observe completed physics ticks, never count render frames as input ticks. Production movement remains authority; diagnostic readouts cannot drive it.
+
+## Milestone workspace agreement
+
+Follow WORKFLOW.md: separate task for each module, always C:/Godot Projects/ProjectVelocity,
+no worktree or duplicate checkout; feature branch from approved dev, user-reviewed PR merge.

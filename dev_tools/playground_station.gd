@@ -56,4 +56,8 @@ static func catalog() -> Array[PlaygroundStation]:
 	station.boxes = [Rect2(-800, 500, 7000, 80), Rect2(5600, -100, 8, 600)]
 	station.envelope = Rect2(-1200, -1000, 8400, 2500)
 	result.append(station)
+	for key: String in ["ONE_WAY", "MOVING", "BREAKABLE", "JUMP_PAD"]:
+		station = PlaygroundStation.new(key, Vector2(0, 450))
+		station.boxes = [Rect2(-700, 500, 950, 80), Rect2(800, 500, 1100, 80), Rect2(250, 900, 550, 80)]
+		result.append(station)
 	return result

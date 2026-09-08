@@ -23,3 +23,6 @@ M5 adds the local follow camera, smoothing/look-ahead, map bounds and camera zon
 M6 adds the dedicated [Test Playground](TEST_PLAYGROUND.md): open `dev_tools/test_playground.tscn` with **F6**. Twelve isolated stations cover existing movement, slopes and high-speed collision. Use PageUp/PageDown, D-pad left/right or the station dropdown to teleport. Diagnostics and dev-only death/respawn/refill/collision controls do not affect production saves.
 
 M7 checkpoint/death/finish primitives are available in dev_tools/lifecycle_playground.tscn. See CHECKPOINTS_AND_LIFECYCLE.md for scope and manual controls. Main/staging still boots the foundation scene.
+
+M8 adds modular platforms and Jump Pads to stations 13–16 of the developer playground.
+See PLATFORM_MODULES.md for Resource authoring and WORKFLOW.md for milestone task/branch rules.

@@ -65,6 +65,12 @@ func advance(frame: InputFrame) -> void:
 	_relocated = false
 	collect_contacts()
 	motor.classify(contacts)
+	if not motor.machine.locked():
+		for index: int in get_slide_collision_count():
+			var hit: KinematicCollision2D = get_slide_collision(index)
+			var body: Object = hit.get_collider()
+			if body != null and body.has_method("on_player_contact"):
+				body.on_player_contact(self, hit.get_normal())
 	var selected: Vector2 = frame.dash_direction
 	if motor.events & PlayerMotor.Event.DASH_STARTED:
 		clear_selection()
@@ -144,3 +150,12 @@ func finish_run() -> void:
 	velocity = Vector2.ZERO
 	clear_selection()
 	publish_visuals()
+
+
+func launch_from_platform(impulse: Vector2) -> void:
+	if start_blocked or motor.machine.locked() or not impulse.is_finite():
+		return
+	motor.launch(impulse)
+	velocity = motor.velocity
+	contacts.clear()
+	_relocated = true

@@ -46,3 +46,13 @@ All implementation files live in `dev_tools`, already excluded from staging expo
 Normal renderer smoke: `godot --path . --script dev_tools/test_playground_smoke.gd`. It captures six stations with Russian HUD into ignored `builds/m6-station-*.png`. Automated/synthetic D-pad navigation is not physical controller validation. See `docs/M6_VALIDATION.md` for recorded results.
 
 M7 adds a button opening the separate dev_tools/lifecycle_playground.tscn fixture. The twelve original catalog entries, geometry, controls and tests are unchanged. Escape from M7 returns here. See CHECKPOINTS_AND_LIFECYCLE.md.
+
+## M8 stations
+
+The original 12 IDs and geometries are preserved. Four additional stations are appended:
+13 ONE_WAY (pass through from below and land), 14 MOVING (three-point route with waits and
+ping-pong return), 15 BREAKABLE (warning/disappearance/safe restoration), 16 JUMP_PAD
+(upward and diagonal force variants). Use dropdown, PgUp/PgDn or D-pad left/right.
+The gap has a lower recovery floor. Hold R/upper face button one second to reset the player;
+reselect a station to rebuild its platform state. See PLATFORM_MODULES.md for all .tres fields.
+Main folder: C:/Godot Projects/ProjectVelocity/dev_tools/test_playground.tscn.

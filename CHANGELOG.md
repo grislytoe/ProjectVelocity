@@ -65,3 +65,12 @@
 - Add reusable DeathZone and independently owned 0.45-second death recovery with static respawn validation, Start fallback, blocked-spawn retry and existing 0.75-second immunity/presentation.
 - Add transport-free synchronized-ready tick gate and actor start barrier, isolated M7 fixtures and automated physics tests.
 - Preserve M6 stations, movement/camera replays, controls, profile schema and protocol. Build 8; stacked PR targets unmerged M6.
+
+## 0.8.0-dev — M8 Platform Modules
+
+- Reusable static/one-way, path-moving, breakable/temporary and Jump Pad scenes with typed Resource configs.
+- Fixed-tick route sampling with speed, point waits, reverse, looping and ping-pong traversal.
+- Contact-driven warning/disappearance and clearance-aware optional restoration; controller-owned pad launch.
+- Four appended playground stations; preserved M3 slope policy and moving-support respawn rejection.
+- Physics integration and render-rate traces; build 9, save schema 2 and protocol 1 unchanged.
+- Persist main-folder/separate-task workflow and user-only merge authorization in WORKFLOW.md.

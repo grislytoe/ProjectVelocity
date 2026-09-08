@@ -60,6 +60,7 @@ func activate_station(index: int) -> void:
 			Vector2(rectangle.position.x, rectangle.end.y)]))
 	for points: PackedVector2Array in station.polygons:
 		add_polygon(points)
+	PlatformPlayground.populate(geometry, station.id)
 	add_rulers(station)
 	camera.map_bounds.rectangle = station.envelope
 	layer.clear_transient_state()
@@ -103,7 +104,9 @@ func _physics_process(_delta: float) -> void:
 			get_tree().debug_collisions_hint = not get_tree().debug_collisions_hint
 			for body: Node in geometry.get_children():
 				if body is StaticBody2D:
-					(body.get_child(0) as CollisionPolygon2D).queue_redraw()
+					for shape: Node in body.get_children():
+						if shape is CollisionPolygon2D:
+							shape.queue_redraw()
 	_pending_action = ""
 	station_ticks += 1
 	peak_speed = maxf(peak_speed, absf(player.velocity.x))
