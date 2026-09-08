@@ -101,3 +101,12 @@ old target generations and rounds; station teardown destroys the complete author
 Physical InputLayer ownership is independent of the targeting registry. Future host
 authority can call this boundary; M9 contains no network transport. See HAZARD_MODULES.md.
 The developer catalog has 22 stations, with a neutral-input second player in turret tests.
+
+## M10 Solo composition
+
+Bootstrap retains one SaveStore/InputLayer/InputPreferences and adds TrialUI navigation.
+SoloTrial owns one disposable SoloCourse and M7 StartBarrier. The course composes M7
+PlayerLifecycle/CheckpointProgress, M8 platforms, M9 HazardWorld and M5 camera.
+TrialRecords is the validated persistence boundary; TrialRecord supplies integer-tick
+validation/formatting. UI observes state/signals and queues navigation outside physics.
+See TIME_TRIAL.md for timing, restart ownership, record identity and debug invalidation.

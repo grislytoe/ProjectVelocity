@@ -28,3 +28,6 @@ M8 adds modular platforms and Jump Pads to stations 13–16 of the developer pla
 M9 adds the complete offline hazard set, independent turret channels and capped projectile
 pooling in stations 17–22. See HAZARD_MODULES.md and docs/M9_VALIDATION.md.
 See PLATFORM_MODULES.md for Resource authoring and WORKFLOW.md for milestone task/branch rules.
+
+M10: F5 now starts the playable Solo Time Trial menu. See TIME_TRIAL.md for the full loop,
+record rules and training course, and docs/M10_VALIDATION.md for test evidence.

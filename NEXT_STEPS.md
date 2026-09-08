@@ -6,3 +6,6 @@
 4. Handoff rule: each milestone gets a separate task but ALWAYS uses C:/Godot Projects/ProjectVelocity.
    No worktrees or project copies. Create its feature branch from approved synchronized dev in the main folder.
    Preserve unrelated user edits. Pass WORKFLOW.md and this agreement to the next task.
+
+M10 is implemented in its own task/main folder; await user review of its PR before merge.
+Do not start M11 automatically. See TIME_TRIAL.md and docs/M10_VALIDATION.md.

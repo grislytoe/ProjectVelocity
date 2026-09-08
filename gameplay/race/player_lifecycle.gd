@@ -43,7 +43,7 @@ func advance() -> void:
 	if not RespawnSafety.valid(player, target):
 		target = start_position
 	if RespawnSafety.valid(player, target):
-		player.respawn_at(target)
+		player.respawn_at(target, true)
 	elif not blocked_reported:
 		blocked_reported = true
 		notification.emit("M7_UNSAFE_RESPAWN")

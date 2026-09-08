@@ -25,9 +25,10 @@ function Invoke-GodotCheck {
     if ($Marker -and -not $output.Contains($Marker)) { throw "$Name missing success marker" }
 }
 
+& (Join-Path $PSScriptRoot "check_trial_hash.ps1")
 Invoke-GodotCheck -Name "version" -Arguments @("--version") -Marker "4.7.2.stable."
 Invoke-GodotCheck -Name "import" -Arguments @("--headless", "--path", ".", "--import")
-Get-ChildItem core,gameplay,visuals,save_system,tests,dev_tools -Recurse -Filter "*.gd" | ForEach-Object {
+Get-ChildItem core,gameplay,visuals,save_system,map_data,ui,tests,dev_tools -Recurse -Filter "*.gd" | ForEach-Object {
     $relative = $_.FullName.Substring($projectRoot.Length + 1).Replace("\", "/")
     Invoke-GodotCheck -Name ("parse-" + $_.BaseName) -Arguments @("--headless", "--path", ".", "--check-only", "--script", $relative)
 }
@@ -81,6 +82,14 @@ foreach ($fps in @(30, 60, 144)) {
     $hazardHashes += $Matches[1]
 }
 if (@($hazardHashes | Select-Object -Unique).Count -ne 1) { throw "Hazards differ between render rates" }
+$trialHashes = @()
+foreach ($fps in @(30, 60, 144)) {
+    Invoke-GodotCheck -Name "m10-trial-$fps" -Arguments @("--headless", "--path", ".", "--fixed-fps", "$fps", "--script", "tests/time_trial_test.gd") -Marker "PROJECTVELOCITY_M10_OK"
+    $log = Get-Content (Join-Path $logRoot "m10-trial-$fps.stdout.log") -Raw
+    if ($log -notmatch 'M10_REPLAY_HASH=([0-9a-f]{64})') { throw "Missing trial replay hash" }
+    $trialHashes += $Matches[1]
+}
+if (@($trialHashes | Select-Object -Unique).Count -ne 1) { throw "Time Trial differs between render rates" }
 git diff --cached --check
 if ($LASTEXITCODE -ne 0) { throw "Staged whitespace validation failed" }
 git diff --check
@@ -92,4 +101,4 @@ if ($ExportWindows) {
     $Godot = Join-Path $projectRoot "builds/windows/ProjectVelocity.exe"
     Invoke-GodotCheck -Name "export-boot" -Arguments @("--headless", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
 }
-Write-Output "M0 + M1 + M2 + M3 + M4 + M5 + M6 + M7 + M8 + M9 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."
+Write-Output "M0 + M1 + M2 + M3 + M4 + M5 + M6 + M7 + M8 + M9 + M10 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."

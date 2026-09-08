@@ -126,3 +126,18 @@ See CAMERA.md and docs/M5_VALIDATION.md. Negative-control errors are intentional
 - Manual review: stations 17–22, both channel colors, trigger sensor, warning timing,
   projectile readability, dropdown/PgUp/PgDn/D-pad, held R/top-face once per second hold.
 - No test may initialize production SaveStore; staging remains the foundation scene.
+
+## M10 Time Trial acceptance
+
+- Run full validate.ps1: now M0–M10, parser including map/UI, hash manifest and isolated boot.
+- Test hint expiry/early Ready, 3/2/1/GO, blocked movement, exact timer ticks at 30/60/144 FPS.
+- Traverse both checkpoints and Finish; skipped/out-of-order triggers must refuse completion.
+- Die, respawn and pause: clock continues through death and stops during pause; record stays valid.
+- Hold restart below/at 0.5s during death/respawn; hold longer: only one restart until release.
+- Verify Retry clears all phases/progress/deaths and skips hint; menu entry replays hint.
+- Check first/improved/equal/worse PB, complete-run deltas, segment minima and disk reload.
+- Check v2 migration, malformed record, read-only/write failure and identity mismatch.
+- Force developer death/relocation: invalid status and no record write.
+- Repeat course rebuild and menu reentry: stable nodes/signals and no pooled shots retained.
+- Run dev_tools/time_trial_smoke.gd normally: isolated GUI + motor-driven finish, RU/EN and
+  keyboard/gamepad prompt captures. Review physical controller focus/hotplug manually.

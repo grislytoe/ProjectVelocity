@@ -94,3 +94,12 @@
 - Prevent repeated Dash refresh during uninterrupted floor/wall contact; require detachment and new contact. Preserve Double Jump refresh.
 - Increase checkpoint trigger height from 90 to 450 px upward and marker height fivefold; keep respawn anchors unchanged.
 - Add pure-motor and real floor/wall regression checks plus airborne checkpoint activation coverage.
+
+## 0.10.0-dev — M10 Solo Time Trial
+
+- F5 now exposes Main Menu → Solo → Map Select → hint/countdown/run/results/retry.
+- Fixed-tick race clock, complete-run PB checkpoint deltas, death count and pause.
+- Half-second rebindable Quick Restart reconstructs the complete course and skips hints.
+- Schema v3 validates UUID/map/version/hash-bound PBs and segment minima, migrates legacy
+  data without promoting unverified records, and retains the previous PB on write failure.
+- RU/EN results, keyboard/gamepad hints, basic control rebinding and isolated integration QA.

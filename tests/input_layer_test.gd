@@ -207,7 +207,8 @@ func _run() -> void:
 	old.settings.controls.erase("input")
 	old.settings.controls.bindings = {"future_jump": ["keyboard:space"]}
 	var migrated: Dictionary = SaveSchema.decode(old)
-	_check(migrated.status == "valid" and migrated.data.save_version == 2, "M1 to M2 migration")
+	_check(migrated.status == "valid" and migrated.data.save_version == SaveSchema.CURRENT_VERSION,
+		"M1 input migration chains to current schema")
 	_check(migrated.data.profile.uuid == old.profile.uuid and
 		migrated.data.settings.controls.bindings == old.settings.controls.bindings, "Migration preserves M1 data")
 	var prefs := InputPreferences.new()
