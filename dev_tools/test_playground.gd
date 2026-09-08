@@ -6,6 +6,7 @@ const RESTART_HOLD_TICKS: int = 60
 var stations: Array[PlaygroundStation] = PlaygroundStation.catalog()
 var station_index: int = 0
 var geometry: Node2D
+var hazards: HazardPlayground
 var player: PlayerController
 var layer: InputLayer
 var camera: LocalPlayerCamera
@@ -61,6 +62,11 @@ func activate_station(index: int) -> void:
 	for points: PackedVector2Array in station.polygons:
 		add_polygon(points)
 	PlatformPlayground.populate(geometry, station.id)
+	hazards = null
+	if station_index >= 16:
+		hazards = HazardPlayground.new()
+		geometry.add_child(hazards)
+		hazards.populate(station.id, player, station.spawn)
 	add_rulers(station)
 	camera.map_bounds.rectangle = station.envelope
 	layer.clear_transient_state()
@@ -203,6 +209,8 @@ func _process(_delta: float) -> void:
 		player.motor.dash_available, player.motor.coyote_ticks, player.motor.dash_ticks,
 		player.motor.wall_lock_ticks, player.motor.end_lag_ticks, station_ticks,
 		peak_speed, peak_fall, peak_rise, restart_ticks / 60.0]
+	if is_instance_valid(hazards):
+		diagnostics.text += "\n" + hazards.diagnostics_text()
 
 
 func add_polygon(points: PackedVector2Array) -> void:

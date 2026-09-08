@@ -1,6 +1,6 @@
 # Known issues
 
-- M3 implements the controller in a standalone developer arena; F5/main and Windows staging still use the foundation placeholder. Run the arena with F6. M7 death/checkpoint/finish primitives have a separate lifecycle playground. Race modes, additional hazards, pause UI and final art remain later work.
+- F5/main and Windows staging still use the foundation placeholder. Run developer scenes with editor F6. M7 lifecycle has a separate fixture; M8 platforms and M9 hazards are in the 22-station playground. Race modes, pause UI and final art remain later work.
 - Movement tuning is an initial baseline. Automated collision/replay checks do not replace subjective playtesting or prove cross-platform bitwise determinism. Further tuning and platform coverage remain open; the developer accepted keyboard and gamepad movement during earlier milestone reviews.
 - The developer confirmed physical gamepad controls during M5 review. The subsequent shared movement/Dash layout needs a follow-up check; real USB/Bluetooth hotplug, other driver mappings and device-name detection remain separate validation items.
 - Controller prompt family detection uses names and may need the explicit family override. Prompt descriptors are text/tokens; final glyph art is deferred.
@@ -15,7 +15,7 @@
 - M5 camera zones are authored axis-aligned world-space Resource rectangles. A map smaller than the visible frame is centered and necessarily exposes its backdrop. Camera collision, cinematics, shake and spectator switching are later work.
 - Rendered jitter was measured on the local OpenGL setup; the developer accepted follow/zone comfort after the 30% zoom reduction. Other hardware still needs review. Small external teleports should emit relocated or explicitly reset the camera.
 
-- M6 introduces offline test fixtures only. New D-pad station navigation and subjective station usability await manual review. Future hazards and network synchronization have no implementation or test stations yet; the long lane is geometry for later reuse. Development scenes are intentionally absent from the Windows staging build.
+- Developer fixtures remain offline. New station usability and physical D-pad navigation require manual review. M9 hazards now have isolated stations; network synchronization remains future work and the long lane is geometry for later reuse. Development scenes are intentionally absent from the Windows staging build.
 
 - M7 respawn validation deliberately requires static support; moving geometry must use an appropriate physics body rather than animating StaticBody2D. If Start and checkpoint are both blocked, recovery waits safely and displays a message. Production map-wide authoring validation and actual online transport are not implemented.
 
@@ -23,3 +23,14 @@
 - Pad flight resumes ordinary M3 variable-height gravity/air control after the impulse. Final feel and physical-controller review remain manual.
 - Moving platforms carry riders but do not implement crushing damage. Authors must leave player clearance along routes.
 - Platform art is procedural placeholder geometry; final art and an editor UI are deferred. Temporary restore clearance uses a conservative convex hull.
+
+- M9 uses procedural hazard/telegraph art and offline authority, with two explicitly registered
+  player IDs. The second playground actor is neutral-input, not a network peer or physical
+  input owner. Production map, host replication and synchronized clocks are later milestones.
+- Turret engagement contention uses stable scene processing order; no fairness scheduler is
+  implemented. Cooldown releases slots. The warning direction is locked for evasion.
+- M9 timing/lead/cadence and warning readability still require the user's gameplay review.
+  The caps station deliberately overrides round speed/cadence to make saturation visible.
+- Author hazards at unit scale and place spawn anchors outside moving-saw routes. Area-based
+  fatal hazards use fixed-tick overlaps; projectile collision uses swept circles. Inactive
+  spike/laser volumes are conservatively excluded from respawn even while harmless.

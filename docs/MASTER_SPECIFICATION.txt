@@ -466,6 +466,7 @@ minimum cooldown;
 projectile speed;
 aim lead factor.
 Projectile speed should initially be approximately 120% of the player's base maximum running speed.
+M9 developer review override: increase that projectile speed by 50% (816 to 1224 px/s); projectiles targeting the opponent match opponent presentation opacity (default 30%).
 Use limited velocity-based lead targeting.
 Projectiles are host authoritative.
 Each projectile has a specific target_player_id .

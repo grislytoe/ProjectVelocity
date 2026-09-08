@@ -72,3 +72,15 @@ M6_BREAKABLE,15 · Temporary platform,15 · Исчезающая платфор�
 M6_BREAKABLE_HINT,Land to arm: amber warning then disappearance. Restoration waits for clearance.,Приземлитесь: жёлтый сигнал и исчезновение. Восстановление ждёт освобождения объёма.
 M6_JUMP_PAD,16 · Jump Pads,16 · Прыжковые панели
 M6_JUMP_PAD_HINT,Land on the first pad for upward launch; the second launches diagonally.,Приземлитесь на первую панель для запуска вверх; вторая запускает по диагонали.
+M6_DEATH_ZONE,17 · DeathZone,17 · Зона смерти
+M6_DEATH_ZONE_HINT,Red area kills after immunity expires; automatic safe respawn.,Красная зона убивает после неуязвимости; автоматическое безопасное возрождение.
+M6_SPIKES,18 · Spikes: static / timed / trigger,18 · Шипы: статические / таймер / триггер
+M6_SPIKES_HINT,Three variants left to right. Cyan box triggers the third; amber warns before extension.,Три варианта слева направо. Голубая рамка включает третий; жёлтый сигнал перед выдвижением.
+M6_SAWS,19 · Saws: static / path,19 · Пилы: статическая / маршрут
+M6_SAWS_HINT,Jump over the static saw and watch the moving saw route with waits.,Перепрыгните статическую пилу и проверьте маршрут движущейся с остановками.
+M6_LASERS,20 · Lasers: permanent / cyclic,20 · Лазеры: постоянный / циклический
+M6_LASERS_HINT,First beam is permanent; second warns in amber before firing. Jump over or wait.,Первый луч постоянный; второй предупреждает жёлтым. Перепрыгните или дождитесь паузы.
+M6_TURRETS,21 · Dual-channel turret,21 · Турель: два канала
+M6_TURRETS_HINT,Cyan barrel targets you; purple targets the independent idle test player. Warning locks direction.,Голубой ствол целится в вас; фиолетовый — в независимого тестового игрока. Сигнал фиксирует направление.
+M6_HAZARD_CAPS,22 · Turret caps / pool,22 · Лимиты турелей / пул
+M6_HAZARD_CAPS_HINT,Four turrets and slow rounds: at most three engage each player; 5 rounds per target / 10 total.,Четыре турели с медленными снарядами: до трёх атакуют игрока; 5 снарядов на цель / 10 всего.

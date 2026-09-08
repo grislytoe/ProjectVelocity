@@ -56,3 +56,15 @@ ping-pong return), 15 BREAKABLE (warning/disappearance/safe restoration), 16 JUM
 The gap has a lower recovery floor. Hold R/upper face button one second to reset the player;
 reselect a station to rebuild its platform state. See PLATFORM_MODULES.md for all .tres fields.
 Main folder: C:/Godot Projects/ProjectVelocity/dev_tools/test_playground.tscn.
+
+## M9 stations
+
+17 DEATH_ZONE; 18 SPIKES (static, timed, sensor-triggered from left to right);
+19 SAWS (static and path); 20 LASERS (permanent and cyclic); 21 TURRETS (two channels);
+22 HAZARD_CAPS (four turrets, slow rounds, shared pool). All original 16 stations remain.
+M9 stations compose M7 automatic safe respawn. Turret fixtures add an independent neutral
+input test actor at x=800; only the local actor owns InputLayer and camera. Cyan/purple
+barrel warnings identify channels. Pool, per-target occupancy, skipped shots, engagement
+counts and channel state/ticks appear in the HUD. Resetting the local actor retires its
+old projectiles; reselecting a station resets the complete fixture. See HAZARD_MODULES.md.
+`dev_tools/hazard_playground_smoke.gd` captures all six M9 stations with Russian hints.

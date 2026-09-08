@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.9.0-dev — M9 Hazard Modules
+
+- Review: increase turret projectile speed by 50% (816 → 1224 px/s; cap fixture 90 → 135).
+  Opponent-target rounds match opponent opacity (30%); pool reuse restores local opacity.
+
+- Reused M7 DeathZone/lifecycle for static/timed/local-trigger spikes, static/path saws
+  and permanent/cyclic lasers with nonlethal warnings and reserved respawn clearance.
+- Added independent dual-barrel per-player turret states, bounded velocity lead, LOS,
+  warning direction lock, minimum cooldown and Resource-based weapon overrides.
+- Added scene-owned pooled target-bound swept projectiles; configurable 5-per-target,
+  10-global and 3-engaging-turret defaults, skip-with-cooldown semantics and teardown.
+- Added six isolated playground stations with a neutral-input second actor and diagnostics;
+  real collision/lifecycle/pool stress tests at three render rates. Save/protocol unchanged.
+
 ## 0.6.0-dev — M6 Test Playground
 
 - Twelve isolated stations for all implemented movement mechanics, walkable/steep slopes and high-speed thin-wall collision.
