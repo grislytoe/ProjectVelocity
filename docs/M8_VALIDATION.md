@@ -36,3 +36,5 @@ Human feel/gamepad, Linux/Steam Deck and crushing gameplay are not validated/imp
 See PLATFORM_MODULES.md and KNOWN_ISSUES.md for authoring limits. User project.godot
 editor normalization is retained locally; only the intended version bump enters the commit.
 PR merge requires explicit user approval. Next milestone is not started.
+
+Manual review follow-up adds eight motor assertions and two real continuous-surface Dash checks. The checkpoint integration now enters above the former trigger height. Full M0–M8 validation passed at 30/60/144 FPS with all three replay hashes unchanged. Normal OpenGL lifecycle smoke passed 48 checks and its enlarged checkpoint screenshot was inspected. CI records the submitted commit result.

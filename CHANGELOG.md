@@ -74,3 +74,9 @@
 - Four appended playground stations; preserved M3 slope policy and moving-support respawn rejection.
 - Physics integration and render-rate traces; build 9, save schema 2 and protocol 1 unchanged.
 - Persist main-folder/separate-task workflow and user-only merge authorization in WORKFLOW.md.
+
+### M8 manual review follow-up
+
+- Prevent repeated Dash refresh during uninterrupted floor/wall contact; require detachment and new contact. Preserve Double Jump refresh.
+- Increase checkpoint trigger height from 90 to 450 px upward and marker height fivefold; keep respawn anchors unchanged.
+- Add pure-motor and real floor/wall regression checks plus airborne checkpoint activation coverage.

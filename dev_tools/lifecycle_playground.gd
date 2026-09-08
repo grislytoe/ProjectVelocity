@@ -33,13 +33,13 @@ func _ready() -> void:
 	for index: int in 2:
 		var checkpoint := CheckpointTrigger.new()
 		checkpoint.checkpoint_id = &"a" if index == 0 else &"b"
-		checkpoint.position = Vector2(350 + index * 650, 566)
+		checkpoint.position = Vector2(350 + index * 650, 386)
 		var anchor := Marker2D.new()
-		anchor.position = checkpoint.position - Vector2(60, 0)
+		anchor.position = Vector2(checkpoint.position.x - 60, 566)
 		add_child(anchor)
 		checkpoint.respawn_anchor = anchor
 		checkpoint.players[player] = lifecycle
-		add_box(checkpoint, Vector2(32, 90), Color(0, 0.8, 0.8, 0.15))
+		add_box(checkpoint, Vector2(32, 450), Color(0, 0.8, 0.8, 0.15))
 		checkpoints.append(checkpoint)
 	hazard = preload("res://gameplay/race/death_zone.tscn").instantiate() as DeathZone
 	hazard.position = Vector2(680, 590)
