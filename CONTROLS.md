@@ -59,3 +59,13 @@ The developer confirmed physical gamepad controls work during M5 review, before 
 ## Approved shared-aim control update
 
 The developer requested movement-bound Dash aim during M5 review, superseding the original separate arrows/right-stick layout. Rebinding move_left/right/up/down updates both movement and Dash aim. Legacy dash_left/right/up/down API names resolve to movement bindings for reads, prompts and rebinding. Old independent direction overrides remain valid in schema 2 and are preserved but ignored at runtime; no save migration or real-user save rewrite is needed. Arrows still navigate UI; the right stick does not select Dash. Shift/RB remain fresh-edge triggers, with no automatic activation on refresh.
+
+## M10 Solo
+
+F5 → Solo → Training Circuit. Ready dismisses the 3-second controls hint early.
+Escape / Start pauses the simulation; Resume continues without invalidating records.
+Hold R / top face for **0.5 seconds** once per release to Quick Restart, even while dead.
+Solo restarts go directly to countdown. Playground R/top face stays **1 second**.
+Main Menu → Controls rebinds Jump, Dash, Restart and Pause for the active device;
+conflicting bindings are rejected. Hints follow the last active keyboard/gamepad device.
+Movement/Dash aiming and fresh Shift/RB triggering are unchanged.

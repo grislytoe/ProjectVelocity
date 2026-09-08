@@ -193,8 +193,10 @@ func clear_dash_selection() -> void:
 	_selected_dash = Vector2.ZERO
 
 
-func clear_transient_state() -> void:
+func clear_transient_state(preserve_restart: bool = false) -> void:
 	for name: StringName in _owned_actions:
+		if preserve_restart and String(name).ends_with("_restart"):
+			continue
 		Input.action_release(name)
 	for action: String in InputBindings.ACTIONS:
 		if action.begins_with("ui_") and InputMap.has_action(action):

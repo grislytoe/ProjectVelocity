@@ -45,3 +45,8 @@ M8 is integrated into dev_tools/test_playground.tscn, stations 13–16. Build 0.
 The full validator now covers M0–M8. Normal-renderer platform check: godot --path . --fixed-fps 60 --script tests/platform_modules_test.gd.
 On Windows use Start-Process with -PassThru, -WindowStyle Hidden, redirected logs and WaitForExit as in validate.ps1.
 See WORKFLOW.md: all milestones use this main project folder, separate tasks and feature branches.
+
+M10 manual entry: C:/Godot Projects/ProjectVelocity/core/bootstrap/main.tscn (F5).
+Choose Solo → Training Circuit → Ready; pass both cyan checkpoint gates, then the lime
+Finish gate. Result Retry and held R restart to countdown; Escape pauses. Menu → Controls
+provides active-device rebinding. Course content is gameplay/race/solo_course.tscn.

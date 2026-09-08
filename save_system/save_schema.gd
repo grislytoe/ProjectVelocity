@@ -2,8 +2,8 @@ class_name SaveSchema
 extends RefCounted
 ## Pure schema validation and sequential migrations. No filesystem access.
 
-const CURRENT_VERSION: int = 2
-const MIGRATIONS: Dictionary = {0: "_migrate_v0_to_v1", 1: "_migrate_v1_to_v2"}
+const CURRENT_VERSION: int = 3
+const MIGRATIONS: Dictionary = {0: "_migrate_v0_to_v1", 1: "_migrate_v1_to_v2", 2: "_migrate_v2_to_v3"}
 
 
 static func defaults() -> Dictionary:
@@ -18,6 +18,7 @@ static func defaults() -> Dictionary:
 			"accessibility": {"high_contrast": false, "flash_intensity": 1.0,
 				"screen_shake": 0.5, "ui_scale": 1.0, "hud_opacity": 1.0},
 		},
+		"trial_records": {},
 		"time_trial_records": {},
 		"checkpoint_splits": {},
 		"last_lobby_settings": {"round_count": 1, "map_id": ""},
@@ -76,7 +77,26 @@ func _migrate_v1_to_v2(source: Dictionary) -> Dictionary:
 	return result
 
 
+func _migrate_v2_to_v3(source: Dictionary) -> Dictionary:
+	var result: Dictionary = source.duplicate(true)
+	result["trial_records"] = {}
+	result.save_version = 3
+	return result
+
+
 static func validate(data: Dictionary) -> bool:
+	if not data.get("trial_records") is Dictionary:
+		return false
+	for key: Variant in data.trial_records:
+		if not key is String or not PlayerProfileData.matches(key, "^[0-9a-f]{64}$"):
+			return false
+		if not TrialRecord.valid(data.trial_records[key]):
+			return false
+		var record: Dictionary = data.trial_records[key]
+		var identity: String = (record.map_id + ":" + str(int(record.map_version)) + ":" \
+			+ record.checksum + ":" + record.player_uuid).sha256_text()
+		if key != identity:
+			return false
 	if not PlayerProfileData.is_whole_number(data.get("save_version")) or (
 		data.save_version != CURRENT_VERSION):
 		return false

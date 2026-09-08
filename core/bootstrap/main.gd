@@ -1,5 +1,5 @@
 extends Control
-## Placeholder composition root; gameplay and services are added in later milestones.
+## Application services and Solo navigation composition root.
 
 var save_store: SaveStore
 var input_layer: InputLayer
@@ -27,6 +27,7 @@ func _ready() -> void:
 	input_preferences.store = save_store
 	input_preferences.layer = input_layer
 	add_child(input_preferences)
+	_open_navigation.call_deferred()
 	input_layer.prompts_changed.connect(_update_prompts)
 	add_child(input_layer)
 	_update_prompts()
@@ -35,6 +36,14 @@ func _ready() -> void:
 	_logger.info("ProjectVelocity %s started" % BuildInfo.label(), "bootstrap")
 	if OS.get_cmdline_user_args().has("--smoke-test"):
 		_run_smoke_test.call_deferred()
+
+
+func _open_navigation() -> void:
+	$Center.hide()
+	var navigation := TrialUI.new()
+	navigation.store = save_store
+	navigation.input_layer = input_layer
+	add_child(navigation)
 
 
 func _run_smoke_test() -> void:

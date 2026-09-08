@@ -84,3 +84,31 @@ M6_TURRETS,21 · Dual-channel turret,21 · Турель: два канала
 M6_TURRETS_HINT,Cyan barrel targets you; purple targets the independent idle test player. Warning locks direction.,Голубой ствол целится в вас; фиолетовый — в независимого тестового игрока. Сигнал фиксирует направление.
 M6_HAZARD_CAPS,22 · Turret caps / pool,22 · Лимиты турелей / пул
 M6_HAZARD_CAPS_HINT,Four turrets and slow rounds: at most three engage each player; 5 rounds per target / 10 total.,Четыре турели с медленными снарядами: до трёх атакуют игрока; 5 снарядов на цель / 10 всего.
+TT_SOLO,Solo · Time Trial,Соло · На время
+TT_SELECT,Map Select,Выбор карты
+TT_MAP,Training Circuit,Тренировочный маршрут
+TT_MAP_DESCRIPTION,A short course with two mandatory checkpoints. Jump over spikes and evade the turret.,Короткий маршрут с двумя обязательными чекпоинтами. Перепрыгните шипы и уклонитесь от турели.
+TT_CONTROLS,Controls,Управление
+TT_LANGUAGE,English / Русский,English / Русский
+TT_QUIT,Quit,Выход
+TT_MENU,Main Menu,Главное меню
+TT_PB,PB: %s,Рекорд: %s
+TT_READY,Ready — start countdown,Готов — начать отсчёт
+TT_HINT,"Move / aim: %s · %s (vertical aim uses movement up/down). Jump: %s. Dash: %s — fresh press. Hold %s for 0.5s to restart. Timer continues through death. Pause: %s.","Движение / прицел: %s · %s (вертикальный прицел — вверх/вниз). Прыжок: %s. Рывок: %s — новое нажатие. Удерживайте %s 0.5 с для рестарта. Смерть не останавливает время. Пауза: %s."
+TT_RESULTS,Run Results,Результаты попытки
+TT_NEW_PB,NEW PERSONAL BEST,НОВЫЙ ЛИЧНЫЙ РЕКОРД
+TT_COMPLETE,Run complete,Попытка завершена
+TT_INVALID,Developer manipulation — record invalid,Изменение геймплея — рекорд недействителен
+TT_SAVE_FAILED,Record could not be saved. Previous PB is preserved.,Не удалось сохранить рекорд. Предыдущий рекорд сохранён.
+TT_PB_DELTA,Delta vs previous PB: %s,Разница с прежним рекордом: %s
+TT_DEATHS,Deaths this run: %d,Смертей за попытку: %d
+TT_SPLIT,Checkpoint %d · %s · %s,Чекпоинт %d · %s · %s
+TT_RETRY,Retry,Повторить
+TT_PAUSED,Paused,Пауза
+TT_RESUME,Resume,Продолжить
+TT_REBIND_HELP,Select an action then press a key or gamepad button on the active device.,Выберите действие и нажмите клавишу или кнопку активного устройства.
+TT_PRESS_BINDING,Waiting for input…,Ожидание ввода…
+TT_BIND_JUMP,Jump,Прыжок
+TT_BIND_DASH,Dash,Рывок
+TT_BIND_RESTART,Quick Restart,Быстрый рестарт
+TT_BIND_PAUSE,Pause,Пауза

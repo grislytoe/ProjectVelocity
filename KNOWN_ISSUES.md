@@ -1,6 +1,6 @@
 # Known issues
 
-- F5/main and Windows staging still use the foundation placeholder. Run developer scenes with editor F6. M7 lifecycle has a separate fixture; M8 platforms and M9 hazards are in the 22-station playground. Race modes, pause UI and final art remain later work.
+- F5/main and staging provide Solo Time Trial on the short Training Circuit. Final map/art and online modes remain future work. M7 lifecycle and all 22 developer playground stations remain available with F6.
 - Movement tuning is an initial baseline. Automated collision/replay checks do not replace subjective playtesting or prove cross-platform bitwise determinism. Further tuning and platform coverage remain open; the developer accepted keyboard and gamepad movement during earlier milestone reviews.
 - The developer confirmed physical gamepad controls during M5 review. The subsequent shared movement/Dash layout needs a follow-up check; real USB/Bluetooth hotplug, other driver mappings and device-name detection remain separate validation items.
 - Controller prompt family detection uses names and may need the explicit family override. Prompt descriptors are text/tokens; final glyph art is deferred.
@@ -34,3 +34,12 @@
 - Author hazards at unit scale and place spawn anchors outside moving-saw routes. Area-based
   fatal hazards use fixed-tick overlaps; projectile collision uses swept circles. Inactive
   spike/laser volumes are conservatively excluded from respawn even while harmless.
+
+## M10 status
+
+F5/Main and staging now offer the complete Solo loop; the earlier foundation-only note
+is superseded. Training Circuit is deliberately short and procedural; it is not the final
+map/art milestone. Keyboard pilot proves reachability, not subjective difficulty/feel.
+Physical gamepad navigation, Linux/Steam Deck and low-end performance remain manual.
+Local records are not cryptographically authenticated. Future debug mutation entry points
+must use the explicit invalidation contract. No online mode, transport or M11 was added.

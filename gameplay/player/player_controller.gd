@@ -6,6 +6,7 @@ signal dash_started
 signal double_jumped
 signal died
 signal relocated(position: Vector2)
+signal gameplay_manipulated
 
 @export var movement_config: PlayerMovementConfig = preload("res://gameplay/player/default_movement.tres")
 @export var simulation_enabled: bool = true
@@ -120,6 +121,8 @@ func clear_selection() -> void:
 
 
 func die(ignore_invulnerability: bool = false) -> bool:
+	if ignore_invulnerability:
+		gameplay_manipulated.emit()
 	if motor.machine.current in [PlayerStateMachine.State.DEATH, PlayerStateMachine.State.FINISH]:
 		return false
 	if motor.invulnerability_ticks > 0 and not ignore_invulnerability:
@@ -132,7 +135,9 @@ func die(ignore_invulnerability: bool = false) -> bool:
 	return true
 
 
-func respawn_at(location: Vector2) -> void:
+func respawn_at(location: Vector2, lifecycle_authorized: bool = false) -> void:
+	if not lifecycle_authorized:
+		gameplay_manipulated.emit()
 	global_position = location
 	spawn_position = location
 	velocity = Vector2.ZERO
