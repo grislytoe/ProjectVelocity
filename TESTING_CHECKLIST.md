@@ -87,3 +87,11 @@ See CAMERA.md and docs/M5_VALIDATION.md. Negative-control errors are intentional
 - Hold reset less than one second, then a full second, then keep holding. Only the complete first hold resets; release rearms. Check F6/F7/F8/F9 developer actions.
 - Inspect English/Russian labels and live input prompts. New physical D-pad navigation still requires manual acceptance.
 - Normal renderer: `godot --path . --script dev_tools/test_playground_smoke.gd`; inspect ignored screenshots. F5 and staging remain the foundation scene; no playground resources are exported.
+
+## M7
+
+- Run dev_tools/validate.ps1: all M0–M6 regression checks plus M7 at 30/60/144 FPS.
+- Verify per-player ordered/unordered rules, optional vs mandatory, invalid Finish without teleport, duplicate events, static spawn clearance, moving support rejection, blocked checkpoint/Start retries, persistent fatal overlap and 45-tick immunity.
+- Run tests/checkpoint_respawn_test.gd with normal renderer and -- --render-smoke; inspect builds/m7-lifecycle.png.
+- Manually play dev_tools/lifecycle_playground.tscn: barrier, cyan checkpoint feedback, red hazard jump, death scatter/ring, yellow Finish, held R/top-face reset, Escape to all twelve M6 stations.
+- No tests may open real-user profile storage. Windows export/boot runs in CI; Linux/Steam Deck/hardware gamepad remain manual coverage.

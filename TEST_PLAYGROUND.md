@@ -44,3 +44,5 @@ All implementation files live in `dev_tools`, already excluded from staging expo
 `./dev_tools/validate.ps1` runs M0–M6, including `tests/test_playground_test.gd` at 30/60/144 FPS. M6 assertions use real collision geometry and observe after player physics, so a rendered frame cannot accidentally repeat a pressed edge. They cover all stations, all eight Dash directions, thin-wall collision, navigation, camera bounds, state reset, dev commands, one-second reset, out-of-bounds recovery, export exclusion and localization. Existing motor tests cover precise timing/edge cases in greater depth.
 
 Normal renderer smoke: `godot --path . --script dev_tools/test_playground_smoke.gd`. It captures six stations with Russian HUD into ignored `builds/m6-station-*.png`. Automated/synthetic D-pad navigation is not physical controller validation. See `docs/M6_VALIDATION.md` for recorded results.
+
+M7 adds a button opening the separate dev_tools/lifecycle_playground.tscn fixture. The twelve original catalog entries, geometry, controls and tests are unchanged. Escape from M7 returns here. See CHECKPOINTS_AND_LIFECYCLE.md.

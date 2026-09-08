@@ -71,3 +71,7 @@ Engine physics interpolation is enabled for matching player/camera render timing
 ## M6 developer playground
 
 `dev_tools/test_playground.tscn` is the dedicated twelve-station movement fixture. `PlaygroundStation` owns the geometry catalog; `TestPlayground` owns station lifecycle, navigation, diagnostics and a single explicit controller/input/camera. Old collision geometry is removed before the next simulation step. Controller state/input and camera interpolation reset on relocation. Production movement, saves and input schemas are unchanged. See [TEST_PLAYGROUND.md](TEST_PLAYGROUND.md) for station layout and commands. The entire tool and its tests are excluded from staging exports.
+
+## M7 lifecycle composition
+
+The gameplay/race layer owns per-player CheckpointProgress, PlayerLifecycle, shape-based RespawnSafety, reusable DeathZone, CheckpointTrigger, FinishTrigger and transport-free ReadyStart/StartBarrier. PlayerController adds only a death signal and an explicit start lock; unbound M0–M6 movement/replays are preserved. M4 presentation remains an observer and M5 relocation resets are reused. See CHECKPOINTS_AND_LIFECYCLE.md for contracts and map authoring.

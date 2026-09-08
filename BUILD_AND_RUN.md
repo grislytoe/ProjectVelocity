@@ -38,3 +38,5 @@ Normal startup loads/creates user://saves/save.json. Use --smoke-test for automa
 M2 startup creates InputLayer and InputPreferences. Synthetic tests need no physical gamepad. See CONTROLS.md for mapping APIs and the remaining hardware validation checklist.
 
 M6 manual fixture: `godot --path . dev_tools/test_playground.tscn` (or open it and use editor F6). See TEST_PLAYGROUND.md for station controls. Normal-renderer capture script: `godot --path . --script dev_tools/test_playground_smoke.gd`. The standard validator includes M6 station integration; export still excludes all dev_tools/tests.
+
+M7 manual review: run dev_tools/lifecycle_playground.tscn (F6), or use the M7 button in the M6 playground. Build identity: 0.7.0-dev / build 8. Normal-renderer smoke: godot --path . --script tests/checkpoint_respawn_test.gd -- --render-smoke (isolated; no saves).

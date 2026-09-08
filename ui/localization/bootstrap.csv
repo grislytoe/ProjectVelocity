@@ -56,3 +56,11 @@ M6_STEEP_HINT,The 63.4-degree slope must slide; it is not walkable ground. Compa
 M6_SPEED_HINT,6000 px lane with 200 px rulers. Dash into the 8 px wall at x=5600; no tunneling. Offline only.,Дорожка 6000 пикселей с шагом 200. Рывок в стену 8 пикселей при x=5600 без проскока. Только офлайн.
 M6_CONTROLS,Move: WASD / left stick · Jump: %s · Dash: %s · Hold %s 1 s: reset · Stations: PgUp/PgDn or D-pad left/right,Движение: WASD / левый стик · Прыжок: %s · Рывок: %s · %s 1 с: сброс · Станции: PgUp/PgDn или крестовина влево/вправо
 M6_DIAGNOSTICS,"%s | pos %.0f / %.0f | v %.0f / %.0f | floor %s wall %s | jump %s dash %s\ncoyote %d dash %d wall lock %d end lag %d ticks | elapsed %d | peak X %.0f fall %.0f rise %.0f px | reset %.2f s","%s | поз %.0f / %.0f | v %.0f / %.0f | пол %s стена %s | прыжок %s рывок %s\ncoyote %d рывок %d стена %d задержка %d тиков | прошло %d | пик X %.0f падение %.0f высота %.0f пикс | сброс %.2f с"
+M7_OPEN,M7 lifecycle,M7: смерть и чекпоинты
+M7_CHECKPOINT,CHECKPOINT,ЧЕКПОИНТ
+M7_SKIPPED_CHECKPOINT,Skipped mandatory checkpoint,Пропущен обязательный чекпоинт
+M7_UNSAFE_RESPAWN,Unsafe respawn position,Небезопасная точка возрождения
+M7_FINISH,FINISH,ФИНИШ
+M7_START,Ready — start in 3 seconds,Готовность — старт через 3 секунды
+M7_GO,GO!,СТАРТ!
+M7_HINT,M7: cyan checkpoints → jump red hazard → yellow finish. F6 death / hold R 1s restart / Esc M6,M7: голубые чекпоинты → прыжок над красной зоной → жёлтый финиш. F6 смерть / R 1с рестарт / Esc M6

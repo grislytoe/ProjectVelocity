@@ -170,6 +170,8 @@ func build_hud() -> void:
 	add_button(row, "M6_DEATH", request_action.bind("death"))
 	add_button(row, "M6_RESTORE", request_action.bind("restore"))
 	add_button(row, "M6_COLLISION", request_action.bind("collision"))
+	add_button(row, "M7_OPEN", func() -> void:
+		get_tree().change_scene_to_file("res://dev_tools/lifecycle_playground.tscn"))
 	hint = Label.new()
 	hint.add_theme_font_size_override("font_size", 22)
 	column.add_child(hint)
