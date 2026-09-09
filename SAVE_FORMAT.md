@@ -1,8 +1,8 @@
-# Save format — M11
+# Save format — M12
 
 ## Location and ownership
 
-Current schema: **save_version 4** (SaveSchema.CURRENT_VERSION).
+Current schema: **save_version 5** (SaveSchema.CURRENT_VERSION).
 SaveStore defaults to user://saves, normally %APPDATA%/Godot/app_userdata/ProjectVelocity/saves on Windows. The application writes local data only; no cloud sync or upload exists.
 
 | File | Purpose |
@@ -111,3 +111,26 @@ both the marker and profile fields. Profile editing never reconstructs the whole
 from PlayerProfileData, and never patches UUID or last_input_device from stale drafts.
 UI shows recovery notifications and failed writes. Language is previewed in the form;
 Cancel returns to persisted language. RGB is opaque in the appearance pipeline.
+
+## Version 5 — applied settings (M12)
+
+v4→v5 adds video.post_intensity and video.speed_intensity (finite 0–1; default 1),
+audio.mutes (master/music/sfx/ui/ambience booleans; default false), and accessibility
+disable_strong_flashes (false), colorblind (off/protanopia/deuteranopia/tritanopia;
+default off), text_size (finite 0.75–1.5; default 1). Existing settings retain their
+values and ranges, including legacy continuous shake and UI scale 0.5–2. Earlier
+migrations chain sequentially. This section supersedes the historical current-version
+statements above. General settings are now applied by SettingsRuntime.
+
+SettingsSession copies only owned fields into the latest save document. It retains
+profile identity, marker, customization, real trial_records, legacy records/splits,
+legacy bindings and foreign fields, including nested audio mute fields. Defaults are
+draft edits. A write failure restores the prior session document and applied visuals;
+the draft remains available for retry or Cancel. InputPreferences excludes uncommitted
+bindings while a settings transaction exists, even during debounced device writes.
+
+Display preview is never serialized, including through other save writers. Only Keep
+persists the candidate after native readback; timeout, Cancel, focus loss and teardown
+restore the actual previous window snapshot. A killed process restarts from the last
+confirmed document. Unsupported saved display sizes are retained and reported; startup
+keeps the safe engine window. Tests always inject unique cache paths.

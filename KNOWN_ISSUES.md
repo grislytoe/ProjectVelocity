@@ -1,5 +1,17 @@
 # Known issues
 
+- M12 fullscreen and borderless use the desktop resolution; windowed resolution is
+  selectable. No OS monitor-resolution switching is attempted. Unsupported saved modes
+  are reported and retain the engine's working startup window.
+- M12 native runtime was exercised on Windows/OpenGL AMD graphics at a 1920×1200
+  desktop, including a 1680×720 ultrawide window. A physical ultrawide monitor, Steam
+  Deck, Linux/Wayland and physical controller hotplug remain hardware review items.
+- Compatibility rendering does not support 2D MSAA. Visual presets use supported texture
+  filtering and procedural effect detail/antialiasing; they are not hardware benchmarks.
+- Colorblind correction is an optional channel-remapping aid; independent shape cues
+  remain. Final audio assets are absent; quiet UI/SFX placeholders and routed empty
+  music/ambience slots are intentional for this milestone.
+
 - F5/main and staging provide Solo Time Trial on the short Training Circuit. Final map/art and online modes remain future work. M7 lifecycle and all 22 developer playground stations remain available with F6.
 - Movement tuning is an initial baseline. Automated collision/replay checks do not replace subjective playtesting or prove cross-platform bitwise determinism. Further tuning and platform coverage remain open; the developer accepted keyboard and gamepad movement during earlier milestone reviews.
 - The developer confirmed physical gamepad controls during M5 review. The subsequent shared movement/Dash layout needs a follow-up check; real USB/Bluetooth hotplug, other driver mappings and device-name detection remain separate validation items.
@@ -12,7 +24,7 @@
 - M4 uses procedural modular placeholder art. Unknown cosmetic slot IDs use the base modules; an asset registry and final art remain future work; M11 supplies RGB customization.
 - Opponent opacity/nickname support is a presentation framework tested using synthetic snapshots, not live multiplayer. The developer accepted the placeholder presentation; replacement art is planned later.
 
-- M5 camera zones are authored axis-aligned world-space Resource rectangles. A map smaller than the visible frame is centered and necessarily exposes its backdrop. Camera collision, cinematics, shake and spectator switching are later work.
+- M5 camera zones are authored axis-aligned world-space Resource rectangles. A map smaller than the visible frame is centered and necessarily exposes its backdrop. Camera collision, cinematics and spectator switching are later work; M12 adds optional bounded shake.
 - Rendered jitter was measured on the local OpenGL setup; the developer accepted follow/zone comfort after the 30% zoom reduction. Other hardware still needs review. Small external teleports should emit relocated or explicitly reset the camera.
 
 - Developer fixtures remain offline. New station usability and physical D-pad navigation require manual review. M9 hazards now have isolated stations; network synchronization remains future work and the long lane is geometry for later reuse. Development scenes are intentionally absent from the Windows staging build.
@@ -48,8 +60,8 @@ must use the explicit invalidation contract. No online mode or transport was add
 
 The first front end is now available; earlier notes deferring all customization UI are
 superseded. Robot art remains the approved modular M4 placeholder, ready for later art.
-Only Training Circuit is playable. Online, production Level Editor, and general
-Video/Audio/Accessibility settings are explicitly unavailable; they are not simulated.
+Only Training Circuit is playable. Online and production Level Editor are unavailable.
+M12 now provides Video/Audio/Controls/Accessibility settings; see SETTINGS.md.
 Physical controller/driver, Linux and Steam Deck validation remain manual. Automated
 controller events exercise Godot UI navigation only. On-screen keyboard supports the
 allowed alphabets and case; it is local, with no Steam Input dependency.

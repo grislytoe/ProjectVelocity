@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.12.0-dev — M12 Settings (build 15)
+
+- Fixed resolution selection in fullscreen and borderless: a real world render target
+  scales independently of the native UI while preserving the competitive camera view.
+  Mode changes retain the selected resolution; Keep/Revert covers render size too.
+- Synchronized native window state with Godot Window and guarded expired confirmation dialogs.
+- Raised minimum resolution/window size to Steam Deck's 1280×800; legacy lower values
+  upgrade without resetting player data.
+- Enabled localized Video, Audio, Controls and Accessibility pages with explicit
+  Apply/Cancel/defaults transactions and separate keyboard/gamepad rebind profiles.
+- Added 15-second Keep/Revert display preview with timeout, focus-loss, teardown,
+  failed-apply and failed-write rollback; unconfirmed display data never reaches disk.
+- Applied render caps, VSync, native window modes, aspect-preserving ultrawide framing,
+  three visual presets, UI/text scale, HUD alpha, contrast/color correction and effects.
+- Created five routed audio buses, independent levels/mutes and quiet UI/SFX placeholders;
+  empty menu/level music and ambience slots reserve future final content.
+- Migrated schema 4→5 while preserving UUID, onboarding, cosmetics, PBs and foreign data.
+  Protocol remains 1 and gameplay content hash/replays remain unchanged.
+
 ## 0.11.0-dev — M11 UI Foundation (build 13)
 
 - Added techno-industrial theme, splash, explicit onboarding, Main Menu profile/robot

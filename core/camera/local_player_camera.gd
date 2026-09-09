@@ -10,6 +10,7 @@ var local_target: CharacterBody2D
 var _last_target: Vector2 = Vector2.ZERO
 var _last_view: Vector2 = Vector2.ZERO
 var _configured: bool = false
+var _shake_phase: float = 0.0
 
 
 func _init() -> void:
@@ -82,4 +83,8 @@ func update_follow(snap: bool) -> void:
 	model.step(_last_target, local_target.velocity, _last_view, config, map_bounds, snap)
 	global_position = model.center
 	zoom = Vector2.ONE * model.zoom_value
+	_shake_phase += 1.0 / 60.0
+	var strength: float = float(SettingsRuntime.access("screen_shake", 0.0))
+	var speed: float = clampf(local_target.velocity.length() / 1800.0, 0, 1)
+	offset = Vector2(sin(_shake_phase * 83), cos(_shake_phase * 71)) * strength * speed * 2.0
 	force_update_scroll()

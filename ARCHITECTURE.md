@@ -1,5 +1,26 @@
 # Architecture
 
+## M12 settings composition
+
+Bootstrap now owns SettingsRuntime and SettingsSession alongside InputPreferences.
+WorldPresentation renders Solo through a SubViewport at the selected resolution budget,
+with a fixed 1920×1080 logical view and an independent native-resolution UI canvas.
+Display selections and window resizing start at 1280×800; bootstrap upgrades legacy
+lower display values without replacing the save document.
+SettingsValues defines schema additions and visual presets; SaveSchema performs the
+pure sequential v4→v5 migration. SettingsPage builds AppUI forms, while
+DisplayConfirmation routes mouse/keyboard/controller actions through the exclusive modal.
+DisplayAdapter owns native window requests/readback/snapshots. SettingsSession owns
+detached drafts and the 15-second trial; only successful explicit Apply/Keep persists.
+InputPreferences retains debounced device writes but excludes provisional bindings.
+
+SettingsRuntime applies Engine.max_fps, DisplayServer VSync, aspect-preserving Window
+scaling, supported canvas texture filters, AudioServer buses and the presentation shader.
+PlayerPlaceholder observes visual options and triggers quiet routed SFX; LocalPlayerCamera
+adds bounded presentation-only shake without changing its follow model or player state.
+AppUI applies text/UI scaling inside a bounded scrollable panel. See SETTINGS.md.
+The paragraphs below describe the earlier milestones historically; current save schema is 5.
+
 ## Implemented bootstrap
 
 `core/bootstrap/main.tscn` is the composition root. It displays the placeholder and build identity. `AppLogger` is the only autoload; it uses Godot's local rotating log sink. `BuildInfo` exposes constants and engine-derived build flags. `AppConfig` is a typed Resource with a checked-in default. No runtime dependency on Steam or EOS exists.

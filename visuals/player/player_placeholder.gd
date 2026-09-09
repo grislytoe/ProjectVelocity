@@ -20,9 +20,11 @@ var dash_ready: bool = true
 var _facing: float = 1.0
 var _max_speed: bool = false
 var _invulnerable: bool = false
+var _audio: SettingsRuntime
 
 
 func _ready() -> void:
+	_audio = get_tree().get_first_node_in_group("settings_runtime") as SettingsRuntime
 	if presentation_config == null or not presentation_config.valid():
 		presentation_config = CharacterPresentationConfig.new()
 	rig = Node2D.new()
@@ -82,7 +84,12 @@ func refresh_style() -> void:
 
 
 func present(frame: PlayerVisualFrame, selection: Vector2 = Vector2.ZERO) -> void:
+	var previous_pose: PlayerAnimationMachine.Pose = animation.current
 	animation.advance(frame)
+	if is_local and is_instance_valid(_audio) and previous_pose != animation.current and (
+		animation.current in [PlayerAnimationMachine.Pose.JUMP, PlayerAnimationMachine.Pose.DASH,
+		PlayerAnimationMachine.Pose.DEATH]):
+		_audio.cue("SFX")
 	if absf(frame.velocity.x) > 1:
 		_facing = signf(frame.velocity.x)
 	if frame.state == PlayerStateMachine.State.WALL_SLIDE and frame.wall_side != 0:
@@ -179,17 +186,28 @@ func _draw() -> void:
 	if nickname_label == null:
 		return
 	var accent: Color = appearance.accent_color
-	accent.a = presentation_config.effect_intensity
+	var preset: Dictionary = SettingsValues.PRESETS[SettingsRuntime.video("effects_quality", "balanced")]
+	accent.a = presentation_config.effect_intensity * float(preset.effects)
+	var segments: int = preset.segments
+	var antialias: bool = preset.antialias
+	var flash: float = float(SettingsRuntime.access("flash_intensity", 1.0))
+	if SettingsRuntime.access("disable_strong_flashes", false):
+		flash = minf(flash, 0.2)
 	var pose: PlayerAnimationMachine.Pose = animation.current
 	if pose == PlayerAnimationMachine.Pose.DOUBLE_JUMP:
-		draw_arc(Vector2.ZERO, 35 + animation.age_ticks, 0, TAU, 40, accent, 2, true)
+		var flash_color: Color = accent
+		flash_color.a *= flash
+		draw_arc(Vector2.ZERO, 35 + animation.age_ticks, 0, TAU, segments, flash_color, 2, antialias)
 	if pose == PlayerAnimationMachine.Pose.DASH:
-		draw_line(-dash_direction * 28, -dash_direction * 76, accent, 5, true)
+		draw_line(-dash_direction * 28, -dash_direction * 76, accent, 5, antialias)
 	if pose in [PlayerAnimationMachine.Pose.SKID, PlayerAnimationMachine.Pose.TURNAROUND]:
 		draw_line(Vector2(-_facing * 20, 31), Vector2(-_facing * 43, 31), accent, 2, true)
 	if pose == PlayerAnimationMachine.Pose.RESPAWN or _invulnerable:
-		draw_arc(Vector2.ZERO, 37, 0, TAU, 40, accent, 1, true)
+		var flash_color: Color = accent
+		flash_color.a *= flash
+		draw_arc(Vector2.ZERO, 37, 0, TAU, segments, flash_color, 1, antialias)
 	if _max_speed and pose == PlayerAnimationMachine.Pose.RUN:
+		accent.a *= float(SettingsRuntime.video("speed_intensity", 1.0))
 		draw_line(Vector2(-_facing * 23, 5), Vector2(-_facing * 39, 5), accent, 1.5, true)
 	# Shape cues remain legible independently of user-selected color hues.
 	if pose != PlayerAnimationMachine.Pose.DEATH:

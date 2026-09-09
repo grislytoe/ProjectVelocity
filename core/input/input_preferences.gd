@@ -6,6 +6,7 @@ var store: SaveStore
 var layer: InputLayer
 var _timer: Timer
 var _dirty: bool = false
+var editing: bool = false
 
 
 func _ready() -> void:
@@ -34,9 +35,13 @@ func flush() -> bool:
 	_timer.stop()
 	if store.read_only:
 		return false
-	store.data.settings.controls.input = layer.config.duplicate(true)
+	var previous: Dictionary = store.data.settings.controls.input.duplicate(true)
+	if not editing:
+		store.data.settings.controls.input = layer.config.duplicate(true)
 	store.data.profile.last_input_device = layer.last_device
 	var success: bool = store.save()
+	if not success:
+		store.data.settings.controls.input = previous
 	_dirty = not success
 	return success
 

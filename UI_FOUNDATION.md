@@ -14,8 +14,8 @@ Main Menu exposes its profile header, robot preview, New Game, Customization, Se
 Level Editor and Quit confirmation. New Game contains Solo and an explicitly unavailable
 Online page. Solo uses the existing TrialMapDefinition manifest and Training Circuit;
 its schematic preview is illustrative, not a second source of gameplay metadata.
-Settings retains Controls/rebinding and language through Profile. Video, Audio and
-Accessibility application remain the next settings milestone, visibly disabled.
+Settings provides Video, Audio, Controls and Accessibility through M12 transactions;
+language remains in Profile. See SETTINGS.md.
 Level Editor says In Development and has only Back. No editor or transport is included.
 
 ## Components and ownership
@@ -54,7 +54,7 @@ Rebinding captures one input and can be canceled with Back. Disabled entries nev
 
 The base canvas is 1920x1080, scaled with the existing aspect-preserving project setup.
 Scrollable forms support smaller windows; the color controls use integer RGB channels
-with no mouse-only popup. General user-configurable UI scale is part of future settings.
+with no mouse-only popup. M12 provides configurable UI/text scale in bounded scrollable panels.
 
 ## Validation
 

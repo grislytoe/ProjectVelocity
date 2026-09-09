@@ -91,6 +91,8 @@ foreach ($fps in @(30, 60, 144)) {
 }
 if (@($trialHashes | Select-Object -Unique).Count -ne 1) { throw "Time Trial differs between render rates" }
 Invoke-GodotCheck -Name "m11-ui" -Arguments @("--headless", "--path", ".", "--script", "tests/ui_foundation_test.gd") -Marker "PROJECTVELOCITY_M11_OK"
+Invoke-GodotCheck -Name "m12-settings" -Arguments @("--headless", "--path", ".", "--script", "tests/settings_test.gd") -Marker "PROJECTVELOCITY_M12_OK"
+Invoke-GodotCheck -Name "m12-ui" -Arguments @("--headless", "--path", ".", "--script", "tests/settings_runtime_test.gd") -Marker "PROJECTVELOCITY_M12_RUNTIME_OK"
 git diff --cached --check
 if ($LASTEXITCODE -ne 0) { throw "Staged whitespace validation failed" }
 git diff --check
@@ -102,4 +104,4 @@ if ($ExportWindows) {
     $Godot = Join-Path $projectRoot "builds/windows/ProjectVelocity.exe"
     Invoke-GodotCheck -Name "export-boot" -Arguments @("--headless", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
 }
-Write-Output "M0 + M1 + M2 + M3 + M4 + M5 + M6 + M7 + M8 + M9 + M10 + M11 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."
+Write-Output "M0 + M1 + M2 + M3 + M4 + M5 + M6 + M7 + M8 + M9 + M10 + M11 + M12 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."

@@ -36,3 +36,7 @@ M11: F5 starts splash and explicit language/nickname onboarding, then the techno
 Main Menu with profile/robot preview, customization and New Game → Solo → map selection.
 Settings retains Controls; Level Editor honestly displays In Development.
 See [UI foundation](UI_FOUNDATION.md) and [M11 validation](docs/M11_VALIDATION.md).
+
+M12: Settings enables Video, Audio, Controls and Accessibility with Apply/Cancel/defaults,
+15-second display confirmation and persisted device profiles. See [Settings](SETTINGS.md).
+Build 0.12.0-dev /15; save schema 5; protocol 1.
