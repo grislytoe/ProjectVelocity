@@ -1,7 +1,7 @@
 # M12 validation — Settings
 
 Implementation: feature/m12-settings in C:/Godot Projects/ProjectVelocity.
-Build 0.12.0-dev /14; schema 5; protocol 1. No gameplay-content manifest change.
+Build 0.12.0-dev /15; schema 5; protocol 1. No gameplay-content manifest change.
 
 ## Automated evidence
 
@@ -24,10 +24,20 @@ Command: C:/Godot/Godot.exe --path . --script tests/settings_runtime_test.gd
 The test creates a UUID-named OS-cache save and mutes Master before playback.
 Observed: Godot 4.7.2.stable.official.ed1daf0bf, OpenGL 3.3 Compatibility,
 AMD Radeon (TM) Graphics; desktop 1920×1200.
-Actual window readbacks: 1280×720, 1280×800, 1600×900, 1920×1080, 1920×1200,
-1680×720 (ultrawide window), 960×1080 and 640×360. All retain the 1920×1080
+Actual window readbacks: 1280×800, 1600×900, 1920×1080, 1920×1200,
+1680×900 and 1280×1080. All retain the 1920×1080
 competitive content area. Native fullscreen and borderless preview/readback, controller
 Revert, keyboard Keep, mouse Revert and VSync on/off readback pass.
+Build 15 adds native Keep at 1280×800 in both fullscreen modes, repeated 1600×900
+and 1920×1080 previews while staying fullscreen, enabled resolution selectors,
+mode changes preserving the selected size, render-size rollback and confirmed-value reload.
+GPU texture image readbacks verify 1280×720, 1600×900 and 1920×1080 buffers;
+1280×800 fits the same 16:9 view in 1280×720. Camera center/zoom and logical
+1920×1080 framing remain unchanged, with native UI drawn independently.
+Selections below Steam Deck's 1280×800 are rejected. A legacy 1280×720 save upgrades
+to 1280×800 without replacing the profile UUID; minimum native window size is checked.
+Native rollback testing caught Windows restoring a fullscreen-sized window rectangle;
+restoring fullscreen now preserves its existing windowed restore rectangle.
 Marker: PROJECTVELOCITY_M12_RUNTIME_OK native=true, no engine warnings/errors.
 
 RU/EN page captures, scale extrema and confirmation captures are generated under builds/
@@ -44,10 +54,12 @@ Windows export/boot is checked by CI using checksum-verified official templates.
 
 ## Manual review in the main folder
 
-1. Open C:/Godot Projects/ProjectVelocity/project.godot and press F5. Confirm build /14.
+1. Open C:/Godot Projects/ProjectVelocity/project.godot and press F5. Confirm build /15.
+   For native window-mode testing disable Embed Game on Next Play and restart F5.
 2. Settings → each of Video/Audio/Controls/Accessibility: change values; Cancel, then
    repeat and Apply. Exit/restart F5 and verify the saved values and unchanged profile/PB.
-3. Video: try window size and each window mode. Exercise Keep, Revert, 15-second timeout,
+3. Video: change resolution within each fullscreen mode and verify the world sharpness
+   changes while the UI and camera view stay fixed. Exercise Keep, Revert, 15-second timeout,
    Alt-Tab, and closing during preview. Restart into the last confirmed mode.
 4. Controls: select keyboard then gamepad; rebind movement/Jump/Dash/Restart, try a conflict,
    cancel capture, reset one profile; adjust deadzones/family. Verify the other profile survives.

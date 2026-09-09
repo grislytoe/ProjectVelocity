@@ -3,6 +3,10 @@
 ## M12 settings composition
 
 Bootstrap now owns SettingsRuntime and SettingsSession alongside InputPreferences.
+WorldPresentation renders Solo through a SubViewport at the selected resolution budget,
+with a fixed 1920×1080 logical view and an independent native-resolution UI canvas.
+Display selections and window resizing start at 1280×800; bootstrap upgrades legacy
+lower display values without replacing the save document.
 SettingsValues defines schema additions and visual presets; SaveSchema performs the
 pure sequential v4→v5 migration. SettingsPage builds AppUI forms, while
 DisplayConfirmation routes mouse/keyboard/controller actions through the exclusive modal.

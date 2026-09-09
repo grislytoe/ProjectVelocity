@@ -39,4 +39,4 @@ See [UI foundation](UI_FOUNDATION.md) and [M11 validation](docs/M11_VALIDATION.m
 
 M12: Settings enables Video, Audio, Controls and Accessibility with Apply/Cancel/defaults,
 15-second display confirmation and persisted device profiles. See [Settings](SETTINGS.md).
-Build 0.12.0-dev /14; save schema 5; protocol 1.
+Build 0.12.0-dev /15; save schema 5; protocol 1.

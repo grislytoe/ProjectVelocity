@@ -75,20 +75,14 @@ func toggle(key: String, data: Dictionary, field: String) -> void:
 func _video() -> void:
 	var data: Dictionary = session.draft.video
 	var resolutions: Array = session.adapter.choices()
-	if not resolutions.has(data.resolution):
+	if not resolutions.has(data.resolution) and int(data.resolution[0]) >= DisplayAdapter.MINIMUM.x and int(data.resolution[1]) >= DisplayAdapter.MINIMUM.y:
 		resolutions.append(data.resolution.duplicate())
 	var names: Array = []
 	for resolution: Array in resolutions:
 		names.append("%d × %d" % [resolution[0], resolution[1]])
-	var resolution_control: OptionButton = choice("SET_RESOLUTION", data, "resolution", resolutions, names)
-	resolution_control.disabled = data.window_mode != "windowed"
-	var mode_control: OptionButton = choice("SET_WINDOW", data, "window_mode", ["windowed", "fullscreen", "borderless"],
+	choice("SET_RESOLUTION", data, "resolution", resolutions, names)
+	choice("SET_WINDOW", data, "window_mode", ["windowed", "fullscreen", "borderless"],
 		["SET_WINDOWED", "SET_FULLSCREEN", "SET_BORDERLESS"])
-	mode_control.item_selected.connect(func(_index: int) -> void:
-		if data.window_mode != "windowed" and DisplayServer.get_name() != "headless":
-			var desktop: Vector2i = DisplayServer.screen_get_size()
-			data.resolution = [desktop.x, desktop.y]
-		show_page.call_deferred(category))
 	ui.label(ui.tr("SET_NATIVE_NOTE"), 20)
 	toggle("SET_VSYNC", data, "vsync")
 	choice("SET_FPS", data, "fps_limit", SettingsValues.FPS,

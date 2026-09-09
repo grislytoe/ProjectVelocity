@@ -180,6 +180,8 @@ func run() -> void:
 	var restore_count: int = display.restores
 	session.free()
 	check(display.restores == restore_count + 1, "Teardown restores preview without callbacks")
+	check(runtime.world.viewport.size == WorldPresentation.render_size(store.data.settings.video.resolution),
+		"Teardown restores confirmed render pixels")
 	preferences.free()
 	layer.free()
 	runtime.free()

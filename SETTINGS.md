@@ -21,12 +21,22 @@ will be documented here with the implementation.
 
 ## Concrete values and behavior
 
-Resolution choices are window dimensions supported by the current desktop: 1280×720,
+Resolution choices are rendering dimensions supported by the current desktop:
 1280×800, 1600×900, 1920×1080, 2560×1080, 2560×1440, 3440×1440, 3840×2160,
 plus the native desktop size when different. Unsupported choices are omitted; an existing
-saved value remains visible and preserved. Native fullscreen/borderless use the desktop
-resolution and disable the size selector. Exclusive fullscreen is requested for Fullscreen;
-borderless requests Godot fullscreen. No OS monitor mode switch is implemented.
+saved value remains visible and preserved. All three modes allow resolution selection.
+The minimum selection and native window size is Steam Deck's 1280×800. Legacy saves
+below either dimension are upgraded to 1280×800 at bootstrap, preserving other data.
+In windowed mode the selection also sets the window size. Fullscreen/borderless output
+at the desktop size and upscale the selected world render target. Exclusive fullscreen
+is requested for Fullscreen; borderless requests Godot fullscreen. The monitor mode
+does not change. Disable Godot's Embed Game on Next Play for native window-mode testing.
+
+WorldPresentation uses a SubViewport with a fixed 1920×1080 logical view. Its actual
+pixel buffer fits 16:9 inside the selected resolution (1280×800 renders 1280×720),
+then scales to the root content area. UI and confirmation dialogs retain native
+rendering clarity. Changing modes preserves the selected resolution; preview rollback
+restores both window state and the saved render size.
 
 Window content always retains the 1920×1080 reference view with KEEP aspect. UI scale
 changes font/control sizes inside that view, never camera zoom or world visibility.

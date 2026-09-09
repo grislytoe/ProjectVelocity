@@ -494,7 +494,7 @@ func _process(delta: float) -> void:
 	super._process(delta)
 	if settings_page != null and screen.begins_with("settings_"):
 		settings_page.poll()
-		if settings.previewing and modal is ConfirmationDialog:
+		if settings.previewing and is_instance_valid(modal) and modal is ConfirmationDialog:
 			modal.dialog_text = tr("SET_CONFIRM_HELP") + "\n" + str(ceili(settings.remaining))
 	for item: Label in [hud, banner, status]:
 		if is_instance_valid(item):

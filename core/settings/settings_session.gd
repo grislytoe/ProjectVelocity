@@ -139,3 +139,6 @@ func _exit_tree() -> void:
 	if previewing:
 		previewing = false
 		adapter.restore(previous_display)
+		if is_instance_valid(runtime) and is_instance_valid(runtime.world) and is_instance_valid(runtime.world.viewport):
+			# The buffer can outlive this session; restore it without emitting UI callbacks.
+			runtime.world.apply(store.data.settings.video)

@@ -231,6 +231,6 @@ SET_CONFIRM_DISPLAY,Keep this display mode?,Сохранить этот режи
 SET_CONFIRM_HELP,Reverts in 15 seconds without confirmation. Back or focus loss also reverts.,Без подтверждения возврат через 15 секунд. Назад или потеря фокуса также отменяют режим.
 SET_KEEP,Keep,Оставить
 SET_REVERT,Revert,Вернуть
-SET_NATIVE_NOTE,Resolution selects window size. Fullscreen modes use the desktop resolution.,Разрешение задаёт размер окна. Полноэкранные режимы используют разрешение рабочего стола.
+SET_NATIVE_NOTE,Resolution sets game rendering quality in every window mode. Interface size and camera view stay unchanged.,Разрешение задаёт качество отрисовки игры во всех режимах окна. Размер интерфейса и обзор камеры не меняются.
 SET_DRAFT_HELP,Apply saves changes. Cancel discards changes since the last Apply. Bindings are previewed while editing.,Применить сохраняет изменения. Отмена возвращает последние сохранённые значения. Назначения ввода действуют пробно во время редактирования.
 SET_REVERTED,Previous display configuration restored.,Возвращены предыдущие параметры экрана.

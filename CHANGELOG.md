@@ -1,7 +1,13 @@
 # Changelog
 
-## 0.12.0-dev — M12 Settings (build 14)
+## 0.12.0-dev — M12 Settings (build 15)
 
+- Fixed resolution selection in fullscreen and borderless: a real world render target
+  scales independently of the native UI while preserving the competitive camera view.
+  Mode changes retain the selected resolution; Keep/Revert covers render size too.
+- Synchronized native window state with Godot Window and guarded expired confirmation dialogs.
+- Raised minimum resolution/window size to Steam Deck's 1280×800; legacy lower values
+  upgrade without resetting player data.
 - Enabled localized Video, Audio, Controls and Accessibility pages with explicit
   Apply/Cancel/defaults transactions and separate keyboard/gamepad rebind profiles.
 - Added 15-second Keep/Revert display preview with timeout, focus-loss, teardown,

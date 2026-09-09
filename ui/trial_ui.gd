@@ -144,7 +144,11 @@ func start_map() -> void:
 	trial.records = TrialRecords.new(store, TrialMapDefinition.new())
 	trial.changed.connect(refresh.call_deferred)
 	trial.message.connect(show_message)
-	get_parent().add_child(trial)
+	var runtime := get_tree().get_first_node_in_group("settings_runtime") as SettingsRuntime
+	if runtime != null:
+		runtime.world.viewport.add_child(trial)
+	else:
+		get_parent().add_child(trial)
 	refresh()
 
 func refresh() -> void:

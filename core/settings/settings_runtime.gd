@@ -7,10 +7,13 @@ static var visual: Dictionary = {}
 var current: Dictionary = {}
 var filter_material: ShaderMaterial
 var quiet_cue: AudioStreamWAV
+var world: WorldPresentation
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("settings_runtime")
+	world = WorldPresentation.new()
+	add_child(world)
 	var overlay := CanvasLayer.new()
 	overlay.layer = 90
 	add_child(overlay)
@@ -53,11 +56,13 @@ func cue(bus: String) -> void:
 func apply(settings: Dictionary) -> void:
 	current = settings.duplicate(true)
 	visual = current.duplicate(true)
+	world.apply(settings.video)
 	Engine.max_fps = int(settings.video.fps_limit)
 	if DisplayServer.get_name() != "headless":
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if settings.video.vsync
 			else DisplayServer.VSYNC_DISABLED)
 	var window: Window = get_tree().root
+	window.min_size = DisplayAdapter.MINIMUM
 	window.content_scale_size = Vector2i(1920, 1080)
 	window.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
 	window.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_KEEP

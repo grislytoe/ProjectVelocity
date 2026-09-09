@@ -3,7 +3,7 @@ extends RefCounted
 ## Build identity. Release flags come from the engine, never a user-writable setting.
 
 const VERSION: String = "0.12.0-dev"
-const BUILD_NUMBER: int = 14
+const BUILD_NUMBER: int = 15
 ## Wire compatibility identity; increment when incompatible network changes are introduced.
 const NETWORK_PROTOCOL_VERSION: int = 1
 const MILESTONE: String = "M12"

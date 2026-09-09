@@ -44,12 +44,16 @@ func run() -> void:
 	store.data.onboarding_complete = true
 	store.data.settings.audio.mutes.master = true
 	store.data.settings.video.resolution = [1280, 720]
+	var fixture_uuid: String = store.data.profile.uuid
 	check(store.save(), "Muted native test fixture")
 	main = preload("res://core/bootstrap/main.tscn").instantiate()
 	main.save_store = store
 	root.add_child(main)
 	await process_frame
 	await process_frame
+	check(store.data.settings.video.resolution == [1280, 800] and store.data.profile.uuid == fixture_uuid,
+		"Legacy low resolution upgrades to Steam Deck minimum without resetting profile")
+	check(root.min_size == DisplayAdapter.MINIMUM, "Window resizing respects Steam Deck minimum")
 	ui = main.get_children().filter(func(node: Node) -> bool: return node is AppUI)[0]
 	await settle()
 	ui.show_menu()
@@ -98,9 +102,11 @@ func run() -> void:
 	session.apply()
 	if render:
 		print("M12_NATIVE_SCREEN=", DisplayServer.screen_get_size())
+		for unsupported: Vector2i in [Vector2i(640, 360), Vector2i(1280, 720), Vector2i(960, 1080)]:
+			check(not session.adapter.supported(unsupported), "Reject sizes below Steam Deck minimum")
 		var before: Dictionary = session.adapter.snapshot()
 		var sizes: Array = session.adapter.choices()
-		for size: Array in [[1680, 720], [960, 1080], [640, 360]]:
+		for size: Array in [[1680, 900], [1280, 1080]]:
 			if session.adapter.supported(Vector2i(size[0], size[1])):
 				sizes.append(size)
 		for resolution: Array in sizes:
@@ -112,7 +118,7 @@ func run() -> void:
 			check(session.adapter.matches(proposed), "Native window actual size")
 			check(root.get_visible_rect().size.is_equal_approx(Vector2(1920, 1080)), "Native aspect keeps competitive view")
 			print("M12_NATIVE_WINDOW=", DisplayServer.window_get_size())
-			if resolution == [1680, 720]:
+			if resolution == [1680, 900]:
 				await capture("ultrawide")
 		session.adapter.restore(before)
 		for enabled: bool in [false, true]:
@@ -122,22 +128,58 @@ func run() -> void:
 		for mode: String in ["fullscreen", "borderless"]:
 			ui.settings_page.show_page("video")
 			await settle()
-			var desktop: Vector2i = DisplayServer.screen_get_size()
 			session.draft.video.window_mode = mode
-			session.draft.video.resolution = [desktop.x, desktop.y]
+			session.draft.video.resolution = [1280, 800]
 			ui.settings_page.apply()
 			await settle()
 			check(session.previewing, "Native preview stays active")
 			if session.previewing:
 				check(session.adapter.matches(session.draft.video), "Native fullscreen readback")
+				check(main.settings_runtime.world.viewport.size == Vector2i(1280, 720), "Fullscreen uses selected render pixels")
 				await capture("confirmation-" + mode)
 				await press("ui_cancel", true)
 				check(not session.previewing, "Pad reverts native modal")
 			session.revert()
 			session.adapter.restore(before)
+		for mode: String in ["fullscreen", "borderless"]:
+			ui.settings_page.show_page("video")
+			session.draft.video.window_mode = mode
+			session.draft.video.resolution = [1280, 800]
+			ui.settings_page.apply()
+			await settle()
+			check(session.keep(), "Keep fullscreen resolution")
+			await settle()
+			ui.settings_page.show_page("video")
+			await settle()
+			var selector := ui.panel.find_child("SET_RESOLUTION", true, false) as OptionButton
+			check(not selector.disabled, "Fullscreen resolution selector remains enabled")
+			var modes := ui.panel.find_child("SET_WINDOW", true, false) as OptionButton
+			modes.item_selected.emit(1 if mode == "fullscreen" else 2)
+			check(session.draft.video.resolution == [1280, 800], "Mode selection preserves resolution")
+			for resolution: Array in [[1600, 900], [1920, 1080]]:
+				session.draft.video.resolution = resolution
+				ui.settings_page.apply()
+				await settle()
+				check(session.previewing and session.adapter.matches(session.draft.video), "Same-mode resolution preview")
+				check(main.settings_runtime.world.viewport.size == WorldPresentation.render_size(resolution), "GPU buffer fits selected resolution")
+				check(root.get_visible_rect().size == Vector2(1920, 1080), "Fullscreen UI reference stays fixed")
+				session.revert()
+				await settle()
+				check(main.settings_runtime.world.viewport.size == Vector2i(1280, 720), "Revert restores render resolution")
+			var reload_store := SaveStore.new(folder)
+			check(reload_store.open() and Vector2i(reload_store.data.settings.video.resolution[0], reload_store.data.settings.video.resolution[1]) == Vector2i(1280, 800)
+				and reload_store.data.settings.video.window_mode == mode, "Only confirmed fullscreen resolution persists")
+		# Restore a confirmed windowed baseline for the remaining input tests.
+		ui.settings_page.show_page("video")
+		session.draft.video.window_mode = "windowed"
+		session.draft.video.resolution = [1280, 800]
+		ui.settings_page.apply()
+		await settle()
+		check(session.keep(), "Confirm windowed baseline")
+		await settle()
 		ui.settings_page.show_page("video")
 		await settle()
-		session.draft.video.resolution = [1600, 900] if session.adapter.supported(Vector2i(1600, 900)) else [640, 360]
+		session.draft.video.resolution = [1600, 900] if session.adapter.supported(Vector2i(1600, 900)) else [1280, 800]
 		ui.settings_page.apply()
 		await settle()
 		if session.previewing:
@@ -149,7 +191,7 @@ func run() -> void:
 		session.adapter.restore(before)
 		ui.settings_page.show_page("video")
 		await settle()
-		session.draft.video.resolution = [1280, 720]
+		session.draft.video.resolution = [1280, 800]
 		ui.settings_page.apply()
 		await settle()
 		check(session.previewing, "Mouse test preview")
@@ -180,6 +222,9 @@ func run() -> void:
 		ui.start_map()
 		await settle()
 		check(is_instance_valid(ui.trial), "Settings returns to Solo")
+		var world: SubViewport = main.settings_runtime.world.viewport
+		check(ui.trial.get_viewport() == world, "Solo renders through selected resolution viewport")
+		check(world.get_visible_rect().size == Vector2(1920, 1080), "World logical view stays fixed")
 		ui.trial.dismiss_hint()
 		await settle()
 		check(ui.hud.scale == Vector2.ONE * scale and ui.hud.get_theme_font_size("font_size") == 51,
@@ -187,6 +232,29 @@ func run() -> void:
 		check(ui.hud.get_global_rect().end.x <= 1920 and ui.banner.get_global_rect().end.y <= 1080,
 			"Scaled HUD and countdown stay in competitive frame")
 		await capture("hud-scale-" + str(scale))
+	# Actual world rendering changes pixel density without changing the camera or HUD.
+	paused = true
+	var world: SubViewport = main.settings_runtime.world.viewport
+	var camera := world.get_camera_2d() as LocalPlayerCamera
+	check(camera != null, "World viewport owns the local camera")
+	var original_zoom: Vector2 = camera.zoom
+	var original_center: Vector2 = camera.global_position
+	for resolution: Array in [[1280, 800], [1600, 900], [1920, 1080]]:
+		var proposed: Dictionary = store.data.settings.duplicate(true)
+		proposed.video.resolution = resolution
+		main.settings_runtime.apply(proposed)
+		await process_frame
+		camera.update_follow(true)
+		check(camera.zoom.is_equal_approx(original_zoom) and camera.global_position.is_equal_approx(original_center),
+			"Render resolution preserves camera framing")
+		check(world.get_visible_rect().size == Vector2(1920, 1080), "Virtual world resolution remains fixed")
+		if render:
+			await RenderingServer.frame_post_draw
+			check(world.get_texture().get_image().get_size() == WorldPresentation.render_size(resolution),
+				"GPU image has the selected pixel dimensions")
+			await capture("world-" + str(resolution[0]) + "x" + str(resolution[1]))
+	main.settings_runtime.apply(store.data.settings)
+	paused = false
 	ui.show_menu()
 	await settle()
 	main.queue_free()

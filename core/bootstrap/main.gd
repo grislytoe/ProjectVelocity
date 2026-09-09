@@ -22,6 +22,11 @@ func _ready() -> void:
 		else:
 			save_store = SaveStore.new()
 	save_store.open()
+	var resolution: Array = save_store.data.settings.video.resolution
+	if int(resolution[0]) < DisplayAdapter.MINIMUM.x or int(resolution[1]) < DisplayAdapter.MINIMUM.y:
+		# Upgrade legacy low-resolution settings without resetting the player's save.
+		save_store.data.settings.video.resolution = [DisplayAdapter.MINIMUM.x, DisplayAdapter.MINIMUM.y]
+		save_store.save()
 	TranslationServer.set_locale(save_store.data.profile.language)
 	input_layer = InputLayer.new()
 	input_layer.configure(save_store.data.settings.controls.input, save_store.data.profile.last_input_device)
