@@ -1,8 +1,8 @@
-# Save format — M10
+# Save format — M11
 
 ## Location and ownership
 
-Current schema: **save_version 3** (SaveSchema.CURRENT_VERSION).
+Current schema: **save_version 4** (SaveSchema.CURRENT_VERSION).
 SaveStore defaults to user://saves, normally %APPDATA%/Godot/app_userdata/ProjectVelocity/saves on Windows. The application writes local data only; no cloud sync or upload exists.
 
 | File | Purpose |
@@ -21,7 +21,7 @@ Every listed field is required. JSON integer-valued numbers are accepted as inte
 
 | Field | Shape and constraints |
 | --- | --- |
-| save_version | Nonnegative integer; current version 3 |
+| save_version | Nonnegative integer; current version 4 |
 | profile.uuid | Cryptographically random RFC 4122-style UUID v4, lowercase, generated at first profile creation |
 | profile.nickname | 3–15 Unicode code points; rules below |
 | profile.body_color / accent_color | Eight lowercase hexadecimal RGBA digits |
@@ -57,7 +57,7 @@ SaveStore.open() validates the primary and backup before accepting either. It re
 6. Invalid in-memory changes: return false with SAVE_INVALID; good files remain unchanged.
 7. Write/flush/rename failure: return false with SAVE_IO_ERROR; retain usable session data and existing good files.
 
-Notification keys have English/Russian translations and are available to future UI. No settings/recovery menu is added. Notification state lasts until the next open() or a later error replaces it; it is not a persistent notification queue.
+Notification keys have English/Russian translations and are available to future UI. M11 displays the notification in onboarding/Main Menu. Notification state lasts until the next open() or a later error replaces it; it is not a persistent notification queue.
 
 Replacement uses same-directory rename after flush and validation. The implementation never deletes a destination to force a failed rename. If backup staging fails, primary replacement is aborted. This is atomic-style replacement, not a universal power-loss/directory-fsync guarantee. Single writer/process is assumed; concurrent application instances are not coordinated. Quarantine files require manual support cleanup.
 
@@ -79,7 +79,7 @@ The v1→v2 migration adds default input preferences without changing UUID, prof
 
 ## Version 3 — real Time Trial records (M10)
 
-Current schema is **save_version 3**. The v2→v3 migration adds `trial_records: {}`;
+M10 introduced **save_version 3**. The v2→v3 migration adds `trial_records: {}`;
 v0/v1 migrate sequentially. Legacy time_trial_records/checkpoint_splits remain preserved
 verbatim, but are never promoted to real PBs: they lack map version/hash and identity.
 All earlier save recovery, size bounds, migration and backup guarantees remain unchanged.
@@ -98,3 +98,16 @@ First/improved valid complete attempts replace PB total and timestamps; equal/wo
 only improve segment minima. Invalid runs do not write. Failed writes restore previous
 session data, retain good disk generations and report a localized failure. No lifetime deaths.
 Map-content checksum is baked and verified by dev_tools/check_trial_hash.ps1 for exports.
+
+## Version 4 — explicit onboarding (M11)
+
+Current schema is **save_version 4**. Required root `onboarding_complete` is a boolean,
+false in new defaults. The v3→v4 migration adds false: older builds did not present the
+language/nickname flow, so an existing or recovered profile is not assumed to have
+completed it. Earlier migrations chain through v4. UUID and all save sections survive.
+A backup retains its own explicit marker; recovery never invents successful completion.
+Only successful ProfileEdit.commit(true) advances the marker; write failure restores
+both the marker and profile fields. Profile editing never reconstructs the whole save
+from PlayerProfileData, and never patches UUID or last_input_device from stale drafts.
+UI shows recovery notifications and failed writes. Language is previewed in the form;
+Cancel returns to persisted language. RGB is opaque in the appearance pipeline.

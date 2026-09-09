@@ -110,3 +110,12 @@ PlayerLifecycle/CheckpointProgress, M8 platforms, M9 HazardWorld and M5 camera.
 TrialRecords is the validated persistence boundary; TrialRecord supplies integer-tick
 validation/formatting. UI observes state/signals and queues navigation outside physics.
 See TIME_TRIAL.md for timing, restart ownership, record identity and debug invalidation.
+
+## M11 UI composition
+
+Bootstrap now creates AppUI (a TrialUI subclass) for splash/onboarding and the front end.
+IndustrialTheme, RobotPreview, CircuitPreview and the exclusive NameKeyboard are reusable
+presentation components. ProfileEdit owns detached transactions through SaveStore;
+schema v4 adds an explicit onboarding_complete boolean via v3→v4 migration.
+AppUI only applies validated appearance to M4 observers. The M10 trial, checkpoint,
+hazard, restart and camera authority is unchanged. See UI_FOUNDATION.md.

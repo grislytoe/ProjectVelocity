@@ -39,13 +39,13 @@ func run() -> void:
 	legacy.erase("trial_records")
 	legacy.time_trial_records = {"old": {"best_time_ms": 100}}
 	var migrated: Dictionary = SaveSchema.decode(legacy)
-	check(migrated.status == "valid" and migrated.data.save_version == 3, "v2 migration")
+	check(migrated.status == "valid" and migrated.data.save_version == SaveSchema.CURRENT_VERSION, "v2 migration")
 	check(migrated.data.profile.uuid == legacy.profile.uuid and
 		migrated.data.time_trial_records == legacy.time_trial_records, "Legacy identity/data preserved")
 	var legacy_file := FileAccess.open(folder.path_join("save.json"), FileAccess.WRITE)
 	legacy_file.store_string(JSON.stringify(legacy))
 	legacy_file.close()
-	check(store.open() and store.data.save_version == 3 and store.data.profile.uuid == legacy.profile.uuid,
+	check(store.open() and store.data.save_version == SaveSchema.CURRENT_VERSION and store.data.profile.uuid == legacy.profile.uuid,
 		"v2 disk migration re-saves current schema without changing identity")
 	var records := TrialRecords.new(store, TrialMapDefinition.new())
 	check(records.complete(600, [200, 400], true).new_pb, "First PB")

@@ -40,7 +40,7 @@ func _ready() -> void:
 
 func _open_navigation() -> void:
 	$Center.hide()
-	var navigation := TrialUI.new()
+	var navigation := AppUI.new()
 	navigation.store = save_store
 	navigation.input_layer = input_layer
 	add_child(navigation)

@@ -54,3 +54,10 @@ Baking keeps identity consistent between editor and exported compiled scripts. R
 from other UUIDs/map versions/content hashes remain stored but are not compared.
 This conservative hash also changes after unrelated gameplay code edits. Future full
 MapDefinition metadata/catalog and final map design remain outside M10.
+
+## M11 integration
+
+F5 now starts splash/onboarding, then Main Menu → New Game → Solo → Map Select.
+The existing SoloTrial timing/PB/checkpoint/restart implementation and gameplay checksum
+are unchanged. AppUI applies saved M4 body/emissive colors to the course on entry/retry.
+Save schema v4 only adds an explicit onboarding marker; v3 trial_records are preserved.

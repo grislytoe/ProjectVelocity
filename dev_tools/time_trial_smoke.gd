@@ -1,7 +1,7 @@
 extends SceneTree
 ## Real renderer, isolated save, GUI navigation and actual motor-driven course completion.
 
-var ui: TrialUI
+var ui: AppUI
 var jump_one: bool = false
 var jump_two: bool = false
 var dashed: bool = false
@@ -11,6 +11,7 @@ func _initialize() -> void:
 	run.call_deferred()
 
 func capture(name_value: String) -> void:
+	await create_timer(0.25).timeout
 	await process_frame
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("res://builds/m10-" + name_value + ".png")
@@ -40,14 +41,23 @@ func run() -> void:
 	await process_frame
 	await process_frame
 	for child: Node in main.get_children():
-		if child is TrialUI:
+		if child is AppUI:
 			ui = child
 	TranslationServer.set_locale("ru")
 	ui.show_menu()
 	await capture("menu-ru")
-	(ui.column.get_child(3) as Button).pressed.emit()
+	ui.show_new_game()
+	await create_timer(0.25).timeout
+	(ui.panel.find_child("TT_SOLO", true, false) as Button).grab_focus()
+	var confirm := InputEventKey.new()
+	confirm.physical_keycode = KEY_ENTER
+	confirm.pressed = true
+	Input.parse_input_event(confirm)
 	await process_frame
-	await process_frame
+	confirm = confirm.duplicate()
+	confirm.pressed = false
+	Input.parse_input_event(confirm)
+	await create_timer(0.25).timeout
 	if ui.screen != "maps":
 		push_error("Solo button navigation failed")
 		quit(1)

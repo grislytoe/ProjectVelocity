@@ -9,3 +9,7 @@
 - Update documentation and build identity, run the full validator, commit, push and open
   a PR into `dev`. Check remote branch, PR and CI. The user manually reviews the module
   and explicitly authorizes merge. Never merge automatically or start the next milestone.
+
+M11 review: the UI foundation uses the same main folder and one feature/m11-ui-foundation
+branch. PR into dev is the delivery boundary; user approval is still required for merge.
+Do not start M12 or another task automatically.
