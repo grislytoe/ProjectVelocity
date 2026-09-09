@@ -77,7 +77,7 @@ static func valid_token(profile: String, token: Variant) -> bool:
 static func valid_config(value: Variant) -> bool:
 	if not value is Dictionary or not value.get("profiles") is Dictionary:
 		return false
-	if value.get("prompt_family") not in FAMILIES or not value.get("deadzones") is Dictionary:
+	if not value.get("prompt_family") is String or value.prompt_family not in FAMILIES or not value.get("deadzones") is Dictionary:
 		return false
 	for zone: String in ["movement", "dash", "activity"]:
 		var amount: Variant = value.deadzones.get(zone)
@@ -88,7 +88,7 @@ static func valid_config(value: Variant) -> bool:
 		if not value.profiles.get(profile) is Dictionary:
 			return false
 		for action: Variant in value.profiles[profile]:
-			if action not in ACTIONS:
+			if not (action is String or action is StringName) or action not in ACTIONS:
 				return false
 			var tokens: Variant = value.profiles[profile][action]
 			if not tokens is Array or tokens.size() > 4:

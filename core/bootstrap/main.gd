@@ -4,6 +4,8 @@ extends Control
 var save_store: SaveStore
 var input_layer: InputLayer
 var input_preferences: InputPreferences
+var settings_runtime: SettingsRuntime
+var settings_session: SettingsSession
 var _smoke_directory: String = ""
 
 @onready var build_label: Label = %BuildLabel
@@ -30,6 +32,16 @@ func _ready() -> void:
 	_open_navigation.call_deferred()
 	input_layer.prompts_changed.connect(_update_prompts)
 	add_child(input_layer)
+	settings_runtime = SettingsRuntime.new()
+	add_child(settings_runtime)
+	settings_runtime.apply(save_store.data.settings)
+	settings_session = SettingsSession.new()
+	settings_session.store = save_store
+	settings_session.runtime = settings_runtime
+	settings_session.preferences = input_preferences
+	add_child(settings_session)
+	if not settings_session.adapter.apply(save_store.data.settings.video):
+		save_store.notification_key = "SET_DISPLAY_FAILED"
 	_update_prompts()
 	build_label.text = BuildInfo.label()
 	build_label.visible = BuildInfo.is_development() or OS.has_feature("staging")
@@ -43,6 +55,7 @@ func _open_navigation() -> void:
 	var navigation := AppUI.new()
 	navigation.store = save_store
 	navigation.input_layer = input_layer
+	navigation.settings = settings_session
 	add_child(navigation)
 
 

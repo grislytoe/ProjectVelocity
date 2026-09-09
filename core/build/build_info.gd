@@ -2,11 +2,11 @@ class_name BuildInfo
 extends RefCounted
 ## Build identity. Release flags come from the engine, never a user-writable setting.
 
-const VERSION: String = "0.11.0-dev"
-const BUILD_NUMBER: int = 13
+const VERSION: String = "0.12.0-dev"
+const BUILD_NUMBER: int = 14
 ## Wire compatibility identity; increment when incompatible network changes are introduced.
 const NETWORK_PROTOCOL_VERSION: int = 1
-const MILESTONE: String = "M11"
+const MILESTONE: String = "M12"
 const REQUIRED_ENGINE: String = "4.7.2"
 
 

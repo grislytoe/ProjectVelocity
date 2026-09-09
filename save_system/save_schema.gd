@@ -2,12 +2,12 @@ class_name SaveSchema
 extends RefCounted
 ## Pure schema validation and sequential migrations. No filesystem access.
 
-const CURRENT_VERSION: int = 4
-const MIGRATIONS: Dictionary = {0: "_migrate_v0_to_v1", 1: "_migrate_v1_to_v2", 2: "_migrate_v2_to_v3", 3: "_migrate_v3_to_v4"}
+const CURRENT_VERSION: int = 5
+const MIGRATIONS: Dictionary = {0: "_migrate_v0_to_v1", 1: "_migrate_v1_to_v2", 2: "_migrate_v2_to_v3", 3: "_migrate_v3_to_v4", 4: "_migrate_v4_to_v5"}
 
 
 static func defaults() -> Dictionary:
-	return {
+	var result: Dictionary = {
 		"save_version": CURRENT_VERSION,
 		"onboarding_complete": false,
 		"profile": PlayerProfileData.create().to_dictionary(),
@@ -24,6 +24,8 @@ static func defaults() -> Dictionary:
 		"checkpoint_splits": {},
 		"last_lobby_settings": {"round_count": 1, "map_id": ""},
 	}
+	SettingsValues.extend(result.settings)
+	return result
 
 
 static func decode(value: Variant) -> Dictionary:
@@ -93,6 +95,18 @@ func _migrate_v3_to_v4(source: Dictionary) -> Dictionary:
 	return result
 
 
+func _migrate_v4_to_v5(source: Dictionary) -> Dictionary:
+	var result: Dictionary = source.duplicate(true)
+	if not result.get("settings") is Dictionary:
+		return {}
+	for category: String in ["video", "audio", "accessibility"]:
+		if not result.settings.get(category) is Dictionary:
+			return {}
+	SettingsValues.extend(result.settings)
+	result.save_version = 5
+	return result
+
+
 static func validate(data: Dictionary) -> bool:
 	if not data.get("onboarding_complete") is bool:
 		return false
@@ -119,6 +133,8 @@ static func validate(data: Dictionary) -> bool:
 	for group: String in ["video", "audio", "controls", "accessibility"]:
 		if not settings.get(group) is Dictionary:
 			return false
+	if not SettingsValues.valid(settings):
+		return false
 	var video: Dictionary = settings.video
 	var resolution: Variant = video.get("resolution")
 	if not resolution is Array or resolution.size() != 2:

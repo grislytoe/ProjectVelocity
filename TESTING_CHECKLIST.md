@@ -162,3 +162,23 @@ See CAMERA.md and docs/M5_VALIDATION.md. Negative-control errors are intentional
 - F6 dev_tools/test_playground.tscn: all 22 stations; F6 lifecycle_playground.tscn remains.
 
 Automated M11 checks inject unique OS-cache save paths; never point tests at real saves.
+# M12 settings acceptance
+
+- Run dev_tools/validate.ps1 with Godot 4.7.2: all M0–M12 checks, parser/import,
+  isolated boot and unchanged gameplay/camera replay hashes must pass.
+- Run tests/settings_runtime_test.gd without --headless for real DisplayServer,
+  VSync/readback, RU/EN screenshots, extreme scales, modal input and Solo return.
+  Its cache save and muted fixture are isolated; screenshots/logs stay under builds.
+- In F5, test each category: change values, Apply, restart, confirm reload; edit again
+  and Cancel; restore Defaults and verify they do not persist until Apply/Keep.
+- Test keyboard and a physical pad: rebind movement/Jump/Dash/Restart, reject a conflict,
+  cancel capture, reset one profile, adjust deadzones and prompt families; check fresh
+  input on Solo entry, Dash aim, 0.5s restart and pause record eligibility.
+- Preview each native mode: Keep, Revert, wait 15 seconds, Alt-Tab and close application.
+  Restart must use the last confirmed mode. Try 1280×720, 1280×800 and desktop size.
+- Check UI scale 50/100/150/200% with text 75/100/150%; reach Apply/Cancel through
+  scrolling and controller focus. Verify bars on ultrawide/16:10 and unchanged camera view.
+- Verify five audio bus levels/mutes (including zero), UI clicks and player SFX. Music
+  and ambience are intentionally empty; do not mistake missing final content for routing.
+- Verify contrast/color correction, flash controls, speed trails, shake Off/Low/Medium/High
+  and HUD 50–100%; inspect legibility without changing gameplay timing.

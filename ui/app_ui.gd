@@ -15,10 +15,15 @@ var modal: Window
 var remembered: Dictionary = {}
 var form_origin: String = "menu"
 var splash_elapsed: float = 0.0
+var settings: SettingsSession
+var settings_page: SettingsPage
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	input_layer.prompts_changed.connect(_prompts_changed)
+	if settings != null:
+		settings_page = SettingsPage.new(self)
+		settings.preview_finished.connect(_display_finished)
 	show_splash()
 
 func _panel(title: String) -> void:
@@ -45,11 +50,13 @@ func _panel(title: String) -> void:
 	var layout := VBoxContainer.new()
 	margin.add_child(layout)
 	var eyebrow := Label.new()
+	eyebrow.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	eyebrow.text = "PROJECT / VELOCITY    •    " + BuildInfo.label()
 	eyebrow.add_theme_color_override("font_color", Color("73e7d2"))
 	eyebrow.add_theme_font_size_override("font_size", 20)
 	layout.add_child(eyebrow)
 	var heading := Label.new()
+	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	heading.text = tr(title)
 	heading.add_theme_font_size_override("font_size", 48)
 	layout.add_child(heading)
@@ -78,6 +85,24 @@ func _finish_transition(token: int) -> void:
 	busy = false
 	input_layer.clear_transient_state()
 	_wire_focus(token)
+	_reveal_focus.call_deferred(token)
+
+func _reveal_focus(token: int) -> void:
+	if token != generation:
+		return
+	var owner: Control = get_viewport().gui_get_focus_owner()
+	if owner == null:
+		return
+	var ancestor: Node = owner.get_parent()
+	while ancestor != null and ancestor != panel:
+		if ancestor is ScrollContainer:
+			if owner.has_meta("settings_caption"):
+				var caption: Control = owner.get_meta("settings_caption").get_ref() as Control
+				if caption != null:
+					ancestor.ensure_control_visible(caption)
+			ancestor.ensure_control_visible(owner)
+			return
+		ancestor = ancestor.get_parent()
 
 func button(key: String, callback: Callable) -> Button:
 	var item := Button.new()
@@ -85,10 +110,13 @@ func button(key: String, callback: Callable) -> Button:
 	item.name = key.validate_node_name()
 	item.custom_minimum_size.y = 58
 	item.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	item.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	item.pressed.connect(func() -> void:
 		if busy or is_instance_valid(modal):
 			return
 		remembered[screen] = item.name
+		if settings != null:
+			settings.runtime.cue("UI")
 		busy = true
 		_activate.call_deferred(callback, generation))
 	column.add_child(item)
@@ -111,6 +139,7 @@ func _controls(node: Node, output: Array[Control]) -> void:
 func _wire_focus(token: int) -> void:
 	if token != generation or not is_instance_valid(panel):
 		return
+	_scale_controls(panel)
 	var items: Array[Control] = []
 	_controls(panel, items)
 	for index: int in items.size():
@@ -132,6 +161,19 @@ func _wire_focus(token: int) -> void:
 			return
 	if not items.is_empty():
 		items[0].grab_focus()
+
+func _scale_controls(node: Node) -> void:
+	var factor: float = float(SettingsRuntime.access("ui_scale", 1.0))
+	var text_factor: float = factor * float(SettingsRuntime.access("text_size", 1.0))
+	if node is Control and not node.has_meta("settings_scaled"):
+		node.set_meta("settings_scaled", true)
+		if node is Label or node is Button or node is LineEdit:
+			var base: int = node.get_theme_font_size("font_size")
+			node.add_theme_font_size_override("font_size", maxi(12, roundi(base * text_factor)))
+		if node is BaseButton:
+			node.custom_minimum_size.y = maxf(36, node.custom_minimum_size.y * factor)
+	for child: Node in node.get_children():
+		_scale_controls(child)
 
 func _update_footer() -> void:
 	if is_instance_valid(prompt):
@@ -235,10 +277,7 @@ func show_settings() -> void:
 	button("TT_CONTROLS", show_controls)
 	button("UI_LANGUAGE", _open_profile)
 	for key: String in ["UI_VIDEO", "UI_AUDIO", "UI_ACCESSIBILITY"]:
-		var item: Button = button(key, Callable())
-		item.text += "  ·  " + tr("UI_IN_DEVELOPMENT")
-		item.disabled = true
-		item.focus_mode = Control.FOCUS_NONE
+		button(key, settings_page.show_page.bind(key.trim_prefix("UI_").to_lower()))
 	button("UI_BACK", show_menu)
 
 func show_editor() -> void:
@@ -247,6 +286,21 @@ func show_editor() -> void:
 	label(tr("UI_IN_DEVELOPMENT"), 48)
 	label(tr("UI_EDITOR_DESCRIPTION"), 28)
 	button("UI_BACK", show_menu)
+
+func show_controls() -> void:
+	settings_page.show_page("controls")
+
+func _display_finished(kept: bool) -> void:
+	_finish_display.call_deferred(kept)
+
+func _finish_display(kept: bool) -> void:
+	if is_instance_valid(modal):
+		modal.hide()
+		modal.queue_free()
+	await get_tree().process_frame
+	settings_page.show_page(settings_page.category)
+	if settings.error_key.is_empty():
+		settings_page.feedback.text = tr("SET_SAVED" if kept else "SET_REVERTED")
 
 func _open_profile() -> void:
 	form_origin = screen
@@ -323,12 +377,14 @@ func _open_keyboard() -> void:
 
 func _present_modal(window: Window) -> void:
 	var previous: Control = get_viewport().gui_get_focus_owner()
+	var previous_weak: WeakRef = weakref(previous)
 	modal = window
 	add_child(modal)
 	modal.tree_exited.connect(func() -> void:
 		input_layer.clear_transient_state()
-		if is_instance_valid(previous):
-			previous.grab_focus.call_deferred())
+		var old_focus: Control = previous_weak.get_ref() as Control
+		if is_instance_valid(old_focus):
+			old_focus.grab_focus.call_deferred())
 	modal.popup_centered()
 
 func _quit_dialog() -> void:
@@ -397,6 +453,16 @@ func show_customization() -> void:
 func start_map() -> void:
 	input_layer.quarantine_gameplay_entry()
 	super.start_map()
+	var font_scale: float = float(SettingsRuntime.access("text_size", 1.0))
+	var ui_scale: float = float(SettingsRuntime.access("ui_scale", 1.0))
+	for item: Label in [hud, banner, status]:
+		item.add_theme_font_size_override("font_size", roundi(item.get_theme_font_size("font_size") * font_scale))
+		item.scale = Vector2.ONE * ui_scale
+	hud.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hud.size.x = 900 / ui_scale
+	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status.size.x = 900 / ui_scale
+	banner.position.x = (1920 - banner.size.x * ui_scale) / 2
 	_apply_player_profile()
 	trial.changed.connect(_apply_player_profile.call_deferred)
 
@@ -413,6 +479,8 @@ func _apply_to_robots(node: Node) -> void:
 func _prompts_changed() -> void:
 	# Device changes update prompts without rebuilding forms or stealing focus.
 	_update_footer()
+	if settings_page != null:
+		settings_page.refresh_prompts()
 	if screen == "controls" and input_layer.last_rebind_result.is_empty():
 		for action: String in ["jump", "dash", "restart", "pause"]:
 			var item: Button = panel.find_child("TT_BIND_" + action.to_upper(), true, false) as Button
@@ -424,9 +492,17 @@ func _prompts_changed() -> void:
 
 func _process(delta: float) -> void:
 	super._process(delta)
+	if settings_page != null and screen.begins_with("settings_"):
+		settings_page.poll()
+		if settings.previewing and modal is ConfirmationDialog:
+			modal.dialog_text = tr("SET_CONFIRM_HELP") + "\n" + str(ceili(settings.remaining))
 	for item: Label in [hud, banner, status]:
 		if is_instance_valid(item):
 			item.visible = not is_instance_valid(panel)
+			item.modulate.a = float(SettingsRuntime.access("hud_opacity", 1.0))
+	if is_instance_valid(hud) and is_instance_valid(status) and is_instance_valid(banner):
+		status.position.y = hud.position.y + hud.size.y * hud.scale.y + 16
+		banner.position.y = maxf(155, status.position.y + status.size.y * status.scale.y + 24)
 	if screen == "splash":
 		splash_elapsed += delta
 		if splash_elapsed > 1.2 and not busy:
@@ -434,6 +510,13 @@ func _process(delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if is_instance_valid(modal):
+		if modal is DisplayConfirmation and modal.route(event):
+			get_viewport().set_input_as_handled()
+		return
+	if settings_page != null and settings_page.capture:
+		if event.is_action_pressed("ui_cancel"):
+			input_layer.cancel_rebind()
+			get_viewport().set_input_as_handled()
 		return
 	if busy:
 		if event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton:
@@ -453,6 +536,9 @@ func _input(event: InputEvent) -> void:
 
 func _back() -> void:
 	if busy:
+		return
+	if screen.begins_with("settings_"):
+		settings_page.cancel()
 		return
 	match screen:
 		"splash": _after_splash()

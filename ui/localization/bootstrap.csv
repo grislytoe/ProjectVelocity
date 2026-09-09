@@ -156,3 +156,81 @@ UI_COSMETICS_UNAVAILABLE,Base robot modules • additional cosmetic parts are no
 UI_CASE,Aa / Аа,Aa / Аа
 UI_NORMAL,Normal,Обычная
 UI_DIFFICULTY,Difficulty: %s,Сложность: %s
+SET_APPLY,Apply,Применить
+SET_DEFAULTS,Restore defaults,По умолчанию
+SET_SAVED,Settings saved.,Настройки сохранены.
+SET_DISPLAY_FAILED,Display mode unavailable. Previous working window restored.,Режим недоступен. Возвращено рабочее окно.
+SET_RESOLUTION,Resolution,Разрешение
+SET_WINDOW,Window mode,Режим окна
+SET_WINDOWED,Windowed,Оконный
+SET_FULLSCREEN,Fullscreen,Полный экран
+SET_BORDERLESS,Borderless fullscreen,Полный экран без рамки
+SET_VSYNC,VSync,Вертикальная синхронизация
+SET_FPS,FPS limit,Ограничение FPS
+SET_UNLIMITED,Unlimited,Без ограничения
+SET_QUALITY,Effects quality / Steam Deck preset,Качество эффектов / пресет Steam Deck
+SET_QUALITY_HIGH,Quality,Качество
+SET_BALANCED,Balanced,Баланс
+SET_PERFORMANCE,Performance,Производительность
+SET_DECK_NOTE,Visual settings only. Steam Deck hardware performance has not been verified.,Только визуальные настройки. Производительность на Steam Deck не проверена.
+SET_POST,Post / camera effect intensity,Интенсивность постэффектов камеры
+SET_SPEED,Speed effect intensity,Интенсивность эффекта скорости
+SET_OFF,Off,Выкл.
+SET_LOW,Low,Низкая
+SET_MEDIUM,Medium,Средняя
+SET_HIGH,High,Высокая
+SET_SHAKE,Screen shake,Тряска экрана
+SET_UI_SCALE,UI scale,Масштаб интерфейса
+SET_HUD,HUD opacity,Непрозрачность HUD
+SET_ASPECT_NOTE,Competitive view stays 16:9. Wider and taller displays use bars.,Обзор остаётся 16:9. На широких и высоких экранах используются полосы.
+SET_CONTRAST,High contrast,Высокая контрастность
+SET_FLASH,Flash intensity,Интенсивность вспышек
+SET_NO_FLASH,Disable strong flashes,Отключить сильные вспышки
+SET_COLORBLIND,Colorblind correction,Цветокоррекция при дальтонизме
+SET_PROTANOPIA,Protanopia,Протанопия
+SET_DEUTERANOPIA,Deuteranopia,Дейтеранопия
+SET_TRITANOPIA,Tritanopia,Тританопия
+SET_TEXT,Text size,Размер текста
+SET_BUS_MASTER,Master volume,Общая громкость
+SET_BUS_MUSIC,Music volume,Громкость музыки
+SET_BUS_SFX,SFX volume,Громкость эффектов
+SET_BUS_UI,UI volume,Громкость интерфейса
+SET_BUS_AMBIENCE,Ambience volume,Громкость окружения
+SET_MUTE_MASTER,Mute Master,Выключить весь звук
+SET_MUTE_MUSIC,Mute Music,Выключить музыку
+SET_MUTE_SFX,Mute SFX,Выключить эффекты
+SET_MUTE_UI,Mute UI,Выключить звук интерфейса
+SET_MUTE_AMBIENCE,Mute Ambience,Выключить звук окружения
+SET_AUDIO_NOTE,Music and ambience slots are prepared. Final audio content is not included.,Слоты музыки и окружения подготовлены. Финальный звуковой контент пока отсутствует.
+SET_PROFILE_KEYBOARD,Profile: Keyboard / mouse,Профиль: клавиатура / мышь
+SET_PROFILE_GAMEPAD,Profile: Gamepad,Профиль: контроллер
+SET_ACTION_MOVE_LEFT,Move / aim left,Движение / направление влево
+SET_ACTION_MOVE_RIGHT,Move / aim right,Движение / направление вправо
+SET_ACTION_MOVE_UP,Aim up,Направление вверх
+SET_ACTION_MOVE_DOWN,Aim down,Направление вниз
+SET_ACTION_JUMP,Jump,Прыжок
+SET_ACTION_DASH,Dash,Рывок
+SET_ACTION_PAUSE,Pause,Пауза
+SET_ACTION_RESTART,Quick Restart,Быстрый рестарт
+SET_ACTION_UI_LEFT,UI left,Интерфейс: влево
+SET_ACTION_UI_RIGHT,UI right,Интерфейс: вправо
+SET_ACTION_UI_UP,UI up,Интерфейс: вверх
+SET_ACTION_UI_DOWN,UI down,Интерфейс: вниз
+SET_ACTION_UI_ACCEPT,UI confirm,Интерфейс: подтверждение
+SET_ACTION_UI_CANCEL,UI back,Интерфейс: назад
+SET_ACTION_UI_FOCUS_NEXT,Next field,Следующее поле
+SET_ACTION_UI_FOCUS_PREV,Previous field,Предыдущее поле
+SET_DEADZONE_MOVEMENT,Movement deadzone,Мёртвая зона движения
+SET_DEADZONE_DASH,Dash aim deadzone,Мёртвая зона направления рывка
+SET_DEADZONE_ACTIVITY,Device activity threshold,Порог активности контроллера
+SET_PROMPTS,Controller prompts,Подсказки контроллера
+SET_AUTO,Automatic,Автоматически
+SET_GENERIC,Generic,Универсальные
+SET_RESET_PROFILE,Reset this profile,Сбросить этот профиль
+SET_CONFIRM_DISPLAY,Keep this display mode?,Сохранить этот режим экрана?
+SET_CONFIRM_HELP,Reverts in 15 seconds without confirmation. Back or focus loss also reverts.,Без подтверждения возврат через 15 секунд. Назад или потеря фокуса также отменяют режим.
+SET_KEEP,Keep,Оставить
+SET_REVERT,Revert,Вернуть
+SET_NATIVE_NOTE,Resolution selects window size. Fullscreen modes use the desktop resolution.,Разрешение задаёт размер окна. Полноэкранные режимы используют разрешение рабочего стола.
+SET_DRAFT_HELP,Apply saves changes. Cancel discards changes since the last Apply. Bindings are previewed while editing.,Применить сохраняет изменения. Отмена возвращает последние сохранённые значения. Назначения ввода действуют пробно во время редактирования.
+SET_REVERTED,Previous display configuration restored.,Возвращены предыдущие параметры экрана.

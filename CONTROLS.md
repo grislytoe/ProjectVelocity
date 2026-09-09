@@ -1,5 +1,22 @@
 # Input and device layer — M2
 
+## M12 settings controls (current)
+
+Main Menu → Settings provides all four pages. Controls explicitly selects Keyboard/mouse
+or Gamepad independently of the active device. All canonical movement, action and UI
+bindings can be changed; shared movement/Dash aim remains one binding. Capture accepts
+one key/button/axis and reports conflicts. Back cancels capture; Reset this profile
+affects only the selected profile. Defaults resets both profiles and input options.
+Movement/Dash/activity deadzones and Auto/Generic/Xbox/PlayStation/Nintendo/Steam Deck
+prompt families are available. Existing multi-binding saves remain readable.
+
+Bindings preview while editing; Apply persists and Cancel restores the last saved input
+configuration. Automatic device persistence cannot save draft bindings. Back from any
+settings page discards changes since the last Apply. Sliders use Left/Right, lists use
+Confirm then directions, and Tab/shoulders traverse focus. The display modal defaults
+to Revert and accepts all three input families, including remapped ui_cancel/accept.
+Gameplay entry continues to require fresh input after leaving UI. No rumble/Steam Input.
+
 InputLayer is the application-wide Godot Input adapter, created by bootstrap. Gameplay consumes sample() → InputFrame; it does not query keyboards, controller IDs or platform SDKs directly. No movement, ability state or player state machine exists in M2.
 
 ## Defaults
