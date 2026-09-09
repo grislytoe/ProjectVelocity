@@ -112,3 +112,47 @@ TT_BIND_JUMP,Jump,Прыжок
 TT_BIND_DASH,Dash,Рывок
 TT_BIND_RESTART,Quick Restart,Быстрый рестарт
 TT_BIND_PAUSE,Pause,Пауза
+UI_MAIN_MENU,Main Menu,Главное меню
+UI_SPLASH,PRECISION / MOMENTUM / CONTROL,ТОЧНОСТЬ / СКОРОСТЬ / КОНТРОЛЬ
+UI_NAV,%s Confirm     •     %s Back     •     %s Next field,%s Выбрать     •     %s Назад     •     %s Следующее поле
+UI_CONTINUE,Continue,Продолжить
+UI_LANGUAGE,Language,Язык
+UI_WELCOME,Welcome. Choose your language to begin.,Добро пожаловать. Выберите язык.
+UI_ENGLISH,English,English
+UI_RUSSIAN,Русский,Русский
+UI_PROFILE,Profile,Профиль
+UI_NEW_GAME,New Game,Новая игра
+UI_CUSTOMIZATION,Customization,Внешний вид
+UI_SETTINGS,Settings,Настройки
+UI_EDITOR,Level Editor,Редактор уровней
+UI_SOLO_DESCRIPTION,Train your movement. Race your personal best.,Оттачивайте движение. Улучшайте личный рекорд.
+UI_ONLINE,Online,По сети
+UI_BACK,Back,Назад
+UI_IN_DEVELOPMENT,In Development,В разработке
+UI_CREATE_LOBBY,Create Lobby,Создать лобби
+UI_JOIN_LOBBY,Join Lobby,Войти в лобби
+UI_MAP_METADATA,Official circuit • %s • version %d,Официальная трасса • %s • версия %d
+UI_MAP_AVAILABILITY,Training Circuit is the available demonstration course. More maps are in development.,Training Circuit — доступная демонстрационная трасса. Другие карты в разработке.
+UI_VIDEO,Video,Видео
+UI_AUDIO,Audio,Звук
+UI_ACCESSIBILITY,Accessibility,Специальные возможности
+UI_EDITOR_DESCRIPTION,Build your own routes in a future update. The editor is not available in this build.,Создание собственных трасс появится в будущем обновлении. В этой сборке редактор недоступен.
+UI_SETUP_PROFILE,Your pilot profile,Ваш профиль пилота
+UI_NAME_RULES,Nickname: 3–15 Latin or Cyrillic letters / digits / spaces / _ / -. Duplicate names are allowed.,Имя: 3–15 букв латиницы или кириллицы / цифр / пробелов / _ / -. Повторяющиеся имена разрешены.
+UI_IDENTITY,Local identity: %s,Локальный ID: %s
+UI_INVALID_NAME,Enter a valid nickname. Emoji and special symbols are not allowed.,Введите допустимое имя. Эмодзи и специальные символы запрещены.
+UI_SAVE,Save,Сохранить
+UI_CANCEL,Cancel,Отмена
+UI_KEYBOARD,On-screen keyboard,Экранная клавиатура
+UI_ALPHABET,EN / РУ,EN / РУ
+UI_SPACE,Space,Пробел
+UI_DELETE,Delete,Удалить
+UI_DONE,Done,Готово
+UI_QUIT_CONFIRM,Quit ProjectVelocity?,Выйти из ProjectVelocity?
+UI_COLOR_HELP,Adjust RGB channels with Left / Right. Use Up / Down or Tab / shoulder buttons to move between channels.,Меняйте RGB стрелками влево / вправо. Переход между каналами: вверх / вниз или Tab / плечевые кнопки.
+UI_BODY,Body color,Цвет корпуса
+UI_ACCENT,Emissive color,Цвет подсветки
+UI_COSMETICS_UNAVAILABLE,Base robot modules • additional cosmetic parts are not available yet.,Базовые модули робота • дополнительные косметические детали пока недоступны.
+UI_CASE,Aa / Аа,Aa / Аа
+UI_NORMAL,Normal,Обычная
+UI_DIFFICULTY,Difficulty: %s,Сложность: %s

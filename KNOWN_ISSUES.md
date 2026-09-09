@@ -9,7 +9,7 @@
 - Quarantined corrupt files and interrupted test-cache folders can remain for diagnosis.
 - Linux export, Steam Deck hardware behavior and target-hardware performance are not validated. CI builds Windows staging with official templates.
 
-- M4 uses procedural modular placeholder art. Unknown cosmetic slot IDs use the base modules; an asset registry, final art and production customization UI are future work.
+- M4 uses procedural modular placeholder art. Unknown cosmetic slot IDs use the base modules; an asset registry and final art remain future work; M11 supplies RGB customization.
 - Opponent opacity/nickname support is a presentation framework tested using synthetic snapshots, not live multiplayer. The developer accepted the placeholder presentation; replacement art is planned later.
 
 - M5 camera zones are authored axis-aligned world-space Resource rectangles. A map smaller than the visible frame is centered and necessarily exposes its backdrop. Camera collision, cinematics, shake and spectator switching are later work.
@@ -42,4 +42,14 @@ is superseded. Training Circuit is deliberately short and procedural; it is not 
 map/art milestone. Keyboard pilot proves reachability, not subjective difficulty/feel.
 Physical gamepad navigation, Linux/Steam Deck and low-end performance remain manual.
 Local records are not cryptographically authenticated. Future debug mutation entry points
-must use the explicit invalidation contract. No online mode, transport or M11 was added.
+must use the explicit invalidation contract. No online mode or transport was added in M10. M11 now supplies the front end.
+
+## M11 limitations
+
+The first front end is now available; earlier notes deferring all customization UI are
+superseded. Robot art remains the approved modular M4 placeholder, ready for later art.
+Only Training Circuit is playable. Online, production Level Editor, and general
+Video/Audio/Accessibility settings are explicitly unavailable; they are not simulated.
+Physical controller/driver, Linux and Steam Deck validation remain manual. Automated
+controller events exercise Godot UI navigation only. On-screen keyboard supports the
+allowed alphabets and case; it is local, with no Steam Input dependency.

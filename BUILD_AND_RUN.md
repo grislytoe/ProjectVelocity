@@ -21,7 +21,7 @@ The validator imports assets, parses all bootstrap/test scripts, runs M0 bootstr
 
 ## Build identity
 
-Version 0.8.0-dev and build number 9 live in core/build/build_info.gd. Keep project.godot's application version synchronized; tests enforce this. OS.is_debug_build() is the authoritative development flag. The staging export adds the staging feature; its label is STAGING. Release-mode engine binaries disable development debug logging; release exports require developer review and are not part of M0.
+Version 0.11.0-dev and build number 13 live in core/build/build_info.gd. Keep project.godot's application version synchronized; tests enforce this. OS.is_debug_build() is the authoritative development flag. The staging export adds the staging feature; its label is STAGING. Release-mode engine binaries disable development debug logging; release exports require developer review and are not part of M0.
 
 ## CI
 
@@ -47,6 +47,18 @@ On Windows use Start-Process with -PassThru, -WindowStyle Hidden, redirected log
 See WORKFLOW.md: all milestones use this main project folder, separate tasks and feature branches.
 
 M10 manual entry: C:/Godot Projects/ProjectVelocity/core/bootstrap/main.tscn (F5).
-Choose Solo → Training Circuit → Ready; pass both cyan checkpoint gates, then the lime
-Finish gate. Result Retry and held R restart to countdown; Escape pauses. Menu → Controls
+Choose New Game → Solo → Training Circuit → Ready; pass both cyan checkpoint gates, then the lime
+Finish gate. Result Retry and held R restart to countdown; Escape pauses. Menu → Settings → Controls
 provides active-device rebinding. Course content is gameplay/race/solo_course.tscn.
+
+## M11 entry point
+
+Current build: **0.11.0-dev / build 13**, save schema **4**, protocol **1**.
+From C:/Godot Projects/ProjectVelocity open project.godot with Godot 4.7.2 and press F5.
+Complete language/nickname onboarding, then New Game → Solo → Training Circuit.
+Profile header, Customization, Settings → Controls and Level Editor are available.
+Run the full M0–M11 validator with `./dev_tools/validate.ps1 -Godot C:/Godot/Godot.exe`.
+Normal-renderer UI tests: `Godot --path . --script tests/ui_foundation_test.gd -- --render-capture`.
+These use isolated temporary saves. Do not delete or modify real saves to run tests.
+On this machine the console wrapper lacks its expected sibling executable; use Godot.exe
+with Start-Process/WaitForExit as validate.ps1 does. CI installs matching official files.

@@ -4,6 +4,8 @@ extends Resource
 @export var map_id: String = "solo_training"
 @export var map_version: int = 1
 @export var name_key: String = "TT_MAP"
+@export var description_key: String = "TT_MAP_DESCRIPTION"
+@export var difficulty_key: String = "UI_NORMAL"
 @export var scene_path: String = "res://gameplay/race/solo_course.tscn"
 @export var checkpoint_ids: Array[StringName] = [&"a", &"b"]
 

@@ -2,13 +2,14 @@ class_name SaveSchema
 extends RefCounted
 ## Pure schema validation and sequential migrations. No filesystem access.
 
-const CURRENT_VERSION: int = 3
-const MIGRATIONS: Dictionary = {0: "_migrate_v0_to_v1", 1: "_migrate_v1_to_v2", 2: "_migrate_v2_to_v3"}
+const CURRENT_VERSION: int = 4
+const MIGRATIONS: Dictionary = {0: "_migrate_v0_to_v1", 1: "_migrate_v1_to_v2", 2: "_migrate_v2_to_v3", 3: "_migrate_v3_to_v4"}
 
 
 static func defaults() -> Dictionary:
 	return {
 		"save_version": CURRENT_VERSION,
+		"onboarding_complete": false,
 		"profile": PlayerProfileData.create().to_dictionary(),
 		"settings": {
 			"video": {"resolution": [1920, 1080], "window_mode": "windowed", "vsync": true,
@@ -84,7 +85,17 @@ func _migrate_v2_to_v3(source: Dictionary) -> Dictionary:
 	return result
 
 
+func _migrate_v3_to_v4(source: Dictionary) -> Dictionary:
+	var result: Dictionary = source.duplicate(true)
+	# Earlier builds never presented onboarding. Preserve identity, ask explicitly once.
+	result["onboarding_complete"] = false
+	result.save_version = 4
+	return result
+
+
 static func validate(data: Dictionary) -> bool:
+	if not data.get("onboarding_complete") is bool:
+		return false
 	if not data.get("trial_records") is Dictionary:
 		return false
 	for key: Variant in data.trial_records:

@@ -19,6 +19,7 @@ var _last_dash_vector: Vector2 = Vector2.ZERO
 var _capture_profile: String = ""
 var _capture_action: String = ""
 var last_rebind_result: Dictionary = {}
+var _entry_release_gate: Array[InputEvent] = []
 
 
 func _ready() -> void:
@@ -170,6 +171,12 @@ func _vector(prefix: String, deadzone: float) -> Vector2:
 
 func sample() -> InputFrame:
 	var frame := InputFrame.new()
+	if not _entry_release_gate.is_empty():
+		for event: InputEvent in _entry_release_gate:
+			if _hardware_held(event):
+				return frame
+		_entry_release_gate.clear()
+		clear_transient_state()
 	if not _capture_action.is_empty() or (last_device == "controller" and active_pad < 0):
 		return frame
 	frame.movement = _vector("move", float(config.deadzones.movement))
@@ -187,6 +194,34 @@ func sample() -> InputFrame:
 	frame.pause_pressed = Input.is_action_just_pressed(action_name("pause"))
 	frame.restart_held = Input.is_action_pressed(action_name("restart"))
 	return frame
+
+
+func quarantine_gameplay_entry() -> void:
+	# UI entry requires release of physically held gameplay inputs, including key repeats.
+	# This gate is only requested by navigation, never by ordinary Solo quick restart.
+	_entry_release_gate.clear()
+	for action: String in ["move_left", "move_right", "move_up", "move_down", "jump", "dash", "restart"]:
+		for token: String in bindings("keyboard", action):
+			var event: InputEvent = InputBindings.event_for(token, -1)
+			if _hardware_held(event):
+				_entry_release_gate.append(event)
+		for id: int in connected_pads:
+			for token: String in bindings("gamepad", action):
+				var event: InputEvent = InputBindings.event_for(token, id)
+				if _hardware_held(event):
+					_entry_release_gate.append(event)
+
+
+func _hardware_held(event: InputEvent) -> bool:
+	if event is InputEventKey:
+		return Input.is_physical_key_pressed(event.physical_keycode)
+	if event is InputEventMouseButton:
+		return Input.is_mouse_button_pressed(event.button_index)
+	if event is InputEventJoypadButton:
+		return connected_pads.has(event.device) and Input.is_joy_button_pressed(event.device, event.button_index)
+	if event is InputEventJoypadMotion:
+		return connected_pads.has(event.device) and Input.get_joy_axis(event.device, event.axis) * event.axis_value > float(config.deadzones.movement)
+	return false
 
 
 func clear_dash_selection() -> void:

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.11.0-dev — M11 UI Foundation (build 13)
+
+- Added techno-industrial theme, splash, explicit onboarding, Main Menu profile/robot
+  header, New Game/Solo maps, transactional Profile and live RGB customization.
+- Added exclusive controller text entry, directed focus, focus restoration, device
+  prompts, mouse navigation and guarded 200 ms transitions. Level Editor and Online
+  are explicit In Development pages; future settings are disabled.
+- Preserved real Solo hint/countdown/run/PB/result/pause/Retry loop and map identity;
+  applied saved appearance to the M4 course robot on entry and retry.
+- Migrated schema 3→4 with an explicit onboarding_complete marker; preserved UUID,
+  records and settings, with rollback/error presentation on failed profile saves.
+- Added isolated GUI/persistence integration tests and normal-renderer RU/EN captures.
+  Protocol remains 1; no gameplay authority, tuning or content hash change.
+
 ## 0.9.0-dev — M9 Hazard Modules
 
 - Review: increase turret projectile speed by 50% (816 → 1224 px/s; cap fixture 90 → 135).

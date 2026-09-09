@@ -69,3 +69,16 @@ Solo restarts go directly to countdown. Playground R/top face stays **1 second**
 Main Menu → Controls rebinds Jump, Dash, Restart and Pause for the active device;
 conflicting bindings are rejected. Hints follow the last active keyboard/gamepad device.
 Movement/Dash aiming and fresh Shift/RB triggering are unchanged.
+
+## M11 UI navigation
+
+F5: splash → language/nickname on first run → Main Menu. Open the profile header to
+edit nickname/language; Customization changes body/emissive RGB. Native text input or
+exclusive on-screen Latin/Cyrillic keyboard supports the complete controller path.
+Arrows/D-pad/left stick navigate; Enter/Space/bottom face confirms; Escape/right face
+returns or cancels. Tab/Shift-Tab and RB/LB traverse fields; Left/Right adjusts RGB.
+Quit opens a modal with Cancel initially focused. Device changes keep current drafts.
+Main Menu → New Game → Solo → Training Circuit preserves the M10 run controls.
+Main Menu → Settings → Controls retains rebinding (Back cancels input capture).
+Solo Escape/Start pauses, freezing simulation/time without invalidation; Quick Restart
+still holds R/top face 0.5 seconds once until release. Developer reset stays one second.

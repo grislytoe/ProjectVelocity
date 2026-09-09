@@ -1,11 +1,11 @@
 # Next steps
 
-1. Manually review M8 on feature/m8-platform-modules, PR into dev. M6 PR #7 and M7 PR #8 are already merged.
-2. Open C:/Godot Projects/ProjectVelocity/dev_tools/test_playground.tscn and run F6; review stations 13–16 and existing movement/lifecycle controls.
-3. Merge only after the user explicitly approves. Do not start the next milestone in this task.
-4. Handoff rule: each milestone gets a separate task but ALWAYS uses C:/Godot Projects/ProjectVelocity.
-   No worktrees or project copies. Create its feature branch from approved synchronized dev in the main folder.
-   Preserve unrelated user edits. Pass WORKFLOW.md and this agreement to the next task.
+M11 is implemented in feature/m11-ui-foundation in C:/Godot Projects/ProjectVelocity.
+Review its PR into dev and manually test F5 onboarding, profile edits, customization,
+controller navigation and the full Solo loop. See UI_FOUNDATION.md and docs/M11_VALIDATION.md.
+Merge only after the user explicitly approves. Do not start M12 in this task.
 
-M10 is implemented in its own task/main folder; await user review of its PR before merge.
-Do not start M11 automatically. See TIME_TRIAL.md and docs/M10_VALIDATION.md.
+Every milestone gets a separate Codex task, always in the main project folder above.
+Never create worktrees or project copies. Start its feature branch from approved,
+synchronized dev and preserve unrelated user changes. Read WORKFLOW.md and the master
+specification; pass this agreement to the next milestone task.

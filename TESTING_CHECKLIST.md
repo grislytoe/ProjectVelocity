@@ -141,3 +141,24 @@ See CAMERA.md and docs/M5_VALIDATION.md. Negative-control errors are intentional
 - Repeat course rebuild and menu reentry: stable nodes/signals and no pooled shots retained.
 - Run dev_tools/time_trial_smoke.gd normally: isolated GUI + motor-driven finish, RU/EN and
   keyboard/gamepad prompt captures. Review physical controller focus/hotplug manually.
+
+## M11 manual acceptance
+
+- Open C:/Godot Projects/ProjectVelocity/project.godot and F5. New/v3 profiles choose
+  language before nickname. Relaunch skips onboarding only after successful Continue.
+- Profile: Latin/Cyrillic 3–15 characters; invalid input disables Save. Cancel language
+  and name edits. Save/relaunch and verify nickname, language, UUID and old PB persist.
+- Customization: adjust all six RGB channels by mouse, arrows and controller; Save,
+  enter Solo and Retry. Verify the same colors; Cancel must restore saved appearance.
+- Visit New Game, maps, Profile, Settings/Controls, Online placeholder and Level Editor
+  in RU/EN using mouse, keyboard, D-pad/left stick and shoulders. Check initial focus,
+  Tab/Shift-Tab, return focus, disabled entries, modal keyboard Done/Cancel and Quit Cancel.
+- Try repeated Confirm/Back during fades and hold movement/jump while entering a map.
+  Reconnect a physical controller, switch back to mouse/keyboard while editing a name.
+- Play Training Circuit: hint/countdown/run/checkpoints/death/Finish/result/Retry/maps/menu.
+  Pause must freeze time and stay eligible; 0.5 s restart must trigger once per release.
+- Review window sizes 1280x720, 1920x1080 and 1280x800; text/focus must stay readable and
+  scroll into view. Linux/Steam Deck and physical controller family checks remain manual.
+- F6 dev_tools/test_playground.tscn: all 22 stations; F6 lifecycle_playground.tscn remains.
+
+Automated M11 checks inject unique OS-cache save paths; never point tests at real saves.
