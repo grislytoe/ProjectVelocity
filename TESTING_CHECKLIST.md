@@ -186,7 +186,7 @@ Automated M11 checks inject unique OS-cache save paths; never point tests at rea
 ## M13 map framework
 
 - Run full dev_tools/validate.ps1 with Godot 4.7.2, including map_framework_test.gd.
-- F5 → New Game → Solo → Map Select: translated metadata/preview; Hint/Countdown/Run/
+- F5 → New Game → Solo → Map Select: compact name/personal-best rows with preview on the right; five rows and Back fit at default UI scale; Hint/Countdown/Run/
   Results, PB/splits, ordinary death clock continuation, pause, retry and 0.5s Quick Restart.
 - F6 dev_tools/map_framework.tscn: 1 valid multi; 2 valid single; 3 seam gap; 4 missing
   anchor; 5 checksum mismatch. Rejected maps show diagnostics with no active geometry.

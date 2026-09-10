@@ -53,7 +53,7 @@ provides active-device rebinding. Course content is gameplay/race/solo_course.ts
 
 ## Current entry point
 
-Current build: **0.14.0-dev / build 19**, save schema **5**, protocol **1**.
+Current build: **0.14.0-dev / build 20**, save schema **5**, protocol **1**.
 From C:/Godot Projects/ProjectVelocity open project.godot with Godot 4.7.2 and press F5.
 Complete language/nickname onboarding, then New Game → Solo → Map Select → Foundry Run or Training Circuit.
 Profile header, Customization, Settings → Controls and Level Editor are available.

@@ -3,7 +3,7 @@
 `map_data/training_circuit.tres` is the production catalog entry used by Map Select,
 SoloTrial, checkpoint progress and TrialRecords. Stable ID `solo_training`, map version
 **3**. Training Circuit remains the short M10 module demonstration, not the final map.
-Build 0.14.0-dev /19; save schema 5; protocol 1.
+Build 0.14.0-dev /20; save schema 5; protocol 1.
 
 ## Resources and units
 

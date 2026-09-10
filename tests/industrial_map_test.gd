@@ -135,14 +135,40 @@ func run() -> void:
 	ui.input_layer = layer
 	root.add_child(ui)
 	ui.show_maps()
+	# Five-entry layout fixture; the production catalog still contains two real maps.
+	var back: Control = ui.column.get_child(ui.column.get_child_count() - 1)
+	for index: int in 3:
+		ui._map_card(MapCatalog.training())
+	ui.column.move_child(back, ui.column.get_child_count() - 1)
+	root.content_scale_size = Vector2i(1920, 1080)
+	root.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
+	await ticks(20)
+	var scroll: ScrollContainer = ui.column.get_parent()
+	var fifth: Control = ui.column.get_child(4)
+	check(scroll.get_global_rect().encloses(fifth.get_global_rect())
+		and scroll.get_global_rect().encloses(back.get_global_rect()),
+		"Five map cards and Back fit without scrolling at default UI scale")
+	fifth.grab_focus()
+	await ticks(2)
+	check(scroll.scroll_vertical == 0 and fifth.get_focus_neighbor(SIDE_BOTTOM) == fifth.get_path_to(back),
+		"Fifth card focus stays visible and navigates to Back")
 	if "--capture" in OS.get_cmdline_user_args():
 		await ticks(20)
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://builds/m14/map-select.png")
-	ui.select_map(MapCatalog.industrial())
+	var first_card: Control = ui.column.get_child(0)
+	var click_position := Vector2(first_card.get_global_rect().end.x - 40,
+		first_card.get_global_rect().get_center().y)
+	for pressed: bool in [true, false]:
+		var click := InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.position = click_position
+		click.pressed = pressed
+		root.push_input(click, true)
+		await process_frame
 	await ticks(3)
-	check(ui.trial.records.definition.map_id == map.map_id and ui.trial.phase == SoloTrial.Phase.HINT,
-		"Real Map Select opens new map with hint")
+	check(is_instance_valid(ui.trial) and ui.trial.records.definition.map_id == map.map_id
+		and ui.trial.phase == SoloTrial.Phase.HINT, "Clicking the card preview opens new map with hint")
 	ui.show_menu()
 	check(not is_instance_valid(ui.trial), "Map select/menu unload owns whole course")
 	ui.free()

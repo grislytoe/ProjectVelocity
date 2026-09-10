@@ -265,23 +265,51 @@ func _map_card(definition: MapDefinition) -> void:
 	if definition == null:
 		label(tr("MAP_INVALID"))
 		return
-	# Keep focus at the card's leading edge so its preview/details stay visible.
-	button(definition.name_key, select_map.bind(definition))
+	var card: Button = button(definition.name_key, select_map.bind(definition))
+	card.text = ""
+	card.custom_minimum_size.y = 96
+	card.accessibility_name = tr(definition.name_key)
+	var inset := MarginContainer.new()
+	inset.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(inset)
+	inset.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for edge: String in ["left", "right"]:
+		inset.add_theme_constant_override("margin_" + edge, 20)
+	for edge: String in ["top", "bottom"]:
+		inset.add_theme_constant_override("margin_" + edge, 8)
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	inset.add_child(row)
+	var details := VBoxContainer.new()
+	details.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	details.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	details.add_theme_constant_override("separation", 2)
+	row.add_child(details)
+	var title := Label.new()
+	title.text = tr(definition.name_key)
+	title.add_theme_font_size_override("font_size", 26)
+	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	details.add_child(title)
+	var best: Dictionary = TrialRecords.new(store, definition).best()
+	var record := Label.new()
+	record.text = tr("UI_MAP_PB") % ("—" if best.is_empty() else TrialRecord.format_time(int(best.total)))
+	record.add_theme_font_size_override("font_size", 22)
+	details.add_child(record)
+	card.accessibility_description = record.text
+	# Child controls leave mouse selection to the whole card.
+	for item: Control in [title, record]:
+		item.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	inset.minimum_size_changed.connect(func() -> void:
+		card.custom_minimum_size.y = maxf(card.custom_minimum_size.y, inset.get_combined_minimum_size().y))
 	if definition.preview != null:
 		var map_preview := TextureRect.new()
 		map_preview.texture = definition.preview
 		map_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		map_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		map_preview.custom_minimum_size.y = 160
-		column.add_child(map_preview)
-	label(tr(definition.description_key))
-	label(tr("UI_DIFFICULTY") % tr(definition.difficulty_key), 22)
-	label(tr("UI_MAP_TIMING") % [definition.expected_duration_seconds,
-		TrialRecord.format_time(definition.par_time_ticks)], 20)
-	var best: Dictionary = TrialRecords.new(store, definition).best()
-	label(tr("TT_PB") % ("—" if best.is_empty() else TrialRecord.format_time(int(best.total))))
-	label(tr("UI_MAP_METADATA") % [definition.map_id, definition.map_version], 20)
-	label(tr("UI_MAP_AVAILABILITY"), 20)
+		map_preview.custom_minimum_size = Vector2(240, 72)
+		map_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(map_preview)
 
 func show_settings() -> void:
 	screen = "settings"

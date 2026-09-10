@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.14.0-dev — compact Map Select (build 20)
+
+- Replace tall map descriptions with compact selectable rows: name and personal best on the left, preview on the right. Five maps plus Back fit on one screen at the default UI scale; keyboard/gamepad focus and whole-row mouse selection are retained.
+- Add a five-entry UI layout fixture without changing the two-map production catalog or map/PB identities.
+
 ## 0.14.0-dev — M14 review (build 19)
 
 - Lower all Industrial checkpoint markers onto the floor; restore standard 450px triggers while keeping safe respawns unchanged. Publish Industrial map version 2 and rebake its checksum; previous PB keys remain stored.

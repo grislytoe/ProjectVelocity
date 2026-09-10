@@ -1,6 +1,6 @@
 # M14 — Foundry Run / Литейный маршрут
 
-Build **0.14.0-dev /19**, schema **5**, protocol **1**. Official ID
+Build **0.14.0-dev /20**, schema **5**, protocol **1**. Official ID
 `industrial_foundry`, version **2**, PV-MAP-1. Normal difficulty; displayed duration
 and par are 90 seconds. Human clean completion and subjective Normal acceptance
 remain **open**. Automated input-driven completion is demonstrated separately below.
@@ -185,6 +185,14 @@ through MapDefinition.checksum and still rejects invalid structure.
 6. Inspect RU/EN, keyboard/controller, 1280×800 and fullscreen settings, and return to
    the 22-station playground / Training Circuit. Hardware/Steam Deck acceptance is
    separate. No merge or M15 start is authorized by this checklist.
+
+### M14 review — compact Map Select (build 20)
+
+Map Select now uses 96px rows with a map name and personal best on the left and
+a 240px preview on the right. Description, difficulty, timing and technical metadata
+are omitted. Five rows and Back fit at the default UI scale; enlarged accessibility
+settings retain scrolling. The integration fixture checks five entries without adding
+placeholder maps to the production catalog. Map versions/checksums and PB keys are unchanged.
 
 ### M14 review — grounded checkpoint markers (build 19)
 

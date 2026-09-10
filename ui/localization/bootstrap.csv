@@ -93,6 +93,7 @@ TT_LANGUAGE,English / Русский,English / Русский
 TT_QUIT,Quit,Выход
 TT_MENU,Main Menu,Главное меню
 TT_PB,PB: %s,Рекорд: %s
+UI_MAP_PB,Personal best: %s,Личный рекорд: %s
 TT_READY,Ready — start countdown,Готов — начать отсчёт
 TT_HINT,"Move / aim: %s · %s (vertical aim uses movement up/down). Jump: %s. Dash: %s — fresh press. Hold %s for 0.5s to restart. Timer continues through death. Pause: %s.","Движение / прицел: %s · %s (вертикальный прицел — вверх/вниз). Прыжок: %s. Рывок: %s — новое нажатие. Удерживайте %s 0.5 с для рестарта. Смерть не останавливает время. Пауза: %s."
 TT_RESULTS,Run Results,Результаты попытки
