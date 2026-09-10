@@ -1,0 +1,5 @@
+[gd_resource type="Resource" script_class="CameraBounds" format=3]
+[ext_resource type="Script" path="res://core/camera/camera_bounds.gd" id="s"]
+[resource]
+script = ExtResource("s")
+rectangle = Rect2(-1000, -850, 43600, 2350)

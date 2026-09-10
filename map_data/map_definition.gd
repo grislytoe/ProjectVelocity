@@ -13,6 +13,8 @@ extends Resource
 @export var expected_duration_seconds: int = 0
 @export var par_time_ticks: int = 0
 @export var death_bounds: Rect2
+@export var camera_bounds: CameraBounds
+@export var camera_zones: Array[CameraZone] = []
 ## Godot 2D world pixels. Placement origins/major geometry use this configurable lattice.
 @export var grid_pixels: Vector2 = Vector2(20, 20)
 @export var sections: Array[MapSectionPlacement] = []

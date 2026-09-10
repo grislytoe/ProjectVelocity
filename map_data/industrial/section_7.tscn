@@ -1,0 +1,496 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://gameplay/hazards/spikes.tscn" id="e1"]
+
+[ext_resource type="Script" path="res://gameplay/hazards/spike_config.gd" id="s3"]
+
+[ext_resource type="PackedScene" path="res://gameplay/hazards/laser.tscn" id="e4"]
+
+[ext_resource type="Script" path="res://gameplay/hazards/laser_config.gd" id="s6"]
+
+[ext_resource type="PackedScene" path="res://gameplay/hazards/turret.tscn" id="e7"]
+
+[ext_resource type="PackedScene" path="res://gameplay/hazards/spikes.tscn" id="e8"]
+
+[ext_resource type="Script" path="res://gameplay/hazards/spike_config.gd" id="s10"]
+
+[sub_resource type="RectangleShape2D" id="Floor0"]
+size = Vector2(5200, 100)
+
+[sub_resource type="Resource" id="c2"]
+script = ExtResource("s3")
+size = Vector2(100, 24)
+mode = 2
+trigger_on_player_overlap = true
+
+[sub_resource type="Resource" id="c5"]
+script = ExtResource("s6")
+mode = 1
+size = Vector2(18, 120)
+
+[sub_resource type="RectangleShape2D" id="Cover"]
+size = Vector2(160, 100)
+
+[sub_resource type="Resource" id="c9"]
+script = ExtResource("s10")
+size = Vector2(100, 24)
+mode = 0
+
+[node name="Section" type="Node2D"]
+
+[node name="Mass0" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(0, -420, 360, -420, 360, 940, 0, 940)
+color = Color(0.065, 0.087, 0.105, 1)
+
+[node name="Mass520" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(520, -420, 880, -420, 880, 940, 520, 940)
+color = Color(0.065, 0.087, 0.105, 1)
+
+[node name="Mass1040" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(1040, -420, 1400, -420, 1400, 940, 1040, 940)
+color = Color(0.065, 0.087, 0.105, 1)
+
+[node name="Mass1560" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(1560, -420, 1920, -420, 1920, 940, 1560, 940)
+color = Color(0.065, 0.087, 0.105, 1)
+
+[node name="Mass2080" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(2080, -420, 2440, -420, 2440, 940, 2080, 940)
+color = Color(0.065, 0.087, 0.105, 1)
+
+[node name="Mass2600" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(2600, -420, 2960, -420, 2960, 940, 2600, 940)
+color = Color(0.065, 0.087, 0.105, 1)
+
+[node name="Mass3120" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(3120, -420, 3480, -420, 3480, 940, 3120, 940)
+color = Color(0.065, 0.087, 0.105, 1)
+
+[node name="Mass3640" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(3640, -420, 4000, -420, 4000, 940, 3640, 940)
+color = Color(0.065, 0.087, 0.105, 1)
+
+[node name="Mass4160" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(4160, -420, 4520, -420, 4520, 940, 4160, 940)
+color = Color(0.065, 0.087, 0.105, 1)
+
+[node name="Mass4680" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(4680, -420, 5040, -420, 5040, 940, 4680, 940)
+color = Color(0.065, 0.087, 0.105, 1)
+
+[node name="Entrance" type="Marker2D" parent="."]
+position = Vector2(0, 600)
+
+[node name="Exit" type="Marker2D" parent="."]
+position = Vector2(5200, 600)
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(120, 566)
+
+[node name="Checkpoint" type="Marker2D" parent="."]
+position = Vector2(180, 388)
+
+[node name="Respawn" type="Marker2D" parent="."]
+position = Vector2(180, 566)
+
+[node name="Finish" type="Marker2D" parent="."]
+position = Vector2(5040, 100)
+
+[node name="Floor0" type="StaticBody2D" parent="."]
+position = Vector2(2600, 650)
+[node name="Collision" type="CollisionShape2D" parent="Floor0"]
+shape = SubResource("Floor0")
+
+[node name="Visual" type="Polygon2D" parent="Floor0"]
+polygon = PackedVector2Array(-2600, -50, 2600, -50, 2600, 50, -2600, 50)
+color = Color(0.27, 0.31, 0.34, 1)
+
+[node name="Floor0Edge" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(0, 600, 5200, 600, 5200, 605, 0, 605)
+color = Color(0.50, 0.76, 0.76, 1)
+
+[node name="Spikes1" parent="." instance=ExtResource("e1")]
+position = Vector2(1050, 588)
+config = SubResource("c2")
+
+[node name="Laser4" parent="." instance=ExtResource("e4")]
+position = Vector2(2200, 540)
+config = SubResource("c5")
+
+[node name="Cover" type="StaticBody2D" parent="."]
+position = Vector2(3080, 550)
+[node name="Collision" type="CollisionShape2D" parent="Cover"]
+shape = SubResource("Cover")
+
+[node name="Visual" type="Polygon2D" parent="Cover"]
+polygon = PackedVector2Array(-80, -50, 80, -50, 80, 50, -80, 50)
+color = Color(0.27, 0.31, 0.34, 1)
+
+[node name="CoverEdge" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(3000, 500, 3160, 500, 3160, 505, 3000, 505)
+color = Color(0.50, 0.76, 0.76, 1)
+
+[node name="Turret" parent="." instance=ExtResource("e7")]
+position = Vector2(3880, 390)
+
+[node name="Spikes8" parent="." instance=ExtResource("e8")]
+position = Vector2(4540, 588)
+config = SubResource("c9")
+
+[node name="Sign11" type="Label" parent="."]
+offset_left = 1710.0
+offset_top = 270.0
+offset_right = 2460.0
+offset_bottom = 330.0
+theme_override_colors/font_color = Color(0.63, 0.85, 0.83, 1)
+theme_override_font_sizes/font_size = 28
+text = "IND_LASER"
+
+[node name="Sign12" type="Label" parent="."]
+offset_left = 2830.0
+offset_top = 240.0
+offset_right = 3580.0
+offset_bottom = 300.0
+theme_override_colors/font_color = Color(0.63, 0.85, 0.83, 1)
+theme_override_font_sizes/font_size = 28
+text = "IND_COVER"
+
+[node name="Sign13" type="Label" parent="."]
+offset_left = 60.0
+offset_top = 220.0
+offset_right = 810.0
+offset_bottom = 280.0
+theme_override_colors/font_color = Color(0.63, 0.85, 0.83, 1)
+theme_override_font_sizes/font_size = 28
+text = "IND_SECTION_7"
+
+[node name="Rib0" type="Polygon2D" parent="."]
+z_index = -8
+polygon = PackedVector2Array(32, -360, 64, -360, 64, 940, 32, 940)
+color = Color(0.11, 0.14, 0.17, 1)
+
+[node name="Crossmember0" type="Polygon2D" parent="."]
+z_index = -7
+polygon = PackedVector2Array(0, 40, 520, 40, 520, 70, 0, 70)
+color = Color(0.42, 0.30, 0.37, 1)
+
+[node name="Pipe0" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(0, 96, 480, 96, 480, 103, 0, 103)
+color = Color(0.18, 0.23, 0.27, 1)
+
+[node name="Coupler0" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(460, 86, 474, 86, 474, 114, 460, 114)
+color = Color(0.26, 0.32, 0.36, 1)
+
+[node name="Rib520" type="Polygon2D" parent="."]
+z_index = -8
+polygon = PackedVector2Array(552, -360, 584, -360, 584, 940, 552, 940)
+color = Color(0.11, 0.14, 0.17, 1)
+
+[node name="Crossmember520" type="Polygon2D" parent="."]
+z_index = -7
+polygon = PackedVector2Array(520, 40, 1040, 40, 1040, 70, 520, 70)
+color = Color(0.42, 0.30, 0.37, 1)
+
+[node name="Pipe520" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(520, 96, 1000, 96, 1000, 103, 520, 103)
+color = Color(0.18, 0.23, 0.27, 1)
+
+[node name="Coupler520" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(980, 86, 994, 86, 994, 114, 980, 114)
+color = Color(0.26, 0.32, 0.36, 1)
+
+[node name="Rib1040" type="Polygon2D" parent="."]
+z_index = -8
+polygon = PackedVector2Array(1072, -360, 1104, -360, 1104, 940, 1072, 940)
+color = Color(0.11, 0.14, 0.17, 1)
+
+[node name="Crossmember1040" type="Polygon2D" parent="."]
+z_index = -7
+polygon = PackedVector2Array(1040, 40, 1560, 40, 1560, 70, 1040, 70)
+color = Color(0.42, 0.30, 0.37, 1)
+
+[node name="Pipe1040" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(1040, 96, 1520, 96, 1520, 103, 1040, 103)
+color = Color(0.18, 0.23, 0.27, 1)
+
+[node name="Coupler1040" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(1500, 86, 1514, 86, 1514, 114, 1500, 114)
+color = Color(0.26, 0.32, 0.36, 1)
+
+[node name="Rib1560" type="Polygon2D" parent="."]
+z_index = -8
+polygon = PackedVector2Array(1592, -360, 1624, -360, 1624, 940, 1592, 940)
+color = Color(0.11, 0.14, 0.17, 1)
+
+[node name="Crossmember1560" type="Polygon2D" parent="."]
+z_index = -7
+polygon = PackedVector2Array(1560, 40, 2080, 40, 2080, 70, 1560, 70)
+color = Color(0.42, 0.30, 0.37, 1)
+
+[node name="Pipe1560" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(1560, 96, 2040, 96, 2040, 103, 1560, 103)
+color = Color(0.18, 0.23, 0.27, 1)
+
+[node name="Coupler1560" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(2020, 86, 2034, 86, 2034, 114, 2020, 114)
+color = Color(0.26, 0.32, 0.36, 1)
+
+[node name="Rib2080" type="Polygon2D" parent="."]
+z_index = -8
+polygon = PackedVector2Array(2112, -360, 2144, -360, 2144, 940, 2112, 940)
+color = Color(0.11, 0.14, 0.17, 1)
+
+[node name="Crossmember2080" type="Polygon2D" parent="."]
+z_index = -7
+polygon = PackedVector2Array(2080, 40, 2600, 40, 2600, 70, 2080, 70)
+color = Color(0.42, 0.30, 0.37, 1)
+
+[node name="Pipe2080" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(2080, 96, 2560, 96, 2560, 103, 2080, 103)
+color = Color(0.18, 0.23, 0.27, 1)
+
+[node name="Coupler2080" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(2540, 86, 2554, 86, 2554, 114, 2540, 114)
+color = Color(0.26, 0.32, 0.36, 1)
+
+[node name="Rib2600" type="Polygon2D" parent="."]
+z_index = -8
+polygon = PackedVector2Array(2632, -360, 2664, -360, 2664, 940, 2632, 940)
+color = Color(0.11, 0.14, 0.17, 1)
+
+[node name="Crossmember2600" type="Polygon2D" parent="."]
+z_index = -7
+polygon = PackedVector2Array(2600, 40, 3120, 40, 3120, 70, 2600, 70)
+color = Color(0.42, 0.30, 0.37, 1)
+
+[node name="Pipe2600" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(2600, 96, 3080, 96, 3080, 103, 2600, 103)
+color = Color(0.18, 0.23, 0.27, 1)
+
+[node name="Coupler2600" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(3060, 86, 3074, 86, 3074, 114, 3060, 114)
+color = Color(0.26, 0.32, 0.36, 1)
+
+[node name="Rib3120" type="Polygon2D" parent="."]
+z_index = -8
+polygon = PackedVector2Array(3152, -360, 3184, -360, 3184, 940, 3152, 940)
+color = Color(0.11, 0.14, 0.17, 1)
+
+[node name="Crossmember3120" type="Polygon2D" parent="."]
+z_index = -7
+polygon = PackedVector2Array(3120, 40, 3640, 40, 3640, 70, 3120, 70)
+color = Color(0.42, 0.30, 0.37, 1)
+
+[node name="Pipe3120" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(3120, 96, 3600, 96, 3600, 103, 3120, 103)
+color = Color(0.18, 0.23, 0.27, 1)
+
+[node name="Coupler3120" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(3580, 86, 3594, 86, 3594, 114, 3580, 114)
+color = Color(0.26, 0.32, 0.36, 1)
+
+[node name="Rib3640" type="Polygon2D" parent="."]
+z_index = -8
+polygon = PackedVector2Array(3672, -360, 3704, -360, 3704, 940, 3672, 940)
+color = Color(0.11, 0.14, 0.17, 1)
+
+[node name="Crossmember3640" type="Polygon2D" parent="."]
+z_index = -7
+polygon = PackedVector2Array(3640, 40, 4160, 40, 4160, 70, 3640, 70)
+color = Color(0.42, 0.30, 0.37, 1)
+
+[node name="Pipe3640" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(3640, 96, 4120, 96, 4120, 103, 3640, 103)
+color = Color(0.18, 0.23, 0.27, 1)
+
+[node name="Coupler3640" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(4100, 86, 4114, 86, 4114, 114, 4100, 114)
+color = Color(0.26, 0.32, 0.36, 1)
+
+[node name="Rib4160" type="Polygon2D" parent="."]
+z_index = -8
+polygon = PackedVector2Array(4192, -360, 4224, -360, 4224, 940, 4192, 940)
+color = Color(0.11, 0.14, 0.17, 1)
+
+[node name="Crossmember4160" type="Polygon2D" parent="."]
+z_index = -7
+polygon = PackedVector2Array(4160, 40, 4680, 40, 4680, 70, 4160, 70)
+color = Color(0.42, 0.30, 0.37, 1)
+
+[node name="Pipe4160" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(4160, 96, 4640, 96, 4640, 103, 4160, 103)
+color = Color(0.18, 0.23, 0.27, 1)
+
+[node name="Coupler4160" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(4620, 86, 4634, 86, 4634, 114, 4620, 114)
+color = Color(0.26, 0.32, 0.36, 1)
+
+[node name="Rib4680" type="Polygon2D" parent="."]
+z_index = -8
+polygon = PackedVector2Array(4712, -360, 4744, -360, 4744, 940, 4712, 940)
+color = Color(0.11, 0.14, 0.17, 1)
+
+[node name="Crossmember4680" type="Polygon2D" parent="."]
+z_index = -7
+polygon = PackedVector2Array(4680, 40, 5200, 40, 5200, 70, 4680, 70)
+color = Color(0.42, 0.30, 0.37, 1)
+
+[node name="Pipe4680" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(4680, 96, 5160, 96, 5160, 103, 4680, 103)
+color = Color(0.18, 0.23, 0.27, 1)
+
+[node name="Coupler4680" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(5140, 86, 5154, 86, 5154, 114, 5140, 114)
+color = Color(0.26, 0.32, 0.36, 1)
+
+[node name="Joint14" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(-2440, -42, -2440, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint15" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(-2200, -42, -2200, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint16" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(-1960, -42, -1960, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint17" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(-1720, -42, -1720, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint18" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(-1480, -42, -1480, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint19" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(-1240, -42, -1240, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint20" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(-1000, -42, -1000, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint21" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(-760, -42, -760, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint22" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(-520, -42, -520, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint23" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(-280, -42, -280, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint24" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(-40, -42, -40, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint25" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(200, -42, 200, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint26" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(440, -42, 440, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint27" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(680, -42, 680, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint28" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(920, -42, 920, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint29" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(1160, -42, 1160, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint30" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(1400, -42, 1400, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint31" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(1640, -42, 1640, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint32" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(1880, -42, 1880, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint33" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(2120, -42, 2120, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Joint34" type="Line2D" parent="Floor0"]
+points = PackedVector2Array(2360, -42, 2360, 45)
+width = 2.0
+default_color = Color(0.17, 0.21, 0.24, 1)
+
+[node name="Bolt35" type="Polygon2D" parent="Floor0"]
+polygon = PackedVector2Array(-2591, -36, -2585, -36, -2585, -30, -2591, -30)
+color = Color(0.58, 0.61, 0.61, 1)
+
+[node name="Bolt36" type="Polygon2D" parent="Floor0"]
+polygon = PackedVector2Array(2585, -36, 2591, -36, 2591, -30, 2585, -30)
+color = Color(0.58, 0.61, 0.61, 1)
+
+[node name="Bolt37" type="Polygon2D" parent="Cover"]
+polygon = PackedVector2Array(-71, -36, -65, -36, -65, -30, -71, -30)
+color = Color(0.58, 0.61, 0.61, 1)
+
+[node name="Bolt38" type="Polygon2D" parent="Cover"]
+polygon = PackedVector2Array(65, -36, 71, -36, 71, -30, 65, -30)
+color = Color(0.58, 0.61, 0.61, 1)
+
+[node name="Route700" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(700, 720, 940, 720, 940, 730, 700, 730)
+color = Color(0.12, 0.40, 0.42, 1)
+
+[node name="Route1700" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(1700, 720, 1940, 720, 1940, 730, 1700, 730)
+color = Color(0.12, 0.40, 0.42, 1)
+
+[node name="Route2700" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(2700, 720, 2940, 720, 2940, 730, 2700, 730)
+color = Color(0.12, 0.40, 0.42, 1)
+
+[node name="Route3700" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(3700, 720, 3940, 720, 3940, 730, 3700, 730)
+color = Color(0.12, 0.40, 0.42, 1)
+
+[node name="Route4700" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(4700, 720, 4940, 720, 4940, 730, 4700, 730)
+color = Color(0.12, 0.40, 0.42, 1)

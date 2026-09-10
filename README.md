@@ -39,8 +39,12 @@ See [UI foundation](UI_FOUNDATION.md) and [M11 validation](docs/M11_VALIDATION.m
 
 M12: Settings enables Video, Audio, Controls and Accessibility with Apply/Cancel/defaults,
 15-second display confirmation and persisted device profiles. See [Settings](SETTINGS.md).
-Build 0.13.0-dev /17; save schema 5; protocol 1.
+Build 0.14.0-dev /20; save schema 5; protocol 1.
 
 M13 uses the shared MapDefinition catalog, structural validation and PV-MAP-1 checksum.
-Training Circuit map version 2 preserves older PBs separately; save schema remains 5.
+Training Circuit now publishes map version 3 and preserves older PBs separately; save schema remains 5.
 F6: res://dev_tools/map_framework.tscn. See docs/MAP_AUTHORING.md and docs/M13_VALIDATION.md.
+
+## M14
+
+M14 adds Foundry Run / Литейный маршрут: an official eight-section Industrial + Brutalism course. F5 → New Game → Solo → Map Select. Automated clean main: 65.550s; express: 62.717s. Human review remains open. Training Circuit is retained separately. Route/evidence: docs/M14_INDUSTRIAL_TRACK.md.

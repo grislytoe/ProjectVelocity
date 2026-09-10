@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="MapSectionDefinition" format=3]
+[ext_resource type="Script" path="res://map_data/map_section_definition.gd" id="s"]
+[resource]
+script = ExtResource("s")
+section_id = &"industrial_2"
+scene_path = "res://map_data/industrial/section_2.tscn"
+major_geometry = Array[NodePath]([NodePath("Floor0/Collision"), NodePath("Floor1/Collision"), NodePath("Floor2/Collision"), NodePath("Step/Collision"), NodePath("Upper/Collision")])

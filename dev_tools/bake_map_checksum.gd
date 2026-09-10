@@ -2,19 +2,23 @@ extends SceneTree
 ## One checksum implementation for authoring, CI, runtime, exports and PB records.
 
 func _initialize() -> void:
-	var map: MapDefinition = MapCatalog.training()
+	for path: String in ["res://map_data/training_circuit.tres", "res://map_data/industrial_foundry.tres"]:
+		if not bake(path):
+			quit(1)
+			return
+	quit()
+
+func bake(path: String) -> bool:
+	var map: MapDefinition = load(path) as MapDefinition
 	var report: MapDiagnostics = MapValidator.inspect(map, false)
 	if not report.valid():
 		printerr(report.describe())
-		quit(1)
-		return
+		return false
 	var hash_value: String = map.checksum()
 	if hash_value.is_empty():
 		printerr("Cannot canonicalize map dependencies")
-		quit(1)
-		return
+		return false
 	if "--update" in OS.get_cmdline_user_args():
-		var path: String = "res://map_data/training_circuit.tres"
 		var source: String = FileAccess.get_file_as_string(path)
 		var pattern := RegEx.new()
 		pattern.compile('declared_checksum = "[^"]*"')
@@ -24,7 +28,6 @@ func _initialize() -> void:
 		file.close()
 	elif map.declared_checksum != hash_value:
 		printerr("Stale PV-MAP-1 declared checksum")
-		quit(1)
-		return
+		return false
 	print("PV_MAP_HASH_OK=" + hash_value)
-	quit()
+	return true

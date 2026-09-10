@@ -3,7 +3,7 @@
 - M13 currently supports translated sections and upright rectangular floor seams.
   Rotated/scaled/mirrored section transforms and other seam types are explicitly rejected.
   Structural validation does not prove all routes physically traversable; the Training
-  Circuit direct route has motor-driven renderer coverage. No final 1–2 minute map yet.
+  Circuit direct route and the full Industrial main/express routes have input-driven coverage. Human Normal/clean-run acceptance remains open; see docs/M14_INDUSTRIAL_TRACK.md.
 - Map checksum is a compatibility digest, not a signature/security boundary. Source
   bundle changes are conservative and can isolate PBs after unrelated gameplay edits.
   Arbitrary executable custom content/Workshop and online negotiation are outside M13.
@@ -22,7 +22,7 @@
   remain. Final audio assets are absent; quiet UI/SFX placeholders and routed empty
   music/ambience slots are intentional for this milestone.
 
-- F5/main and staging provide Solo Time Trial on the short Training Circuit. Final map/art and online modes remain future work. M7 lifecycle and all 22 developer playground stations remain available with F6.
+- F5/main and staging provide Solo Time Trial on Foundry Run and the separate short Training Circuit. Final production art and online modes remain future work. M7 lifecycle and all 22 developer playground stations remain available with F6.
 - Movement tuning is an initial baseline. Automated collision/replay checks do not replace subjective playtesting or prove cross-platform bitwise determinism. Further tuning and platform coverage remain open; the developer accepted keyboard and gamepad movement during earlier milestone reviews.
 - The developer confirmed physical gamepad controls during M5 review. The subsequent shared movement/Dash layout needs a follow-up check; real USB/Bluetooth hotplug, other driver mappings and device-name detection remain separate validation items.
 - Controller prompt family detection uses names and may need the explicit family override. Prompt descriptors are text/tokens; final glyph art is deferred.

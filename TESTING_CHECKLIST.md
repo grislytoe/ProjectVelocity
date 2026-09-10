@@ -186,7 +186,7 @@ Automated M11 checks inject unique OS-cache save paths; never point tests at rea
 ## M13 map framework
 
 - Run full dev_tools/validate.ps1 with Godot 4.7.2, including map_framework_test.gd.
-- F5 → New Game → Solo → Map Select: translated metadata/preview; Hint/Countdown/Run/
+- F5 → New Game → Solo → Map Select: compact name/personal-best rows with preview on the right; five rows and Back fit at default UI scale; Hint/Countdown/Run/
   Results, PB/splits, ordinary death clock continuation, pause, retry and 0.5s Quick Restart.
 - F6 dev_tools/map_framework.tscn: 1 valid multi; 2 valid single; 3 seam gap; 4 missing
   anchor; 5 checksum mismatch. Rejected maps show diagnostics with no active geometry.
@@ -197,3 +197,7 @@ Automated M11 checks inject unique OS-cache save paths; never point tests at rea
 - M12 native test: tests/settings_runtime_test.gd without --headless; check selected
   fullscreen/borderless world buffer, sharp UI, 16:9 framing, minimum 1280×800 and rollback.
 - Level Editor still displays In Development. All 22 playground stations remain present.
+
+## M14
+
+M14: full validate.ps1 includes Industrial structural/fallback/PB/UI fixtures and input-driven main (30/60/144), express and eight-death recovery runs. Human clean completion, Normal feel, optional express entry, camera/telegraphs and hardware review remain open. Follow the exact checklist in docs/M14_INDUSTRIAL_TRACK.md before authorizing merge.

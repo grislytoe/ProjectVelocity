@@ -10,7 +10,14 @@ static func training() -> MapDefinition:
 	return resource.duplicate_deep(Resource.DEEP_DUPLICATE_ALL) as MapDefinition if resource is MapDefinition else null
 
 static func official() -> Array[MapDefinition]:
-	return [training()]
+	return [industrial(), training()]
+
+static func industrial() -> MapDefinition:
+	var path: String = "res://map_data/industrial_foundry.tres"
+	if not MapDependencies.available(path, MapDiagnostics.new()):
+		return null
+	var resource: Resource = load(path)
+	return resource.duplicate_deep(Resource.DEEP_DUPLICATE_ALL) as MapDefinition if resource is MapDefinition else null
 
 static func validate_catalog(maps: Array[MapDefinition]) -> MapDiagnostics:
 	var report := MapDiagnostics.new()

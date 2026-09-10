@@ -152,3 +152,7 @@ No second checkpoint authority, network adapter, editor or streaming system is a
 All 22 developer playground stations remain available. See MAP_FORMAT.md and
 [map authoring](docs/MAP_AUTHORING.md). The developer overview is
 res://dev_tools/map_framework.tscn; tests and tools remain excluded from exports.
+
+## M14
+
+M14 adds industrial_foundry through the existing MapCatalog/MapAssembly/SoloCourse path. Eight serialized scenes use M8/M9 modules. MapDefinition camera bounds/zones are validated, hashed and injected into M5. No movement, network, streaming or save authority changes. See docs/M14_INDUSTRIAL_TRACK.md.

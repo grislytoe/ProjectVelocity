@@ -94,6 +94,19 @@ Invoke-GodotCheck -Name "m11-ui" -Arguments @("--headless", "--path", ".", "--sc
 Invoke-GodotCheck -Name "m12-settings" -Arguments @("--headless", "--path", ".", "--script", "tests/settings_test.gd") -Marker "PROJECTVELOCITY_M12_OK"
 Invoke-GodotCheck -Name "m12-ui" -Arguments @("--headless", "--path", ".", "--script", "tests/settings_runtime_test.gd") -Marker "PROJECTVELOCITY_M12_RUNTIME_OK"
 Invoke-GodotCheck -Name "m13-maps" -Arguments @("--headless", "--path", ".", "--script", "tests/map_framework_test.gd") -Marker "PROJECTVELOCITY_M13_OK"
+New-Item -ItemType Directory -Force builds/m14 | Out-Null
+Invoke-GodotCheck -Name "m14-maps" -Arguments @("--headless", "--path", ".", "--fixed-fps", "60", "--script", "tests/industrial_map_test.gd") -Marker "PROJECTVELOCITY_M14_MAP_OK"
+$industrialHashes = @()
+foreach ($fps in @(30, 60, 144)) {
+    Invoke-GodotCheck -Name "m14-route-$fps" -Arguments @("--headless", "--path", ".", "--fixed-fps", "$fps", "--script", "tests/industrial_route_test.gd") -Marker "PROJECTVELOCITY_M14_ROUTE_OK"
+    $routeLog = Get-Content (Join-Path $logRoot "m14-route-$fps.stdout.log") -Raw
+    if ($routeLog -notmatch 'M14_REPLAY_HASH=([0-9a-f]{64})') { throw "Missing Industrial input replay hash" }
+    $industrialHashes += $Matches[1]
+}
+if (@($industrialHashes | Select-Object -Unique).Count -ne 1) { throw "Industrial replay differs between render rates" }
+foreach ($route in @('shortcut', 'recovery')) {
+    Invoke-GodotCheck -Name "m14-$route" -Arguments @("--headless", "--path", ".", "--fixed-fps", "60", "--script", "tests/industrial_route_test.gd", "--", "--$route") -Marker "PROJECTVELOCITY_M14_ROUTE_OK"
+}
 git diff --cached --check
 if ($LASTEXITCODE -ne 0) { throw "Staged whitespace validation failed" }
 git diff --check
@@ -111,5 +124,10 @@ if ($ExportWindows) {
     if ($exportLog -notmatch 'PV_MAP_BOOT_HASH=([0-9a-f]{64})' -or $Matches[1] -ne $mapHash) {
         throw "Export map identity differs from editor"
     }
+    if ($editorLog -notmatch 'PV_INDUSTRIAL_BOOT_HASH=([0-9a-f]{64})') { throw "Missing Industrial editor identity" }
+    $industrialHash = $Matches[1]
+    if ($exportLog -notmatch 'PV_INDUSTRIAL_BOOT_HASH=([0-9a-f]{64})' -or $Matches[1] -ne $industrialHash) {
+        throw "Export Industrial identity differs from editor"
+    }
 }
-Write-Output "M0-M13 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."
+Write-Output "M0-M14 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."
