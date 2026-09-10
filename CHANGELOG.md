@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.13.0-dev — M13 Map Framework (build 17)
+
+- Review fix: reject displaced assembly hosts and top-level section nodes; include
+  inherited persistent signal connections and bind arguments in the canonical checksum.
+
+- Added typed map/section/placement/point Resources, configurable pixel grid, explicit
+  entrance/exit anchors, floor seam/structure diagnostics and safe load failure.
+- Migrated the real Training Circuit/catalog/Solo path to three authored section scenes;
+  retained the M7 lifecycle, M8 platforms, M9 pools and all 22 developer stations.
+- Unified map/PB hashing as PV-MAP-1 with semantic resources, normalized code bundle,
+  editor-save stability and exported-PCK identity checks. Training map version is 2;
+  old PBs remain stored separately. Save schema 5 and protocol 1 are unchanged.
+- Added nonstrict/optional checkpoint record routes with ID-based deltas and compatible
+  segment minima, isolated valid/invalid map tests, failure cleanup and F6 grid fixture.
+- Production Level Editor remains In Development. No streaming, online checks or M14.
+
 ## 0.12.0-dev — M12 Settings (build 15)
 
 - Fixed resolution selection in fullscreen and borderless: a real world render target

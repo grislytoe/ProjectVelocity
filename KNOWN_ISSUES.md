@@ -1,7 +1,17 @@
 # Known issues
 
-- M12 fullscreen and borderless use the desktop resolution; windowed resolution is
-  selectable. No OS monitor-resolution switching is attempted. Unsupported saved modes
+- M13 currently supports translated sections and upright rectangular floor seams.
+  Rotated/scaled/mirrored section transforms and other seam types are explicitly rejected.
+  Structural validation does not prove all routes physically traversable; the Training
+  Circuit direct route has motor-driven renderer coverage. No final 1–2 minute map yet.
+- Map checksum is a compatibility digest, not a signature/security boundary. Source
+  bundle changes are conservative and can isolate PBs after unrelated gameplay edits.
+  Arbitrary executable custom content/Workshop and online negotiation are outside M13.
+- Physical Linux/Steam Deck, controller hardware and target performance certification
+  remain separate reviews; Windows renderer evidence is recorded in docs/M13_VALIDATION.md.
+
+- Fullscreen/borderless output at desktop resolution and upscale the selected world
+  render target; windowed mode also changes native size. Minimum selection is 1280×800. No OS monitor-resolution switching is attempted. Unsupported saved modes
   are reported and retain the engine's working startup window.
 - M12 native runtime was exercised on Windows/OpenGL AMD graphics at a 1920×1200
   desktop, including a 1680×720 ultrawide window. A physical ultrawide monitor, Steam

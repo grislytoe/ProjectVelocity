@@ -257,17 +257,27 @@ func show_maps() -> void:
 	_leave()
 	screen = "maps"
 	_panel("TT_SELECT")
-	var definition := TrialMapDefinition.new()
-	var map_preview := CircuitPreview.new()
-	column.add_child(map_preview)
-	map_preview.custom_minimum_size.y = 160
+	for definition: MapDefinition in MapCatalog.official():
+		_map_card(definition)
+	button("UI_BACK", show_new_game)
+
+func _map_card(definition: MapDefinition) -> void:
+	if definition == null:
+		label(tr("MAP_INVALID"))
+		return
+	if definition.preview != null:
+		var map_preview := TextureRect.new()
+		map_preview.texture = definition.preview
+		map_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		map_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		map_preview.custom_minimum_size.y = 160
+		column.add_child(map_preview)
 	label(tr(definition.name_key), 32)
 	label(tr(definition.description_key))
 	label(tr("UI_DIFFICULTY") % tr(definition.difficulty_key), 22)
 	var best: Dictionary = TrialRecords.new(store, definition).best()
 	label(tr("TT_PB") % ("—" if best.is_empty() else TrialRecord.format_time(int(best.total))))
-	button("TT_MAP", start_map)
-	button("UI_BACK", show_new_game)
+	button(definition.name_key, select_map.bind(definition))
 	label(tr("UI_MAP_METADATA") % [definition.map_id, definition.map_version], 20)
 	label(tr("UI_MAP_AVAILABILITY"), 20)
 
@@ -467,7 +477,7 @@ func start_map() -> void:
 	trial.changed.connect(_apply_player_profile.call_deferred)
 
 func _apply_player_profile() -> void:
-	if is_instance_valid(trial):
+	if is_instance_valid(trial) and is_instance_valid(trial.course):
 		_apply_to_robots(trial.course)
 
 func _apply_to_robots(node: Node) -> void:
@@ -548,7 +558,7 @@ func _back() -> void:
 		"online", "maps": show_new_game()
 		"controls": show_settings()
 		"trial":
-			if trial.phase == SoloTrial.Phase.RESULT:
+			if trial.phase in [SoloTrial.Phase.RESULT, SoloTrial.Phase.ERROR]:
 				show_maps()
 			else:
 				toggle_pause()

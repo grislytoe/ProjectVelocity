@@ -1,0 +1,24 @@
+[gd_scene format=3]
+[ext_resource type="PackedScene" path="res://gameplay/hazards/spikes.tscn" id="hazard"]
+[sub_resource type="RectangleShape2D" id="floor"]
+size = Vector2(1400, 40)
+[node name="Section" type="Node2D"]
+[node name="Entrance" type="Marker2D" parent="."]
+position = Vector2(0, 600)
+[node name="Exit" type="Marker2D" parent="."]
+position = Vector2(1400, 600)
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(700, 620)
+[node name="Collision" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("floor")
+[node name="Visual" type="Polygon2D" parent="Floor"]
+polygon = PackedVector2Array(-700, -20, 700, -20, 700, 20, -700, 20)
+color = Color(0.160784, 0.27451, 0.32549, 1)
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(100, 566)
+[node name="Checkpoint" type="Marker2D" parent="."]
+position = Vector2(1400, 386)
+[node name="Respawn" type="Marker2D" parent="."]
+position = Vector2(1350, 566)
+[node name="Spikes" parent="." instance=ExtResource("hazard")]
+position = Vector2(760, 588)

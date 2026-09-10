@@ -47,13 +47,17 @@ PB total/timestamps, but can improve individual segment minima (including final 
 Invalid/incomplete runs never write. Failed writes restore the previous in-memory save;
 UI reports failure without claiming a new PB. The original SaveStore backup/recovery applies.
 
-The map manifest has stable map ID, version, translation key, scene path and ordered IDs.
-Its baked SHA-256 covers normalized gameplay .gd/.tscn/.tres content. The full validator
-rejects a stale manifest; run dev_tools/check_trial_hash.ps1 -Update after intentional changes.
-Baking keeps identity consistent between editor and exported compiled scripts. Records
-from other UUIDs/map versions/content hashes remain stored but are not compared.
-This conservative hash also changes after unrelated gameplay code edits. Future full
-MapDefinition metadata/catalog and final map design remain outside M10.
+M13 replaces the M10 manifest with the production MapDefinition catalog and modular
+section scenes. PV-MAP-1 is the sole checksum algorithm for map validation and PBs.
+Training Circuit now uses map version 2; version-1 records remain stored, without
+comparison or promotion. See MAP_FORMAT.md for the canonical code/resource graph,
+checksum bake/check workflow and supported structural contract.
+
+Solo validates definitions before activation, then verifies all respawn positions with
+M7 physics safety before player control. Failure tears down actors, barrier and pool,
+showing a localized map error. Map-level strict_order and mandatory flags feed the same
+per-player CheckpointProgress. For nonstrict/optional routes, records keep actual reached
+IDs; checkpoint deltas match by ID, and segment minima merge only for identical routes.
 
 ## M11 integration
 

@@ -4,7 +4,9 @@ extends Node
 
 signal changed
 signal message(key: String)
-enum Phase { HINT, COUNTDOWN, RUN, RESULT }
+enum Phase { HINT, COUNTDOWN, RUN, RESULT, ERROR }
+var diagnostics := MapDiagnostics.new()
+var _safety_pending: bool = false
 var phase: Phase = Phase.HINT
 var course: SoloCourse
 var layer: InputLayer
@@ -34,12 +36,23 @@ func retry(show_hint: bool = false) -> void:
 		course.free()
 	if is_instance_valid(barrier):
 		barrier.free()
+	course = null
+	barrier = null
+	diagnostics = MapValidator.inspect(records.definition)
+	if not diagnostics.valid():
+		_load_failed()
+		return
 	layer.clear_transient_state(true)
 	_frame = InputFrame.new()
 	course = load(records.definition.scene_path).instantiate() as SoloCourse
 	course.input_layer = layer
 	course.definition = records.definition
 	add_child(course)
+	if not course.diagnostics.valid():
+		diagnostics = course.diagnostics
+		_load_failed()
+		return
+	_safety_pending = true
 	course.player.input_provider = func() -> InputFrame: return _frame
 	course.lifecycle.checkpoint_activated.connect(_checkpoint)
 	course.lifecycle.completed.connect(_finish)
@@ -80,6 +93,14 @@ func _physics_process(_delta: float) -> void:
 	if _retry_pending:
 		_retry_pending = false
 		retry()
+	if phase == Phase.ERROR:
+		return
+	if _safety_pending:
+		_safety_pending = false
+		if not course.validate_respawns():
+			diagnostics = course.diagnostics
+			_load_failed()
+			return
 	tick += 1
 	_frame = layer.sample()
 	if not _frame.restart_held:
@@ -109,6 +130,20 @@ func invalidate() -> void:
 	valid = false
 	changed.emit()
 
+func _load_failed() -> void:
+	phase = Phase.ERROR
+	valid = false
+	_safety_pending = false
+	if is_instance_valid(course):
+		course.free()
+	if is_instance_valid(barrier):
+		barrier.free()
+	course = null
+	barrier = null
+	# Detailed diagnostics are local developer output; UI uses only translation keys.
+	print("[MapValidation] " + diagnostics.describe())
+	changed.emit()
+
 func _death() -> void:
 	if phase == Phase.RUN:
 		deaths += 1
@@ -116,12 +151,9 @@ func _death() -> void:
 func _checkpoint(id: StringName) -> void:
 	if phase != Phase.RUN:
 		return
-	var index: int = records.definition.checkpoint_ids.find(id)
-	if index != splits.size():
-		invalidate()
-		return
 	splits.append(elapsed)
-	live_delta = "" if baseline.is_empty() else TrialRecord.delta(elapsed - int(baseline.splits[index]))
+	var index: int = -1 if baseline.is_empty() else baseline.ids.find(String(id))
+	live_delta = "" if index < 0 else TrialRecord.delta(elapsed - int(baseline.splits[index]))
 	changed.emit()
 
 func _finish() -> void:
@@ -129,6 +161,6 @@ func _finish() -> void:
 		return
 	phase = Phase.RESULT
 	course.world.retire_target(&"local")
-	result = records.complete(elapsed, splits, valid)
+	result = records.complete(elapsed, splits, valid, course.lifecycle.progress.reached)
 	course.set_deferred("process_mode", Node.PROCESS_MODE_DISABLED)
 	changed.emit()

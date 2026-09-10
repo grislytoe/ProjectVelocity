@@ -182,3 +182,18 @@ Automated M11 checks inject unique OS-cache save paths; never point tests at rea
   and ambience are intentionally empty; do not mistake missing final content for routing.
 - Verify contrast/color correction, flash controls, speed trails, shake Off/Low/Medium/High
   and HUD 50–100%; inspect legibility without changing gameplay timing.
+
+## M13 map framework
+
+- Run full dev_tools/validate.ps1 with Godot 4.7.2, including map_framework_test.gd.
+- F5 → New Game → Solo → Map Select: translated metadata/preview; Hint/Countdown/Run/
+  Results, PB/splits, ordinary death clock continuation, pause, retry and 0.5s Quick Restart.
+- F6 dev_tools/map_framework.tscn: 1 valid multi; 2 valid single; 3 seam gap; 4 missing
+  anchor; 5 checksum mismatch. Rejected maps show diagnostics with no active geometry.
+- Inspect aligned floor joins, entrance/exit rings, grid and safe respawn dots.
+- Verify repeated map exit/retry/failure leaves no actors, pool shots or stale callbacks.
+- Validate identity across editor/compiled Windows staging export; run --smoke-test only
+  with its isolated save injection. Do not run tests against production user saves.
+- M12 native test: tests/settings_runtime_test.gd without --headless; check selected
+  fullscreen/borderless world buffer, sharp UI, 16:9 framing, minimum 1280×800 and rollback.
+- Level Editor still displays In Development. All 22 playground stations remain present.

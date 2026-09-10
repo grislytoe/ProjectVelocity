@@ -1,0 +1,67 @@
+[gd_resource type="Resource" script_class="MapDefinition" format=3]
+
+[ext_resource type="Script" path="res://map_data/map_definition.gd" id="map"]
+[ext_resource type="Script" path="res://map_data/map_section_placement.gd" id="placement"]
+[ext_resource type="Script" path="res://map_data/map_point.gd" id="point"]
+[ext_resource type="Resource" path="res://map_data/sections/training_1.tres" id="s1"]
+[ext_resource type="Resource" path="res://map_data/sections/training_2.tres" id="s2"]
+[ext_resource type="Resource" path="res://map_data/sections/training_3.tres" id="s3"]
+[ext_resource type="Texture2D" path="res://map_data/training_preview.svg" id="preview"]
+
+[sub_resource type="Resource" id="p1"]
+script = ExtResource("placement")
+instance_id = &"first"
+section = ExtResource("s1")
+next_id = &"middle"
+[sub_resource type="Resource" id="p2"]
+script = ExtResource("placement")
+instance_id = &"middle"
+section = ExtResource("s2")
+transform = Transform2D(1, 0, 0, 1, 1400, 0)
+next_id = &"last"
+[sub_resource type="Resource" id="p3"]
+script = ExtResource("placement")
+instance_id = &"last"
+section = ExtResource("s3")
+transform = Transform2D(1, 0, 0, 1, 2800, 0)
+[sub_resource type="Resource" id="start"]
+script = ExtResource("point")
+point_id = &"start"
+section_id = &"first"
+anchor = NodePath("Start")
+respawn_anchor = NodePath("Start")
+[sub_resource type="Resource" id="a"]
+script = ExtResource("point")
+point_id = &"a"
+section_id = &"first"
+anchor = NodePath("Checkpoint")
+respawn_anchor = NodePath("Respawn")
+[sub_resource type="Resource" id="b"]
+script = ExtResource("point")
+point_id = &"b"
+section_id = &"middle"
+anchor = NodePath("Checkpoint")
+respawn_anchor = NodePath("Respawn")
+[sub_resource type="Resource" id="finish"]
+script = ExtResource("point")
+point_id = &"finish"
+section_id = &"last"
+anchor = NodePath("Finish")
+trigger_size = Vector2(45, 450)
+
+[resource]
+script = ExtResource("map")
+map_id = "solo_training"
+map_version = 2
+name_key = "TT_MAP"
+description_key = "TT_MAP_DESCRIPTION"
+preview = ExtResource("preview")
+map_type = "official"
+expected_duration_seconds = 12
+par_time_ticks = 720
+death_bounds = Rect2(-3900, 1050, 12000, 100)
+sections = Array[ExtResource("placement")]([SubResource("p1"), SubResource("p2"), SubResource("p3")])
+start = SubResource("start")
+finish = SubResource("finish")
+checkpoints = Array[ExtResource("point")]([SubResource("a"), SubResource("b")])
+declared_checksum = "6b8576e0a8e0f1c9f4d5ea815120e7e7ea61b759a877ef3d2891794804158c16"

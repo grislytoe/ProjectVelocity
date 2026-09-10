@@ -234,3 +234,5 @@ SET_REVERT,Revert,Вернуть
 SET_NATIVE_NOTE,Resolution sets game rendering quality in every window mode. Interface size and camera view stay unchanged.,Разрешение задаёт качество отрисовки игры во всех режимах окна. Размер интерфейса и обзор камеры не меняются.
 SET_DRAFT_HELP,Apply saves changes. Cancel discards changes since the last Apply. Bindings are previewed while editing.,Применить сохраняет изменения. Отмена возвращает последние сохранённые значения. Назначения ввода действуют пробно во время редактирования.
 SET_REVERTED,Previous display configuration restored.,Возвращены предыдущие параметры экрана.
+MAP_INVALID,This map could not be loaded. Its structure or resources are invalid.,Карта не загружена. Некорректная структура или ресурсы.
+MAP_CHECKSUM_ERROR,Map content does not match its version and checksum. Reinstall the correct map.,Содержимое карты не соответствует версии и контрольной сумме. Установите правильную карту.

@@ -1,3 +1,4 @@
-# Map definitions and modular sections
+# Map Data
 
-Reserved for later milestones. No runtime implementation in M0. See ../ARCHITECTURE.md for ownership and ../docs/MASTER_SPECIFICATION.txt for approved requirements.
+M13 typed map/section/placement/point Resources, catalog, structural validation and PV-MAP-1.
+Production entry: training_circuit.tres. Contract: ../MAP_FORMAT.md; authoring: ../docs/MAP_AUTHORING.md.

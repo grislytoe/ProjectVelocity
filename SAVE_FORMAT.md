@@ -97,7 +97,7 @@ checkpoint sequence. It never identifies a player by nickname.
 First/improved valid complete attempts replace PB total and timestamps; equal/worse runs
 only improve segment minima. Invalid runs do not write. Failed writes restore previous
 session data, retain good disk generations and report a localized failure. No lifetime deaths.
-Map-content checksum is baked and verified by dev_tools/check_trial_hash.ps1 for exports.
+Map-content checksum is baked and verified by dev_tools/check_trial_hash.ps1 for exports; M13 uses PV-MAP-1 (MAP_FORMAT.md).
 
 ## Version 4 — explicit onboarding (M11)
 
@@ -134,3 +134,17 @@ persists the candidate after native readback; timeout, Cancel, focus loss and te
 restore the actual previous window snapshot. A killed process restarts from the last
 confirmed document. Unsupported saved display sizes are retained and reported; startup
 keeps the safe engine window. Tests always inject unique cache paths.
+
+## M13 — map identity transition (schema remains 5)
+
+Training Circuit keeps stable map_id solo_training and moves to map_version 2 with
+PV-MAP-1 checksum. All old records/keys/checksums remain verbatim. No migration rewrites
+PBs, UUID, profile/onboarding, input, settings or legacy containers. TrialMapDefinition
+is an adapter to MapCatalog, with no second hashing algorithm.
+
+Runtime matching accepts a valid route under the map's strict/mandatory contract.
+The ids/splits arrays store actual activation order; optional points may be absent.
+Checkpoint deltas match by ID. Segment minima merge only for the same ordered IDs;
+a faster different route establishes fresh segment minima. Schema-5 TrialRecord already
+represents these arrays and therefore needs no version increment. Historical M10 text
+requiring the exact authored sequence applies to strict all-mandatory courses.
