@@ -3,7 +3,7 @@
 `map_data/training_circuit.tres` is the production catalog entry used by Map Select,
 SoloTrial, checkpoint progress and TrialRecords. Stable ID `solo_training`, map version
 **3**. Training Circuit remains the short M10 module demonstration, not the final map.
-Build 0.14.0-dev /18; save schema 5; protocol 1.
+Build 0.14.0-dev /19; save schema 5; protocol 1.
 
 ## Resources and units
 
@@ -139,7 +139,7 @@ progress counter is introduced. See SAVE_FORMAT.md and TIME_TRIAL.md.
 
 ## M14 catalog and camera additions
 
-Foundry Run (industrial_foundry version 1) is a separate official eight-section map.
+Foundry Run (industrial_foundry version 2) is a separate official eight-section map.
 MapDefinition now carries optional CameraBounds and CameraZone resources; they are
 validated and included in PV-MAP-1. SoloCourse injects them into the M5 camera.
 The conservative shared code/format identity update publishes Training version 3;

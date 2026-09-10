@@ -39,7 +39,7 @@ See [UI foundation](UI_FOUNDATION.md) and [M11 validation](docs/M11_VALIDATION.m
 
 M12: Settings enables Video, Audio, Controls and Accessibility with Apply/Cancel/defaults,
 15-second display confirmation and persisted device profiles. See [Settings](SETTINGS.md).
-Build 0.14.0-dev /18; save schema 5; protocol 1.
+Build 0.14.0-dev /19; save schema 5; protocol 1.
 
 M13 uses the shared MapDefinition catalog, structural validation and PV-MAP-1 checksum.
 Training Circuit now publishes map version 3 and preserves older PBs separately; save schema remains 5.

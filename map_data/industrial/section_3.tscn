@@ -95,7 +95,7 @@ position = Vector2(5200, 600)
 position = Vector2(120, 566)
 
 [node name="Checkpoint" type="Marker2D" parent="."]
-position = Vector2(180, 100)
+position = Vector2(180, 388)
 
 [node name="Respawn" type="Marker2D" parent="."]
 position = Vector2(180, 566)

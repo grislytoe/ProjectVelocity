@@ -95,7 +95,7 @@ point_id = &"cp1"
 section_id = &"s2"
 anchor = NodePath("Checkpoint")
 respawn_anchor = NodePath("Respawn")
-trigger_size = Vector2(70, 1000)
+trigger_size = Vector2(70, 450)
 
 [sub_resource type="Resource" id="cp2"]
 script = ExtResource("point")
@@ -103,7 +103,7 @@ point_id = &"cp2"
 section_id = &"s3"
 anchor = NodePath("Checkpoint")
 respawn_anchor = NodePath("Respawn")
-trigger_size = Vector2(70, 1000)
+trigger_size = Vector2(70, 450)
 
 [sub_resource type="Resource" id="cp3"]
 script = ExtResource("point")
@@ -111,7 +111,7 @@ point_id = &"cp3"
 section_id = &"s4"
 anchor = NodePath("Checkpoint")
 respawn_anchor = NodePath("Respawn")
-trigger_size = Vector2(70, 1000)
+trigger_size = Vector2(70, 450)
 
 [sub_resource type="Resource" id="cp4"]
 script = ExtResource("point")
@@ -119,7 +119,7 @@ point_id = &"cp4"
 section_id = &"s5"
 anchor = NodePath("Checkpoint")
 respawn_anchor = NodePath("Respawn")
-trigger_size = Vector2(70, 1000)
+trigger_size = Vector2(70, 450)
 
 [sub_resource type="Resource" id="cp5"]
 script = ExtResource("point")
@@ -127,7 +127,7 @@ point_id = &"cp5"
 section_id = &"s6"
 anchor = NodePath("Checkpoint")
 respawn_anchor = NodePath("Respawn")
-trigger_size = Vector2(70, 1000)
+trigger_size = Vector2(70, 450)
 
 [sub_resource type="Resource" id="cp6"]
 script = ExtResource("point")
@@ -135,7 +135,7 @@ point_id = &"cp6"
 section_id = &"s7"
 anchor = NodePath("Checkpoint")
 respawn_anchor = NodePath("Respawn")
-trigger_size = Vector2(70, 1000)
+trigger_size = Vector2(70, 450)
 
 [sub_resource type="Resource" id="cp7"]
 script = ExtResource("point")
@@ -143,7 +143,7 @@ point_id = &"cp7"
 section_id = &"s8"
 anchor = NodePath("Checkpoint")
 respawn_anchor = NodePath("Respawn")
-trigger_size = Vector2(70, 1000)
+trigger_size = Vector2(70, 450)
 
 [sub_resource type="Resource" id="finish"]
 script = ExtResource("point")
@@ -155,7 +155,7 @@ trigger_size = Vector2(70, 1000)
 [resource]
 script = ExtResource("map")
 map_id = "industrial_foundry"
-map_version = 1
+map_version = 2
 name_key = "IND_MAP"
 description_key = "IND_DESCRIPTION"
 preview = ExtResource("preview")
@@ -168,4 +168,4 @@ sections = Array[ExtResource("p")]([SubResource("p1"), SubResource("p2"), SubRes
 start = SubResource("start")
 finish = SubResource("finish")
 checkpoints = Array[ExtResource("point")]([SubResource("cp1"), SubResource("cp2"), SubResource("cp3"), SubResource("cp4"), SubResource("cp5"), SubResource("cp6"), SubResource("cp7")])
-declared_checksum = "6c7406075c1fd826d66d2f8435980ebfadcd32e530d06ee4de890e931d9b818e"
+declared_checksum = "734392eeb66fbade4f9dd9e3d1e2d8527b7d4c077906b744f81fdc7be969517b"

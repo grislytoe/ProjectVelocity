@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.14.0-dev — M14 review (build 19)
+
+- Lower all Industrial checkpoint markers onto the floor; restore standard 450px triggers while keeping safe respawns unchanged. Publish Industrial map version 2 and rebake its checksum; previous PB keys remain stored.
+
+
 ## 0.14.0-dev — M14 First Industrial Track (build 18)
 
 - Add Foundry Run: eight authored Industrial + Brutalism sections, all required core modules, seven mandatory checkpoints and one optional upper express branch.

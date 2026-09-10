@@ -1,7 +1,7 @@
 # M14 — Foundry Run / Литейный маршрут
 
-Build **0.14.0-dev /18**, schema **5**, protocol **1**. Official ID
-`industrial_foundry`, version **1**, PV-MAP-1. Normal difficulty; displayed duration
+Build **0.14.0-dev /19**, schema **5**, protocol **1**. Official ID
+`industrial_foundry`, version **2**, PV-MAP-1. Normal difficulty; displayed duration
 and par are 90 seconds. Human clean completion and subjective Normal acceptance
 remain **open**. Automated input-driven completion is demonstrated separately below.
 
@@ -33,8 +33,8 @@ Measured values below replace those estimates as technical evidence.
 | 8 Dispatch — apply learned mechanics | Static saw, temporary bridge across x2100–2580, spikes and cyclic laser; safe finish apron | 7.583s | 7.933s |
 
 Intervals are between actual trigger timestamps, not section geometric boundaries.
-Start is `(120,566)`. Seven mandatory checkpoints lie at local `(180,100)` in
-sections 2–8, with `(180,566)` respawns. Their tall trigger volumes cover the route
+Start is `(120,566)`. Seven mandatory checkpoints lie at local `(180,388)` in
+sections 2–8, with `(180,566)` respawns. Their 450px trigger volumes cover the route
 and the express exit. Finish is section 8 local `(5040,100)`. All anchors have full
 capsule clearance, stationary support and fatal-volume exclusion checked by M7.
 Fall DeathZone starts at y1100, extends 6000px past both route ends and is 10000px
@@ -185,3 +185,10 @@ through MapDefinition.checksum and still rejects invalid structure.
 6. Inspect RU/EN, keyboard/controller, 1280×800 and fullscreen settings, and return to
    the 22-station playground / Training Circuit. Hardware/Steam Deck acceptance is
    separate. No merge or M15 start is authorized by this checklist.
+
+### M14 review — grounded checkpoint markers (build 19)
+
+Industrial version 2 lowers checkpoint origins from y100 to y388. The existing
+M7 visual has its foot at local y212, so every marker now meets the y600 floor.
+Checkpoint trigger height returns to the standard 450px; respawns stay at y566.
+Start and Finish are unchanged. Version-1 records remain under their original keys.
