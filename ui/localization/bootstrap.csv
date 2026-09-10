@@ -132,7 +132,8 @@ UI_IN_DEVELOPMENT,In Development,В разработке
 UI_CREATE_LOBBY,Create Lobby,Создать лобби
 UI_JOIN_LOBBY,Join Lobby,Войти в лобби
 UI_MAP_METADATA,Official circuit • %s • version %d,Официальная трасса • %s • версия %d
-UI_MAP_AVAILABILITY,Training Circuit is the available demonstration course. More maps are in development.,Training Circuit — доступная демонстрационная трасса. Другие карты в разработке.
+UI_MAP_AVAILABILITY,Available for local Solo Time Trial.,Доступна для локального Solo Time Trial.
+UI_MAP_TIMING,Expected: ~%d seconds • Par: %s,Ориентир: ~%d с • Пар: %s
 UI_VIDEO,Video,Видео
 UI_AUDIO,Audio,Звук
 UI_ACCESSIBILITY,Accessibility,Специальные возможности
@@ -236,3 +237,24 @@ SET_DRAFT_HELP,Apply saves changes. Cancel discards changes since the last Apply
 SET_REVERTED,Previous display configuration restored.,Возвращены предыдущие параметры экрана.
 MAP_INVALID,This map could not be loaded. Its structure or resources are invalid.,Карта не загружена. Некорректная структура или ресурсы.
 MAP_CHECKSUM_ERROR,Map content does not match its version and checksum. Reinstall the correct map.,Содержимое карты не соответствует версии и контрольной сумме. Установите правильную карту.
+IND_MAP,Foundry Run,Литейный маршрут
+IND_DESCRIPTION,Cross the concrete foundry: gantries shafts cranes and the live production line.,Пройдите бетонный комбинат: эстакады шахты краны и действующую производственную линию.
+IND_SECTION_1,01 / RECEIVING YARD,01 / ПРИЁМНЫЙ ДВОР
+IND_SECTION_2,02 / GANTRIES,02 / ЭСТАКАДЫ
+IND_SECTION_3,03 / VENTILATION SHAFT,03 / ВЕНТИЛЯЦИОННАЯ ШАХТА
+IND_SECTION_4,04 / TRANSFER SPAN,04 / ПЕРЕГРУЗОЧНЫЙ ПРОЛЁТ
+IND_SECTION_5,05 / CRANE HALL,05 / КРАНОВЫЙ ЦЕХ
+IND_SECTION_6,06 / PRESS LIFT,06 / ПОДЪЁМ ПРЕССА
+IND_SECTION_7,07 / LIVE LINE,07 / ДЕЙСТВУЮЩАЯ ЛИНИЯ
+IND_SECTION_8,08 / DISPATCH,08 / ВЫПУСКНОЙ ДВОР
+IND_LOW_JUMP,LOW DUCT / short jump →,НИЗКИЙ ПРОХОД / короткий прыжок →
+IND_GAP,LOADING PIT →,ПОГРУЗОЧНАЯ ЯМА →
+IND_ONE_WAY,GANTRY / jump through ↑,ЭСТАКАДА / прыжок снизу ↑
+IND_WALL,SHAFT / wall jump ↑,ШАХТА / прыжок от стены ↑
+IND_SHORTCUT,EXPRESS / upper ledge + Dash ↗,ЭКСПРЕСС / верхняя площадка + Dash ↗
+IND_DASH,TRANSFER / double jump + Dash →,ПРОЛЁТ / двойной прыжок + Dash →
+IND_MOVING,CRANE / land on the shuttle →,КРАН / посадка на платформу →
+IND_PAD,Jump Pad / hold jump then jump again ↑,Jump Pad / держите прыжок и прыгните ещё ↑
+IND_LASER,LIVE LINE / watch the warning →,ЛИНИЯ / следите за предупреждением →
+IND_COVER,COVER / break line of sight →,УКРЫТИЕ / прервите линию огня →
+IND_FINAL,DISPATCH / final stretch →,ВЫПУСК / финишная прямая →

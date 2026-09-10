@@ -49,6 +49,8 @@ func _ready() -> void:
 	var pit := DeathZone.new()
 	box(self, pit, definition.death_bounds.get_center(), definition.death_bounds.size, Color("a33d53"))
 	var camera := LocalPlayerCamera.new()
+	camera.map_bounds = definition.camera_bounds
+	camera.zones = definition.camera_zones
 	add_child(camera)
 	camera.follow_local(player)
 

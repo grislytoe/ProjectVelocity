@@ -77,6 +77,15 @@ func _run_smoke_test() -> void:
 	var map_ok: bool = trial.phase == SoloTrial.Phase.HINT and is_instance_valid(trial.course)
 	print("PV_MAP_BOOT_HASH=" + trial.records.checksum)
 	trial.free()
+	trial = SoloTrial.new()
+	trial.layer = input_layer
+	trial.records = TrialRecords.new(save_store, MapCatalog.industrial())
+	settings_runtime.world.viewport.add_child(trial)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	map_ok = map_ok and trial.phase == SoloTrial.Phase.HINT and is_instance_valid(trial.course)
+	print("PV_INDUSTRIAL_BOOT_HASH=" + trial.records.checksum)
+	trial.free()
 	if not map_ok:
 		_logger.error("Map identity/assembly smoke failed", "bootstrap")
 		get_tree().quit(1)

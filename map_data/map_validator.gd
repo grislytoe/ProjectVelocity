@@ -18,6 +18,14 @@ static func inspect(map: MapDefinition, verify_checksum: bool = true) -> MapDiag
 		return report
 	if map.sections.is_empty():
 		report.add("sections", "map", "At least one section required")
+	if map.camera_bounds != null and not map.camera_bounds.valid():
+		report.add("camera", "camera_bounds", "Invalid camera bounds")
+	var camera_ids: Array[String] = []
+	for zone: CameraZone in map.camera_zones:
+		if zone == null or not zone.valid() or zone.zone_id in camera_ids:
+			report.add("camera", "camera_zones", "Invalid or duplicate camera zone")
+		else:
+			camera_ids.append(zone.zone_id)
 	if not map.death_bounds.position.is_finite() or not map.death_bounds.size.is_finite() \
 		or map.death_bounds.size.x <= 0 or map.death_bounds.size.y <= 0:
 		report.add("bounds", "map", "Finite positive fall DeathZone bounds required")

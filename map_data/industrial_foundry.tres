@@ -1,0 +1,171 @@
+[gd_resource type="Resource" script_class="MapDefinition" format=3]
+
+[ext_resource type="Script" path="res://map_data/map_definition.gd" id="map"]
+
+[ext_resource type="Script" path="res://map_data/map_section_placement.gd" id="p"]
+
+[ext_resource type="Script" path="res://map_data/map_point.gd" id="point"]
+
+[ext_resource type="Texture2D" path="res://map_data/industrial_preview.svg" id="preview"]
+
+[ext_resource type="Resource" path="res://map_data/industrial_camera.tres" id="camera"]
+
+[ext_resource type="Resource" path="res://map_data/industrial/section_1.tres" id="s1"]
+
+[ext_resource type="Resource" path="res://map_data/industrial/section_2.tres" id="s2"]
+
+[ext_resource type="Resource" path="res://map_data/industrial/section_3.tres" id="s3"]
+
+[ext_resource type="Resource" path="res://map_data/industrial/section_4.tres" id="s4"]
+
+[ext_resource type="Resource" path="res://map_data/industrial/section_5.tres" id="s5"]
+
+[ext_resource type="Resource" path="res://map_data/industrial/section_6.tres" id="s6"]
+
+[ext_resource type="Resource" path="res://map_data/industrial/section_7.tres" id="s7"]
+
+[ext_resource type="Resource" path="res://map_data/industrial/section_8.tres" id="s8"]
+
+[sub_resource type="Resource" id="p1"]
+script = ExtResource("p")
+instance_id = &"s1"
+section = ExtResource("s1")
+transform = Transform2D(1, 0, 0, 1, 0, 0)
+next_id = &"s2"
+
+[sub_resource type="Resource" id="p2"]
+script = ExtResource("p")
+instance_id = &"s2"
+section = ExtResource("s2")
+transform = Transform2D(1, 0, 0, 1, 5200, 0)
+next_id = &"s3"
+
+[sub_resource type="Resource" id="p3"]
+script = ExtResource("p")
+instance_id = &"s3"
+section = ExtResource("s3")
+transform = Transform2D(1, 0, 0, 1, 10400, 0)
+next_id = &"s4"
+
+[sub_resource type="Resource" id="p4"]
+script = ExtResource("p")
+instance_id = &"s4"
+section = ExtResource("s4")
+transform = Transform2D(1, 0, 0, 1, 15600, 0)
+next_id = &"s5"
+
+[sub_resource type="Resource" id="p5"]
+script = ExtResource("p")
+instance_id = &"s5"
+section = ExtResource("s5")
+transform = Transform2D(1, 0, 0, 1, 20800, 0)
+next_id = &"s6"
+
+[sub_resource type="Resource" id="p6"]
+script = ExtResource("p")
+instance_id = &"s6"
+section = ExtResource("s6")
+transform = Transform2D(1, 0, 0, 1, 26000, 0)
+next_id = &"s7"
+
+[sub_resource type="Resource" id="p7"]
+script = ExtResource("p")
+instance_id = &"s7"
+section = ExtResource("s7")
+transform = Transform2D(1, 0, 0, 1, 31200, 0)
+next_id = &"s8"
+
+[sub_resource type="Resource" id="p8"]
+script = ExtResource("p")
+instance_id = &"s8"
+section = ExtResource("s8")
+transform = Transform2D(1, 0, 0, 1, 36400, 0)
+
+[sub_resource type="Resource" id="start"]
+script = ExtResource("point")
+point_id = &"start"
+section_id = &"s1"
+anchor = NodePath("Start")
+respawn_anchor = NodePath("Start")
+trigger_size = Vector2(70, 1000)
+
+[sub_resource type="Resource" id="cp1"]
+script = ExtResource("point")
+point_id = &"cp1"
+section_id = &"s2"
+anchor = NodePath("Checkpoint")
+respawn_anchor = NodePath("Respawn")
+trigger_size = Vector2(70, 1000)
+
+[sub_resource type="Resource" id="cp2"]
+script = ExtResource("point")
+point_id = &"cp2"
+section_id = &"s3"
+anchor = NodePath("Checkpoint")
+respawn_anchor = NodePath("Respawn")
+trigger_size = Vector2(70, 1000)
+
+[sub_resource type="Resource" id="cp3"]
+script = ExtResource("point")
+point_id = &"cp3"
+section_id = &"s4"
+anchor = NodePath("Checkpoint")
+respawn_anchor = NodePath("Respawn")
+trigger_size = Vector2(70, 1000)
+
+[sub_resource type="Resource" id="cp4"]
+script = ExtResource("point")
+point_id = &"cp4"
+section_id = &"s5"
+anchor = NodePath("Checkpoint")
+respawn_anchor = NodePath("Respawn")
+trigger_size = Vector2(70, 1000)
+
+[sub_resource type="Resource" id="cp5"]
+script = ExtResource("point")
+point_id = &"cp5"
+section_id = &"s6"
+anchor = NodePath("Checkpoint")
+respawn_anchor = NodePath("Respawn")
+trigger_size = Vector2(70, 1000)
+
+[sub_resource type="Resource" id="cp6"]
+script = ExtResource("point")
+point_id = &"cp6"
+section_id = &"s7"
+anchor = NodePath("Checkpoint")
+respawn_anchor = NodePath("Respawn")
+trigger_size = Vector2(70, 1000)
+
+[sub_resource type="Resource" id="cp7"]
+script = ExtResource("point")
+point_id = &"cp7"
+section_id = &"s8"
+anchor = NodePath("Checkpoint")
+respawn_anchor = NodePath("Respawn")
+trigger_size = Vector2(70, 1000)
+
+[sub_resource type="Resource" id="finish"]
+script = ExtResource("point")
+point_id = &"finish"
+section_id = &"s8"
+anchor = NodePath("Finish")
+trigger_size = Vector2(70, 1000)
+
+[resource]
+script = ExtResource("map")
+map_id = "industrial_foundry"
+map_version = 1
+name_key = "IND_MAP"
+description_key = "IND_DESCRIPTION"
+preview = ExtResource("preview")
+map_type = "official"
+camera_bounds = ExtResource("camera")
+expected_duration_seconds = 90
+par_time_ticks = 5400
+death_bounds = Rect2(-6000, 1100, 53600, 10000)
+sections = Array[ExtResource("p")]([SubResource("p1"), SubResource("p2"), SubResource("p3"), SubResource("p4"), SubResource("p5"), SubResource("p6"), SubResource("p7"), SubResource("p8")])
+start = SubResource("start")
+finish = SubResource("finish")
+checkpoints = Array[ExtResource("point")]([SubResource("cp1"), SubResource("cp2"), SubResource("cp3"), SubResource("cp4"), SubResource("cp5"), SubResource("cp6"), SubResource("cp7")])
+declared_checksum = "6c7406075c1fd826d66d2f8435980ebfadcd32e530d06ee4de890e931d9b818e"

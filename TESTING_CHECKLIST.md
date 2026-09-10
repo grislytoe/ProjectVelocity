@@ -197,3 +197,7 @@ Automated M11 checks inject unique OS-cache save paths; never point tests at rea
 - M12 native test: tests/settings_runtime_test.gd without --headless; check selected
   fullscreen/borderless world buffer, sharp UI, 16:9 framing, minimum 1280×800 and rollback.
 - Level Editor still displays In Development. All 22 playground stations remain present.
+
+## M14
+
+M14: full validate.ps1 includes Industrial structural/fallback/PB/UI fixtures and input-driven main (30/60/144), express and eight-death recovery runs. Human clean completion, Normal feel, optional express entry, camera/telegraphs and hardware review remain open. Follow the exact checklist in docs/M14_INDUSTRIAL_TRACK.md before authorizing merge.

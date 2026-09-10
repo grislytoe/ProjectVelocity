@@ -265,6 +265,8 @@ func _map_card(definition: MapDefinition) -> void:
 	if definition == null:
 		label(tr("MAP_INVALID"))
 		return
+	# Keep focus at the card's leading edge so its preview/details stay visible.
+	button(definition.name_key, select_map.bind(definition))
 	if definition.preview != null:
 		var map_preview := TextureRect.new()
 		map_preview.texture = definition.preview
@@ -272,12 +274,12 @@ func _map_card(definition: MapDefinition) -> void:
 		map_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		map_preview.custom_minimum_size.y = 160
 		column.add_child(map_preview)
-	label(tr(definition.name_key), 32)
 	label(tr(definition.description_key))
 	label(tr("UI_DIFFICULTY") % tr(definition.difficulty_key), 22)
+	label(tr("UI_MAP_TIMING") % [definition.expected_duration_seconds,
+		TrialRecord.format_time(definition.par_time_ticks)], 20)
 	var best: Dictionary = TrialRecords.new(store, definition).best()
 	label(tr("TT_PB") % ("—" if best.is_empty() else TrialRecord.format_time(int(best.total))))
-	button(definition.name_key, select_map.bind(definition))
 	label(tr("UI_MAP_METADATA") % [definition.map_id, definition.map_version], 20)
 	label(tr("UI_MAP_AVAILABILITY"), 20)
 

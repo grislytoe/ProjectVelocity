@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.14.0-dev — M14 First Industrial Track (build 18)
+
+- Add Foundry Run: eight authored Industrial + Brutalism sections, all required core modules, seven mandatory checkpoints and one optional upper express branch.
+- Integrate separate RU/EN catalog card/preview, bounds and existing Solo/PB lifecycle. Training geometry is unchanged; version 3 reflects the shared checksum/code update and old PB keys remain stored.
+- Add full-route input replays, contact coverage, measured 65.550s main / 62.717s express and 7.383–10.783s controlled recovery; add adversarial structural/lifecycle/UI tests and both-map export identity checks.
+- Preserve movement/hazard tuning, schema5/protocol1 and prior fixtures. Human clean completion and Normal/hardware acceptance remain open; no M15.
+
+
 ## 0.13.0-dev — M13 Map Framework (build 17)
 
 - Review fix: reject displaced assembly hosts and top-level section nodes; include

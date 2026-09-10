@@ -34,5 +34,5 @@ empty maps, missing refs/dependencies/configs, unsupported transforms, bad seams
 IDs/links/route metadata, deterministic canonicalization, unsafe respawns and cleanup.
 The fixture generator must not modify the cached catalog: use deep Resource copies.
 
-The production Level Editor stays In Development. No final map, runtime streaming,
-network transport, Workshop, digital signatures or M14 work is included.
+M14 adds Foundry Run; see docs/M14_INDUSTRIAL_TRACK.md for layout and route evidence. The production Level Editor stays In Development. No runtime streaming,
+network transport, Workshop or digital signatures are included.

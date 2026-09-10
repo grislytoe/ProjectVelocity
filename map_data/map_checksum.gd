@@ -9,7 +9,7 @@ static func compute(map: MapDefinition) -> String:
 	var report := MapDiagnostics.new()
 	var payload: Array = ["PV-MAP-1", MapCodeManifest.DIGEST, map.map_id, map.map_version,
 		map.map_type, map.grid_pixels, map.strict_order, map.par_time_ticks, map.death_bounds,
-		map.start, map.finish, map.checkpoints]
+		map.start, map.finish, map.checkpoints, map.camera_bounds, map.camera_zones]
 	if not MapDependencies.available(map.scene_path, report):
 		return ""
 	payload.append(load(map.scene_path))
