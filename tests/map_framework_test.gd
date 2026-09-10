@@ -39,6 +39,29 @@ func single() -> MapDefinition:
 	map.declared_checksum = map.checksum()
 	return map
 
+func connection_fixture(enabled: bool) -> String:
+	var child := Node2D.new()
+	child.name = "Child"
+	var target := Node2D.new()
+	target.name = "Target"
+	child.add_child(target)
+	target.owner = child
+	child.ready.connect(target.set_physics_process.bind(enabled), CONNECT_PERSIST)
+	var packed := PackedScene.new()
+	check(packed.pack(child) == OK, "Pack persistent nested signal fixture")
+	child.free()
+	var child_path: String = fixture_dir.path_join("child-%s.tscn" % enabled)
+	check(ResourceSaver.save(packed, child_path) == OK, "Save nested signal fixture")
+	var source: String = FileAccess.get_file_as_string("res://map_data/sections/training_1.tscn")
+	source = source.replace('[sub_resource type="RectangleShape2D"',
+		'[ext_resource type="PackedScene" path="%s" id="nested"]\n[sub_resource type="RectangleShape2D"' % child_path)
+	source += '\n[node name="Child" parent="." instance=ExtResource("nested")]\n'
+	var path: String = fixture_dir.path_join("connections-%s.tscn" % enabled)
+	var writer := FileAccess.open(path, FileAccess.WRITE)
+	writer.store_string(source)
+	writer.close()
+	return path
+
 func run() -> void:
 	DirAccess.make_dir_recursive_absolute(fixture_dir)
 	var map: MapDefinition = MapCatalog.training()
@@ -110,6 +133,18 @@ func run() -> void:
 	map = MapCatalog.training()
 	map.scene_path = "res://gameplay/player/default_movement.tres"
 	rejects(map, "scene")
+	map = MapCatalog.training()
+	var host: Node2D = load(map.scene_path).instantiate()
+	host.position = Vector2(1000, 0)
+	var host_scene := PackedScene.new()
+	check(host_scene.pack(host) == OK, "Pack displaced host fixture")
+	host.free()
+	map.scene_path = fixture_dir.path_join("displaced-host.tscn")
+	check(ResourceSaver.save(host_scene, map.scene_path) == OK, "Save displaced host fixture")
+	rejects(map, "transform")
+	map = MapCatalog.training()
+	scene_variant(map, 0, func(node: Node) -> void: node.get_node("Entrance").top_level = true, "top-level")
+	rejects(map, "transform")
 	map = MapCatalog.training()
 	map.sections[0].section.major_geometry = [^"Missing"]
 	rejects(map, "geometry")
@@ -191,6 +226,14 @@ func run() -> void:
 		node.get_node("Spikes").config = node.get_node("Spikes").config.duplicate()
 		node.get_node("Spikes").config.size.x += 20, "tuning")
 	check(map.checksum() != hash_value, "Dependent resource tuning affects checksum")
+	var signal_hashes: Array[String] = []
+	for enabled: bool in [false, true]:
+		map = MapCatalog.training()
+		map.sections[0].section.scene_path = connection_fixture(enabled)
+		check(MapValidator.inspect(map, false).valid(), "Nested persistent connection is valid content")
+		signal_hashes.append(map.checksum())
+	check(not signal_hashes[0].is_empty() and signal_hashes[0] != signal_hashes[1],
+		"Changing only inherited signal bind arguments changes map checksum")
 	await runtime_checks()
 	await records_checks()
 	for file: String in DirAccess.get_files_at(fixture_dir):

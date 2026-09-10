@@ -3,7 +3,7 @@
 `map_data/training_circuit.tres` is the production catalog entry used by Map Select,
 SoloTrial, checkpoint progress and TrialRecords. Stable ID `solo_training`, map version
 **2**. Training Circuit remains the short M10 module demonstration, not the final map.
-Build 0.13.0-dev /16; save schema 5; protocol 1.
+Build 0.13.0-dev /17; save schema 5; protocol 1.
 
 ## Resources and units
 
@@ -23,8 +23,8 @@ Build 0.13.0-dev /16; save schema 5; protocol 1.
   separate respawn Marker2D path for Start/checkpoints, trigger_size in pixels,
   mandatory flag for checkpoints. Start/Finish roles come from their fields.
 
-Coordinates are Godot 2D world pixels, +X right, +Y down. Section scenes have identity
-root transforms. M13 supports finite translations only for section placements and
+Coordinates are Godot 2D world pixels, +X right, +Y down. The assembly host and section scenes have identity root transforms. Top-level nodes
+are rejected inside sections so anchors cannot escape their declared coordinate space. M13 supports finite translations only for section placements and
 anchor frames: unit X/Y basis, no scale, reflection, rotation or skew. This is the
 initial supported transform contract for gravity-bound modules, not a numeric rule
 from the master specification. Local nested Marker2D transforms are accumulated.
@@ -82,7 +82,10 @@ Assembly/unload happen outside query flushing, with no streaming or global callb
 of a tagged, length-delimited UTF-8 representation with explicit map ID/version/type,
 par ticks, grid, fall bounds, strict order, ordered placements/links/section IDs,
 major geometry paths, route points and the semantic scene/resource graph.
-Arrays and node/connection order are significant; dictionaries/properties are sorted.
+Arrays and node order are significant; dictionaries/properties and signal names are sorted.
+Persistent connections are collected from resolved nodes, including nested/inherited
+scenes. Target paths, methods, flags, bound/unbound arguments and connection order within
+each signal participate in identity.
 Booleans, integers, strings, vectors, transforms, rectangles, colors and packed arrays
 have type tags; finite floating values use little-endian IEEE754 double bytes with
 negative zero normalized. Strings are exact UTF-8; translations/locales are not hashed.

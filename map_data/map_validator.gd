@@ -30,6 +30,8 @@ static func inspect(map: MapDefinition, verify_checksum: bool = true) -> MapDiag
 		var node: Node = shell.instantiate()
 		if not node is SoloCourse or node.get_child_count() != 0:
 			report.add("scene", map.scene_path, "Expected empty SoloCourse assembly host")
+		elif node.transform != Transform2D.IDENTITY or node.top_level:
+			report.add("transform", map.scene_path, "Assembly host must retain the map coordinate frame")
 		node.free()
 	var roots: Dictionary[StringName, Node2D] = {}
 	var definition_ids: Dictionary = {}
@@ -199,9 +201,9 @@ static func inspect_nodes(node: Node, report: MapDiagnostics, location: String) 
 		report.add("authority", location, "Actors, progress, triggers and pools belong to the assembly host")
 	if node is Node2D:
 		var pose: Transform2D = node.transform
-		if not pose.origin.is_finite() or not pose.x.is_finite() or not pose.y.is_finite() \
+		if node.top_level or not pose.origin.is_finite() or not pose.x.is_finite() or not pose.y.is_finite() \
 			or is_zero_approx(pose.determinant()):
-			report.add("transform", location, "Non-finite or singular node transform")
+			report.add("transform", location, "Non-finite, singular or top-level transform breaks section coordinates")
 	for property: Dictionary in node.get_property_list():
 		if property.usage & PROPERTY_USAGE_STORAGE and property.usage & PROPERTY_USAGE_SCRIPT_VARIABLE:
 			var value: Variant = node.get(property.name)

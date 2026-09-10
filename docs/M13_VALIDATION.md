@@ -9,8 +9,8 @@ C:/Godot Projects/ProjectVelocity. Base dev/origin/dev was
 
 - Full `./dev_tools/validate.ps1 -Godot C:/Godot/Godot.exe`: M0–M13 passed, including
   clean import, every GDScript parser check, isolated headless boot and all prior suites.
-  The final run is in ignored builds/m13-validation-final.log.
-- M13: **112 checks**. Single/multiple sections; catalog identity; null/empty definitions;
+  The final run is in ignored builds/m13-recheck-validation.log.
+- M13: **125 checks**. Single/multiple sections; catalog identity; null/empty definitions;
   duplicate IDs; broken links; missing direct/transitive dependencies; configs; grid,
   transform, overlap/seam/support, route/Start/Finish/checkpoint rules; declared hash
   mismatch; semantic reserialization/editor metadata/locale stability; changed hazards
@@ -20,7 +20,7 @@ C:/Godot Projects/ProjectVelocity. Base dev/origin/dev was
 - M10: **62 checks** at 30/60/144 FPS, including actual triggers/Finish, death clock,
   pause eligibility, quick restart, 12 repeated rebuilds and real UI round trips.
 - Normal renderer `dev_tools/time_trial_smoke.gd`: menu/New Game/Solo/Map Select,
-  hint/countdown, motor-driven complete run **356 ticks, 0 deaths**, both checkpoints,
+  hint/countdown, motor-driven complete run **355 ticks, 0 deaths**, both checkpoints,
   stored PB, RU/EN result, pause/retry and gamepad prompts. No engine errors/warnings.
 - Normal renderer `tests/settings_runtime_test.gd`: passed with native=true, including
   minimum 1280×800, selected world-buffer pixel dimensions, fullscreen/borderless,
@@ -46,8 +46,8 @@ All gameplay/camera replay hashes match the approved M10/M11 validation baseline
 The content identity intentionally changes: the old monolithic procedural course now
 uses section Resources/scenes and a new canonical format. It is not a replay regression.
 Training Circuit is `solo_training`, version **2**, PV-MAP-1 checksum
-`57e1ae1fe0af3e7ae99ea6093dfcdd3821b2f62eb796afa0fb233a6e4040a232`.
-Build **0.13.0-dev /16**, save schema **5**, network protocol **1**.
+`6b8576e0a8e0f1c9f4d5ea815120e7e7ea61b759a877ef3d2891794804158c16`.
+Build **0.13.0-dev /17**, save schema **5**, network protocol **1**.
 The user's unrelated project.godot editor normalization remains unstaged; only the
 intentional application version change is included.
 
@@ -76,3 +76,17 @@ Workshop, network transport, online validation or signatures are implemented.
    Confirm Level Editor still says In Development. The old 22-station playground remains
    dev_tools/test_playground.tscn.
 5. Review the PR into dev. Merge requires separate explicit user approval.
+
+## Review follow-up — build 17
+
+An independent fixture reproduced two gaps before the fix: a SoloCourse scene with
+position (1000, 0) passed structural validation, and two otherwise identical section
+scenes with different bind arguments on an inherited persistent connection had equal
+checksums. The first could mix local and world respawn coordinates; the second omitted
+relevant behavior from identity. Both now have regression tests, alongside a top-level
+anchor rejection. Resolved-node connection inspection includes inherited connections;
+the host must be at identity and section nodes cannot escape their local coordinate frame.
+
+The PV-MAP-1 checksum is intentionally rebaked while M13 remains under PR review.
+Earlier version-1 and version-2 records retain their old checksum/key and remain on disk,
+without promotion or comparison to this build. Save schema stays 5 and protocol stays 1.

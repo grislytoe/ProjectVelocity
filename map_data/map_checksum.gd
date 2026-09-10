@@ -85,7 +85,7 @@ static func encode(value: Variant, report: MapDiagnostics, stack: Array = []) ->
 			var nested: Array = stack.duplicate()
 			nested.append(value)
 			if value is PackedScene:
-				return encode(_scene(value), report, nested)
+				return encode(_scene(value, report), report, nested)
 			var properties: Dictionary = {"@class": value.get_class()}
 			for property: Dictionary in value.get_property_list():
 				var key: String = property.name
@@ -97,23 +97,16 @@ static func encode(value: Variant, report: MapDiagnostics, stack: Array = []) ->
 			report.add("resource", "checksum", "Unsupported canonical type %d" % typeof(value))
 			return ""
 
-static func _scene(scene: PackedScene) -> Array:
+static func _scene(scene: PackedScene, report: MapDiagnostics) -> Array:
 	# Materialize inherited/default properties without entering the tree. This makes
 	# editor-added type/script/default overrides equivalent to omitted inherited values.
 	var root: Node = scene.instantiate()
 	var nodes: Array = []
-	_node(root, root, nodes)
+	_node(root, root, nodes, report)
 	root.free()
-	var state: SceneState = scene.get_state()
-	var connections: Array = []
-	for index: int in state.get_connection_count():
-		connections.append([state.get_connection_source(index), state.get_connection_signal(index),
-			state.get_connection_target(index), state.get_connection_method(index),
-			state.get_connection_flags(index), state.get_connection_binds(index),
-			state.get_connection_unbinds(index)])
-	return [nodes, connections]
+	return nodes
 
-static func _node(node: Node, root: Node, nodes: Array) -> void:
+static func _node(node: Node, root: Node, nodes: Array, report: MapDiagnostics) -> void:
 	var properties: Dictionary = {}
 	for property: Dictionary in node.get_property_list():
 		var key: String = property.name
@@ -122,6 +115,22 @@ static func _node(node: Node, root: Node, nodes: Array) -> void:
 			properties[key] = node.get(key)
 	var groups: Array = Array(node.get_groups())
 	groups.sort()
-	nodes.append([root.get_path_to(node), node.get_class(), groups, properties])
+	# SceneState only exposes this scene's own connections. Inspect resolved nodes
+	# so inherited/nested persistent connections and their bind arguments participate.
+	var connections: Array = []
+	var signals: Array[Dictionary] = node.get_signal_list()
+	signals.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.name < b.name)
+	for signal_info: Dictionary in signals:
+		for connection: Dictionary in node.get_signal_connection_list(signal_info.name):
+			if connection.flags & Object.CONNECT_PERSIST == 0:
+				continue
+			var callback: Callable = connection.callable
+			var target: Object = callback.get_object()
+			if not target is Node or (target != root and not root.is_ancestor_of(target)):
+				report.add("connection", str(root.get_path_to(node)), "Persistent target must belong to this scene")
+				continue
+			connections.append([signal_info.name, root.get_path_to(target), callback.get_method(),
+				connection.flags, callback.get_bound_arguments(), callback.get_unbound_arguments_count()])
+	nodes.append([root.get_path_to(node), node.get_class(), groups, properties, connections])
 	for child: Node in node.get_children():
-		_node(child, root, nodes)
+		_node(child, root, nodes, report)

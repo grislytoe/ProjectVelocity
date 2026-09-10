@@ -1,6 +1,9 @@
 # Changelog
 
-## 0.13.0-dev — M13 Map Framework (build 16)
+## 0.13.0-dev — M13 Map Framework (build 17)
+
+- Review fix: reject displaced assembly hosts and top-level section nodes; include
+  inherited persistent signal connections and bind arguments in the canonical checksum.
 
 - Added typed map/section/placement/point Resources, configurable pixel grid, explicit
   entrance/exit anchors, floor seam/structure diagnostics and safe load failure.
