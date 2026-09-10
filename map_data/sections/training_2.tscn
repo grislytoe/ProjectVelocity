@@ -1,0 +1,28 @@
+[gd_scene format=3]
+[ext_resource type="PackedScene" path="res://gameplay/platforms/moving_platform.tscn" id="moving"]
+[ext_resource type="PackedScene" path="res://gameplay/platforms/one_way_platform.tscn" id="oneway"]
+[ext_resource type="PackedScene" path="res://gameplay/platforms/breakable_platform.tscn" id="temporary"]
+[sub_resource type="RectangleShape2D" id="floor"]
+size = Vector2(1400, 40)
+[node name="Section" type="Node2D"]
+[node name="Entrance" type="Marker2D" parent="."]
+position = Vector2(0, 600)
+[node name="Exit" type="Marker2D" parent="."]
+position = Vector2(1400, 600)
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(700, 620)
+[node name="Collision" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("floor")
+[node name="Visual" type="Polygon2D" parent="Floor"]
+polygon = PackedVector2Array(-700, -20, 700, -20, 700, 20, -700, 20)
+color = Color(0.160784, 0.27451, 0.32549, 1)
+[node name="Checkpoint" type="Marker2D" parent="."]
+position = Vector2(1400, 386)
+[node name="Respawn" type="Marker2D" parent="."]
+position = Vector2(1350, 566)
+[node name="Moving" parent="." instance=ExtResource("moving")]
+position = Vector2(400, 460)
+[node name="OneWay" parent="." instance=ExtResource("oneway")]
+position = Vector2(750, 430)
+[node name="Temporary" parent="." instance=ExtResource("temporary")]
+position = Vector2(1100, 470)

@@ -74,7 +74,7 @@ func run() -> void:
 	bad.trial_records[records.key()].splits = [999, 12]
 	check(not SaveSchema.validate(bad), "Corrupt record rejected")
 	var other := TrialMapDefinition.new()
-	other.map_version = 2
+	other.map_version += 1
 	check(TrialRecords.new(store, other).best().is_empty(), "Map version isolates PB")
 	var changed_records := TrialRecords.new(store, TrialMapDefinition.new())
 	changed_records.checksum = "changed".sha256_text()

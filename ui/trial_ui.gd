@@ -12,6 +12,7 @@ var banner: Label
 var status: Label
 var screen: String = "menu"
 var _message_ticks: int = 0
+var selected_definition: MapDefinition
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -99,12 +100,20 @@ func show_maps() -> void:
 	_leave()
 	screen = "maps"
 	_panel("TT_SELECT")
-	label(tr("TT_MAP_DESCRIPTION"))
-	var repository := TrialRecords.new(store, TrialMapDefinition.new())
-	var best: Dictionary = repository.best()
-	label(tr("TT_PB") % ("—" if best.is_empty() else TrialRecord.format_time(int(best.total))))
-	button("TT_MAP", start_map).grab_focus()
+	for definition: MapDefinition in MapCatalog.official():
+		if definition == null:
+			label(tr("MAP_INVALID"))
+			continue
+		label(tr(definition.description_key))
+		var repository := TrialRecords.new(store, definition)
+		var best: Dictionary = repository.best()
+		label(tr("TT_PB") % ("—" if best.is_empty() else TrialRecord.format_time(int(best.total))))
+		button(definition.name_key, select_map.bind(definition)).grab_focus()
 	button("TT_MENU", show_menu)
+
+func select_map(definition: MapDefinition) -> void:
+	selected_definition = definition
+	start_map()
 
 func show_controls() -> void:
 	screen = "controls"
@@ -141,7 +150,7 @@ func start_map() -> void:
 	trial = SoloTrial.new()
 	trial.process_mode = Node.PROCESS_MODE_PAUSABLE
 	trial.layer = input_layer
-	trial.records = TrialRecords.new(store, TrialMapDefinition.new())
+	trial.records = TrialRecords.new(store, selected_definition if selected_definition != null else MapCatalog.training())
 	trial.changed.connect(refresh.call_deferred)
 	trial.message.connect(show_message)
 	var runtime := get_tree().get_first_node_in_group("settings_runtime") as SettingsRuntime
@@ -156,7 +165,12 @@ func refresh() -> void:
 		return
 	if is_instance_valid(panel):
 		panel.free()
-	if trial.phase == SoloTrial.Phase.HINT:
+	if trial.phase == SoloTrial.Phase.ERROR:
+		_panel("TT_SELECT")
+		label(tr(trial.diagnostics.message_key()))
+		button("TT_SELECT", show_maps).grab_focus()
+		button("TT_MENU", show_menu)
+	elif trial.phase == SoloTrial.Phase.HINT:
 		_panel("TT_CONTROLS")
 		label(tr("TT_HINT") % [input_layer.prompt("move_left").get("label", ""),
 			input_layer.prompt("move_right").get("label", ""), input_layer.prompt("jump").get("label", ""),
@@ -173,8 +187,10 @@ func refresh() -> void:
 			TrialRecord.delta(trial.elapsed - int(trial.baseline.total))))
 		label(tr("TT_DEATHS") % trial.deaths)
 		for index: int in trial.splits.size():
-			var difference: String = "—" if trial.baseline.is_empty() else TrialRecord.delta(
-				trial.splits[index] - int(trial.baseline.splits[index]))
+			var id: String = str(trial.course.lifecycle.progress.reached[index])
+			var old_index: int = -1 if trial.baseline.is_empty() else trial.baseline.ids.find(id)
+			var difference: String = "—" if old_index < 0 else TrialRecord.delta(
+				trial.splits[index] - int(trial.baseline.splits[old_index]))
 			label(tr("TT_SPLIT") % [index + 1, TrialRecord.format_time(trial.splits[index]), difference], 22)
 		button("TT_RETRY", trial.request_retry).grab_focus()
 		button("TT_SELECT", show_maps)
@@ -220,7 +236,7 @@ func _physics_process(_delta: float) -> void:
 		_message_ticks = maxi(0, _message_ticks - 1)
 
 func _input(event: InputEvent) -> void:
-	if not is_instance_valid(trial) or trial.phase == SoloTrial.Phase.RESULT:
+	if not is_instance_valid(trial) or trial.phase in [SoloTrial.Phase.RESULT, SoloTrial.Phase.ERROR]:
 		return
 	if event.is_action_pressed(input_layer.action_name("pause")):
 		toggle_pause.call_deferred()

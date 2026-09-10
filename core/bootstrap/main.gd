@@ -67,6 +67,20 @@ func _open_navigation() -> void:
 func _run_smoke_test() -> void:
 	await get_tree().process_frame
 	await get_tree().physics_frame
+	# Exercise the same canonical identity and section loading in editor and compiled PCK.
+	var trial := SoloTrial.new()
+	trial.layer = input_layer
+	trial.records = TrialRecords.new(save_store, MapCatalog.training())
+	settings_runtime.world.viewport.add_child(trial)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var map_ok: bool = trial.phase == SoloTrial.Phase.HINT and is_instance_valid(trial.course)
+	print("PV_MAP_BOOT_HASH=" + trial.records.checksum)
+	trial.free()
+	if not map_ok:
+		_logger.error("Map identity/assembly smoke failed", "bootstrap")
+		get_tree().quit(1)
+		return
 	input_preferences.flush()
 	var save_ok: bool = SaveSchema.validate(save_store.data) and (
 		save_store.notification_key.is_empty())

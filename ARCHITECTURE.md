@@ -140,3 +140,15 @@ presentation components. ProfileEdit owns detached transactions through SaveStor
 schema v4 adds an explicit onboarding_complete boolean via v3→v4 migration.
 AppUI only applies validated appearance to M4 observers. The M10 trial, checkpoint,
 hazard, restart and camera authority is unchanged. See UI_FOUNDATION.md.
+
+## M13 map composition
+
+Map Data owns MapDefinition, section definitions/placements, route point resources,
+MapCatalog, MapValidator/MapDiagnostics and PV-MAP-1 canonical identity. Gameplay/maps
+MapAssembly owns section instances. SoloCourse owns actor/lifecycle/trigger/camera/pool
+composition; SoloTrial owns preflight, first-physics safety and atomic failure teardown.
+UI selects catalog definitions and presents localized errors and preview metadata.
+No second checkpoint authority, network adapter, editor or streaming system is added.
+All 22 developer playground stations remain available. See MAP_FORMAT.md and
+[map authoring](docs/MAP_AUTHORING.md). The developer overview is
+res://dev_tools/map_framework.tscn; tests and tools remain excluded from exports.

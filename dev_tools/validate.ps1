@@ -25,9 +25,9 @@ function Invoke-GodotCheck {
     if ($Marker -and -not $output.Contains($Marker)) { throw "$Name missing success marker" }
 }
 
-& (Join-Path $PSScriptRoot "check_trial_hash.ps1")
 Invoke-GodotCheck -Name "version" -Arguments @("--version") -Marker "4.7.2.stable."
 Invoke-GodotCheck -Name "import" -Arguments @("--headless", "--path", ".", "--import")
+& (Join-Path $PSScriptRoot "check_trial_hash.ps1") -Godot $Godot
 Get-ChildItem core,gameplay,visuals,save_system,map_data,ui,tests,dev_tools -Recurse -Filter "*.gd" | ForEach-Object {
     $relative = $_.FullName.Substring($projectRoot.Length + 1).Replace("\", "/")
     Invoke-GodotCheck -Name ("parse-" + $_.BaseName) -Arguments @("--headless", "--path", ".", "--check-only", "--script", $relative)
@@ -93,6 +93,7 @@ if (@($trialHashes | Select-Object -Unique).Count -ne 1) { throw "Time Trial dif
 Invoke-GodotCheck -Name "m11-ui" -Arguments @("--headless", "--path", ".", "--script", "tests/ui_foundation_test.gd") -Marker "PROJECTVELOCITY_M11_OK"
 Invoke-GodotCheck -Name "m12-settings" -Arguments @("--headless", "--path", ".", "--script", "tests/settings_test.gd") -Marker "PROJECTVELOCITY_M12_OK"
 Invoke-GodotCheck -Name "m12-ui" -Arguments @("--headless", "--path", ".", "--script", "tests/settings_runtime_test.gd") -Marker "PROJECTVELOCITY_M12_RUNTIME_OK"
+Invoke-GodotCheck -Name "m13-maps" -Arguments @("--headless", "--path", ".", "--script", "tests/map_framework_test.gd") -Marker "PROJECTVELOCITY_M13_OK"
 git diff --cached --check
 if ($LASTEXITCODE -ne 0) { throw "Staged whitespace validation failed" }
 git diff --check
@@ -103,5 +104,12 @@ if ($ExportWindows) {
     Invoke-GodotCheck -Name "export" -Arguments @("--headless", "--path", ".", "--export-debug", '"Windows Staging"', "builds/windows/ProjectVelocity.exe")
     $Godot = Join-Path $projectRoot "builds/windows/ProjectVelocity.exe"
     Invoke-GodotCheck -Name "export-boot" -Arguments @("--headless", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
+    $editorLog = Get-Content (Join-Path $logRoot "boot.stdout.log") -Raw
+    $exportLog = Get-Content (Join-Path $logRoot "export-boot.stdout.log") -Raw
+    if ($editorLog -notmatch 'PV_MAP_BOOT_HASH=([0-9a-f]{64})') { throw "Missing editor map identity" }
+    $mapHash = $Matches[1]
+    if ($exportLog -notmatch 'PV_MAP_BOOT_HASH=([0-9a-f]{64})' -or $Matches[1] -ne $mapHash) {
+        throw "Export map identity differs from editor"
+    }
 }
-Write-Output "M0 + M1 + M2 + M3 + M4 + M5 + M6 + M7 + M8 + M9 + M10 + M11 + M12 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."
+Write-Output "M0-M13 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."
