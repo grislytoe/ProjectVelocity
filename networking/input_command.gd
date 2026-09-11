@@ -40,6 +40,5 @@ static func decode(value: Variant) -> InputCommand:
 	command.frame.jump_held = value[7]
 	command.frame.jump_released = value[8]
 	command.frame.dash_pressed = value[9]
-	if command.frame.jump_pressed and command.frame.jump_released:
-		return null
+	# M2 can report both edges for a short tap completed within one physics tick.
 	return command

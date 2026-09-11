@@ -49,6 +49,13 @@ func codec_tests() -> void:
 		"x".repeat(config.max_packet_bytes + 1).to_utf8_buffer()]:
 		check(NetPacket.decode(bytes, config) == null, "malformed/unknown/oversize rejected")
 	var base: Array = command(0, 100).values()
+	var tap: Array = base.duplicate()
+	tap[6] = true
+	tap[7] = false
+	tap[8] = true
+	var decoded_tap: InputCommand = InputCommand.decode(tap)
+	check(decoded_tap != null and decoded_tap.frame.jump_pressed and not decoded_tap.frame.jump_held,
+		"preserve M2 short Jump tap with both edges in one tick")
 	for index: int in base.size():
 		var broken: Array = base.duplicate()
 		broken[index] = {"position": [9999, 1]}

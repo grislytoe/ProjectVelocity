@@ -79,8 +79,8 @@ is `[nickname, body_rgba_hex, accent_rgba_hex]`; nickname uses M1's 3–15 chara
 colors are exactly 8 hex characters. Both maps pass M13 validation before connecting.
 
 INPUT sequence: 0..65535. Axes finite [-1,1], movement length <=1.001, Dash zero or an
-eight-direction unit vector. Four action fields are actual booleans; contradictory press
-and release is rejected. There is **no** player identity, transform, velocity, ability grant,
+eight-direction unit vector. Four action fields are actual booleans; press/release can
+coexist for M2 taps completed within one physics tick. There is **no** player identity, transform, velocity, ability grant,
 death or Finish claim in INPUT.
 
 Actor state: `[x, y, gameplay_state, generation, blocked, motor_values]`. Position within
