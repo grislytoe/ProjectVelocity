@@ -169,8 +169,8 @@ histories/events/buffers; freeing the course releases actors, pools and signals.
 Two PowerShell terminals, both in `C:/Godot Projects/ProjectVelocity`:
 
 ```powershell
-& C:/Godot/Godot.exe --path . res://networking/local_network.tscn -- --role=host --port=24715
-& C:/Godot/Godot.exe --path . res://networking/local_network.tscn -- --role=client --port=24715
+& C:/Godot/Godot.exe --path . -- --local-network --role=host --port=24715
+& C:/Godot/Godot.exe --path . -- --local-network --role=client --port=24715
 ```
 
 Add `--map=industrial` to both for Foundry (default Training). Host `--snapshots=30` selects
@@ -178,6 +178,11 @@ Add `--map=industrial` to both for Foundry (default Training). Host `--snapshots
 Dash. F8 disconnects; F9 retries on guest. Close both windows to release the port.
 No network Quick Restart or local pause. This debug/staging scene bypasses Solo saves;
 production Online stays a placeholder. Non-debug builds reject the developer scene.
+
+Bootstrap handles `--local-network` before opening any player save. This also works in
+Windows Staging: `./builds/windows/ProjectVelocity.exe -- --local-network --role=host`.
+Official export templates disable CLI scene-path overrides, so do not pass a scene path
+to the exported EXE. Editor F6 on `networking/local_network.tscn` remains supported.
 
 ```powershell
 ./dev_tools/test_local_network.ps1 -Godot C:/Godot/Godot.exe

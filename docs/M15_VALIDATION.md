@@ -68,6 +68,12 @@ suite, downloads checksum-verified official templates, exports Windows Staging a
 both ordinary application and the network developer scene. Local export templates were
 not installed; local export is not claimed. Final PR/Actions status is checked at delivery.
 
+Initial CI also passed all six network scenarios, exported Windows and booted the normal
+application. Its additional network boot exposed that official templates prohibit CLI
+scene overrides. Bootstrap now handles `--local-network` before any save initialization;
+the launcher and export smoke use that flag. A separate local two-process regression checks
+this entry point; subsequent CI verifies it in the actual export.
+
 Single developer round, default sample profiles/preferences, same-process reconnect,
 current-world dynamic replay and snapshot-cadence hazard visuals are explicit limits.
 No EOS/M16, production lobby/series/spectator UX, Linux/Steam Deck/physical controller or

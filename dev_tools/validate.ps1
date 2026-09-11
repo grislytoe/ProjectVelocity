@@ -125,7 +125,7 @@ if ($ExportWindows) {
     Invoke-GodotCheck -Name "export" -Arguments @("--headless", "--path", ".", "--export-debug", '"Windows Staging"', "builds/windows/ProjectVelocity.exe")
     $Godot = Join-Path $projectRoot "builds/windows/ProjectVelocity.exe"
     Invoke-GodotCheck -Name "export-boot" -Arguments @("--headless", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
-    Invoke-GodotCheck -Name "m15-export-boot" -Arguments @("--headless", "res://networking/local_network.tscn", "--quit-after", "30", "--", "--role=host", "--port=24920") -Marker "M15_READY role=host protocol=2"
+    Invoke-GodotCheck -Name "m15-export-boot" -Arguments @("--headless", "--quit-after", "30", "--", "--local-network", "--role=host", "--port=24920") -Marker "M15_READY role=host protocol=2"
     $editorLog = Get-Content (Join-Path $logRoot "boot.stdout.log") -Raw
     $exportLog = Get-Content (Join-Path $logRoot "export-boot.stdout.log") -Raw
     if ($editorLog -notmatch 'PV_MAP_BOOT_HASH=([0-9a-f]{64})') { throw "Missing editor map identity" }

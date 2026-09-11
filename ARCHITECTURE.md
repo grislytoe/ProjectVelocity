@@ -15,6 +15,9 @@ intent and rollback/wire values. CommandQueue, PredictionHistory, SnapshotBuffer
 GameplayEvents independently own bounded state. Host owns collision, lifecycle and time;
 presentation observes detached frames. See NETWORKING.md for schema and limitations.
 
+Main bootstrap dispatches the development `--local-network` flag before save initialization.
+This supports official export templates, which disable CLI scene-path overrides.
+
 
 ## M12 settings composition
 

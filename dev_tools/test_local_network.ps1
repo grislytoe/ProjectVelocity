@@ -20,10 +20,10 @@ try {
     foreach ($role in @('host', 'client')) {
         $roleRoot = Join-Path $runRoot $role
         New-Item -ItemType Directory -Force -Path $roleRoot | Out-Null
-        $arguments = @('--path', ('"' + $projectRoot + '"'), 'res://networking/local_network.tscn',
+        $arguments = @('--path', ('"' + $projectRoot + '"'),
             '--max-fps', "$Fps", '--log-file', ('"' + (Join-Path $roleRoot 'godot.log') + '"'))
         if (-not $Rendered) { $arguments += '--headless' }
-        $arguments += @('--', "--role=$role", "--port=$Port", '--auto=true',
+        $arguments += @('--', '--local-network', "--role=$role", "--port=$Port", '--auto=true',
             "--ticks=$(if ($role -eq 'host') { 1200 } else { 1080 })", "--emulation=$Profile",
             "--snapshots=$Snapshots", "--seed=$(if ($role -eq 'host') { 15 } else { 29 })",
             "--map=$Map", "--reconnect=$($Reconnect.ToString().ToLowerInvariant())",

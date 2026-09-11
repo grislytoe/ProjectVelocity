@@ -9,6 +9,8 @@ the same session within 45 seconds. Close windows to leave. This developer scene
 default bindings without touching saved preferences. Solo R Quick Restart/pause remain
 offline-only; networking never creates Time Trial records.
 
+Preferred editor/export startup: `-- --local-network --role=host` (or `client`).
+
 
 ## M12 settings controls (current)
 
