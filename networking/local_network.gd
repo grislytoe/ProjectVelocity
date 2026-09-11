@@ -14,6 +14,8 @@ var _previous_clock: int = 0
 var _clock_monotonic: bool = true
 var _screenshots: int = 0
 var _retry_port: int = 24715
+var _last_physics_usec: int = 0
+var _maximum_physics_gap_usec: int = 0
 
 func option(key: String, fallback: String = "") -> String:
 	for argument: String in OS.get_cmdline_user_args():
@@ -51,6 +53,7 @@ func _ready() -> void:
 		return
 	var config := NetworkConfig.new()
 	config.snapshot_hz = int(option("snapshots", "20"))
+	config.timeout_ticks = int(option("timeout-ticks", "180"))
 	if not config.valid():
 		get_tree().quit(1)
 		return
@@ -104,6 +107,10 @@ func bot_input() -> InputFrame:
 func _physics_process(_delta: float) -> void:
 	if session == null:
 		return
+	var now: int = Time.get_ticks_usec()
+	if _last_physics_usec > 0:
+		_maximum_physics_gap_usec = maxi(_maximum_physics_gap_usec, now - _last_physics_usec)
+	_last_physics_usec = now
 	if automated and not session.host and option("reconnect") == "true":
 		if session.service_tick == 700:
 			session.transport.close()
@@ -189,7 +196,8 @@ func finish_test() -> void:
 		"rejected_commands": session.queue.rejected, "connected": session.transport.connected,
 		"wire_rejected": session.transport.rejected, "wire_error": session.transport.error,
 		"packet_counts": session.packet_counts, "service_tick": session.service_tick,
-		"last_packet": session.last_packet_tick}
+		"last_packet": session.last_packet_tick, "timeout_ticks": session.config.timeout_ticks,
+		"maximum_physics_gap_ms": _maximum_physics_gap_usec / 1000.0}
 	print("M15_RESULT=", JSON.stringify(report))
 	session.shutdown()
 	print("PROJECTVELOCITY_M15_PROCESS_OK" if success else "M15_PROCESS_FAILED")

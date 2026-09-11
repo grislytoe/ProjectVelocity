@@ -24,6 +24,7 @@ try {
             '--max-fps', "$Fps", '--log-file', ('"' + (Join-Path $roleRoot 'godot.log') + '"'))
         if (-not $Rendered) { $arguments += '--headless' }
         $arguments += @('--', '--local-network', "--role=$role", "--port=$Port", '--auto=true',
+            '--timeout-ticks=600',
             "--ticks=$(if ($role -eq 'host') { 1200 } else { 1080 })", "--emulation=$Profile",
             "--snapshots=$Snapshots", "--seed=$(if ($role -eq 'host') { 15 } else { 29 })",
             "--map=$Map", "--reconnect=$($Reconnect.ToString().ToLowerInvariant())",

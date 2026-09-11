@@ -34,6 +34,13 @@ hard timeouts and `finally` cleanup. It checks handshake scope, movement, remote
 GO, monotonically consistent clocks, divergence correction, events and orderly disconnect.
 Two actors in one SceneTree are not counted as separate-instance acceptance.
 
+The automated launcher explicitly uses a 600-tick (10-second) heartbeat timeout to tolerate
+shared CI runner scheduling stalls; ordinary developer sessions retain 180 ticks (3 seconds).
+Reports include the configured timeout and maximum wall-time gap between physics callbacks.
+One push CI run disconnected both endpoints before GO under the shorter timeout while the
+same commit's PR run passed. This is recorded as a scheduling-sensitive failure, not a pass.
+Explicit disconnect/reconnect tests still exercise transport closure immediately.
+
 ## Observed Windows evidence
 
 Godot 4.7.2.stable.official.ed1daf0bf, Windows, OpenGL Compatibility on AMD Radeon Graphics.
