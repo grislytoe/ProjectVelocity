@@ -54,7 +54,12 @@ the injected180px guest divergence; it is not steady-state latency error.
 The initial full validator reached its final M16 wan/reconnect scenario but failed because
 the original1980-tick guest limit ended before the host's second-player Finish fixture
 after reconnect hints. This was a test-duration failure, not recorded as a pass. Extended
-M16 runs to2400/2280 service ticks (still45-second hard timeout); targeted rerun passed.
+M16 runs to2400/2280 service ticks; targeted rerun passed.
+CI runs34610475300 and34610476607 later hit the original45-second process deadline
+in different M16 scenarios. A40-second physics fixture had insufficient runner scheduling
+headroom. M16 now allows90 seconds per process; M15 retains45 seconds. Gameplay assertions
+and owned-process cleanup remain intact. The full local e2c015c2 run passed
+(`builds/validation/m16-final-sha.log`) before this launcher-only timeout adjustment.
 The complete local M0–M16 run passed (`builds/validation/m16-full-final.log`). Subsequent
 retry checks exposed and fixed a real new-round command-sequence bug: host reset its queue
 while guest retained the previous round sequence. Guest now rebases sequence/history when

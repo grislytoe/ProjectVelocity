@@ -45,8 +45,10 @@ try {
         $processes += $process
         # Both run real time; no --fixed-fps, which accelerates headless clocks independently.
     }
+    # Race fixtures need 40 seconds of physics plus startup/scheduling headroom on CI.
+    $processTimeoutMs = if ($Race) { 90000 } else { 45000 }
     foreach ($process in $processes) {
-        if (-not $process.WaitForExit(45000)) { throw "M15 process $($process.Id) timeout; $runRoot" }
+        if (-not $process.WaitForExit($processTimeoutMs)) { throw "M15 process $($process.Id) timeout; $runRoot" }
         $process.WaitForExit()
     }
     $reports = @()
