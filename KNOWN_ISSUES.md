@@ -1,5 +1,14 @@
 # Known issues
 
+- M15 Local Network is a two-player, single-round developer path, without EOS/Steam,
+  lobby/series/results/spectator UX or persistent reconnect authentication. F9 retains
+  an in-memory session bearer; restarting the guest app requires a new session.
+- Guest replay uses corrected current dynamic geometry, not historical platform transforms.
+  Stress can produce visible corrections; WAN comfort is not certified. Cycle/turret/
+  projectile visuals update at snapshot cadence. Developer sample profiles/preferences
+  do not load the user's save. Production Online stays a placeholder. See NETWORKING.md.
+
+
 - M13 currently supports translated sections and upright rectangular floor seams.
   Rotated/scaled/mirrored section transforms and other seam types are explicitly rejected.
   Structural validation does not prove all routes physically traversable; the Training

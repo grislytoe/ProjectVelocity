@@ -1,3 +1,6 @@
 # Transport and synchronized simulation
 
-Reserved for later milestones. No runtime implementation in M0. See ../ARCHITECTURE.md for ownership and ../docs/MASTER_SPECIFICATION.txt for approved requirements.
+M15 owns transport-independent host simulation, validated packet values, prediction/replay,
+interpolation, events and clock. LocalENetTransport alone implements the loopback adapter.
+Start `local_network.tscn` in two processes using the commands in ../NETWORKING.md.
+No online service, persistent identity, Solo save or SDK belongs in this layer.

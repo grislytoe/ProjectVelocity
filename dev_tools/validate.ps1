@@ -28,7 +28,7 @@ function Invoke-GodotCheck {
 Invoke-GodotCheck -Name "version" -Arguments @("--version") -Marker "4.7.2.stable."
 Invoke-GodotCheck -Name "import" -Arguments @("--headless", "--path", ".", "--import")
 & (Join-Path $PSScriptRoot "check_trial_hash.ps1") -Godot $Godot
-Get-ChildItem core,gameplay,visuals,save_system,map_data,ui,tests,dev_tools -Recurse -Filter "*.gd" | ForEach-Object {
+Get-ChildItem core,gameplay,networking,visuals,save_system,map_data,ui,tests,dev_tools -Recurse -Filter "*.gd" | ForEach-Object {
     $relative = $_.FullName.Substring($projectRoot.Length + 1).Replace("\", "/")
     Invoke-GodotCheck -Name ("parse-" + $_.BaseName) -Arguments @("--headless", "--path", ".", "--check-only", "--script", $relative)
 }
@@ -107,6 +107,14 @@ if (@($industrialHashes | Select-Object -Unique).Count -ne 1) { throw "Industria
 foreach ($route in @('shortcut', 'recovery')) {
     Invoke-GodotCheck -Name "m14-$route" -Arguments @("--headless", "--path", ".", "--fixed-fps", "60", "--script", "tests/industrial_route_test.gd", "--", "--$route") -Marker "PROJECTVELOCITY_M14_ROUTE_OK"
 }
+foreach ($fps in @(30, 60, 144)) {
+    Invoke-GodotCheck -Name "m15-core-$fps" -Arguments @("--headless", "--path", ".", "--fixed-fps", "$fps", "--script", "tests/network_core_test.gd") -Marker "PROJECTVELOCITY_M15_CORE_OK"
+    & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Fps $fps -Port (24715 + $fps)
+}
+& (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Profile wan -Snapshots 30 -Reconnect -Port 24915
+& (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Profile stress -Map industrial -Port 24916
+& (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Lifecycle -Port 24917
+
 git diff --cached --check
 if ($LASTEXITCODE -ne 0) { throw "Staged whitespace validation failed" }
 git diff --check
@@ -117,6 +125,7 @@ if ($ExportWindows) {
     Invoke-GodotCheck -Name "export" -Arguments @("--headless", "--path", ".", "--export-debug", '"Windows Staging"', "builds/windows/ProjectVelocity.exe")
     $Godot = Join-Path $projectRoot "builds/windows/ProjectVelocity.exe"
     Invoke-GodotCheck -Name "export-boot" -Arguments @("--headless", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
+    Invoke-GodotCheck -Name "m15-export-boot" -Arguments @("--headless", "res://networking/local_network.tscn", "--quit-after", "30", "--", "--role=host", "--port=24920") -Marker "M15_READY role=host protocol=2"
     $editorLog = Get-Content (Join-Path $logRoot "boot.stdout.log") -Raw
     $exportLog = Get-Content (Join-Path $logRoot "export-boot.stdout.log") -Raw
     if ($editorLog -notmatch 'PV_MAP_BOOT_HASH=([0-9a-f]{64})') { throw "Missing editor map identity" }
@@ -130,4 +139,4 @@ if ($ExportWindows) {
         throw "Export Industrial identity differs from editor"
     }
 }
-Write-Output "M0-M14 validation passed. Camera and gameplay replays are render-rate independent; presentation/camera do not change movement."
+Write-Output "M0-M15 validation passed, including separate-process localhost network sessions."

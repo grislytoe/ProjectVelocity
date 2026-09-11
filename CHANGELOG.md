@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.15.0-dev — M15 Network Core Without EOS (build 21)
+
+- Add transport-independent two-player host authority, validated protocol 2 packets,
+  input sequences/acks, bounded guest prediction with shared collision motor replay,
+  remote interpolation, replicated lifecycle events and host tick clock/start gate.
+- Add loopback ENet developer scene for Training and Industrial Foundry, M8/M9 dynamic
+  correction, target-bound projectile presentation, same-process guest reconnect,
+  seeded latency/jitter/loss/reorder/duplicate emulation and network diagnostics.
+- Add MTU-safe bounded datagram assembly, real two-process launcher and CI coverage at
+  30/60/144 FPS, 20/30 Hz snapshots, reconnect and collision-based lifecycle events.
+- Keep schema5 and offline Solo isolated. Re-bake conservative map/code identities:
+  Training v4, Industrial v3; older PB keys remain stored. No EOS/M16 or automatic merge.
+
+
 ## 0.14.0-dev — compact Map Select (build 20)
 
 - Replace tall map descriptions with compact selectable rows: name and personal best on the left, preview on the right. Five maps plus Back fit on one screen at the default UI scale; keyboard/gamepad focus and whole-row mouse selection are retained.

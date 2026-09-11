@@ -1,5 +1,15 @@
 # Input and device layer — M2
 
+## M15 developer Local Network
+
+Launch `res://networking/local_network.tscn` with `--role=host` or `--role=client` after
+Godot's `--` separator; see NETWORKING.md for complete commands. WASD/left stick movement
+and Dash direction, Space/A Jump, fresh Shift/RB Dash. F8 disconnects. Guest F9 retries
+the same session within 45 seconds. Close windows to leave. This developer scene uses
+default bindings without touching saved preferences. Solo R Quick Restart/pause remain
+offline-only; networking never creates Time Trial records.
+
+
 ## M12 settings controls (current)
 
 Main Menu → Settings provides all four pages. Controls explicitly selects Keyboard/mouse

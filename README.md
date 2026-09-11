@@ -39,7 +39,14 @@ See [UI foundation](UI_FOUNDATION.md) and [M11 validation](docs/M11_VALIDATION.m
 
 M12: Settings enables Video, Audio, Controls and Accessibility with Apply/Cancel/defaults,
 15-second display confirmation and persisted device profiles. See [Settings](SETTINGS.md).
-Build 0.14.0-dev /20; save schema 5; protocol 1.
+Build 0.15.0-dev /21; save schema 5; network protocol 2 (wire revision 1).
+
+## M15 Local Network
+
+Two separate Godot processes can play host/guest on localhost, with authoritative collision,
+guest prediction/reconciliation, opponent interpolation and replicated world/lifecycle state.
+Launch commands, emulator profiles and limitations: [NETWORKING.md](NETWORKING.md).
+Validation evidence: [docs/M15_VALIDATION.md](docs/M15_VALIDATION.md). No EOS/Steam integration.
 
 M13 uses the shared MapDefinition catalog, structural validation and PV-MAP-1 checksum.
 Training Circuit now publishes map version 3 and preserves older PBs separately; save schema remains 5.
