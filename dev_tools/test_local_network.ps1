@@ -5,6 +5,7 @@ param(
     [ValidateSet(30, 60, 144)][int]$Fps = 60,
     [int]$Port = 24715,
     [switch]$Rendered,
+    [switch]$Exported,
     [switch]$Reconnect,
     [int]$DisconnectTick = 700,
     [switch]$Lifecycle,
@@ -24,8 +25,9 @@ try {
     foreach ($role in @('host', 'client')) {
         $roleRoot = Join-Path $runRoot $role
         New-Item -ItemType Directory -Force -Path $roleRoot | Out-Null
-        $arguments = @('--path', ('"' + $projectRoot + '"'),
-            '--max-fps', "$Fps", '--log-file', ('"' + (Join-Path $roleRoot 'godot.log') + '"'))
+        $arguments = @('--max-fps', "$Fps", '--log-file', ('"' + (Join-Path $roleRoot 'godot.log') + '"'))
+        # Official export templates load their adjacent pack and disable --path overrides.
+        if (-not $Exported) { $arguments += @('--path', ('"' + $projectRoot + '"')) }
         if (-not $Rendered) { $arguments += '--headless' }
         $arguments += @('--', '--local-network', "--role=$role", "--port=$Port", '--auto=true',
             '--timeout-ticks=600',

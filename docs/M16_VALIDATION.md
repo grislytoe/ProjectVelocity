@@ -132,4 +132,8 @@ Stress can produce visible corrections;150–200ms comfort is not certified.
 Local export templates are absent. CI downloads checksum-verified official templates,
 exports Windows Staging, verifies both map identities and ordinary/network boots, then
 runs actual exported host/client processes. No local export pass is claimed.
+Run34611781918 passed all editor process scenarios, export and both boot smoke checks,
+then exposed a launcher error: official export templates reject `--path`. The exported
+process scenario now explicitly uses `-Exported`, loading the EXE's adjacent pack without
+a project path override; editor launches retain the explicit workspace path.
 User manual review and explicit merge authorization remain required. Do not merge or start M17.
