@@ -1,4 +1,7 @@
-# Networking — M15
+# Networking — M16
+
+M16 requirements extraction: [docs/M16_REQUIREMENTS.md](docs/M16_REQUIREMENTS.md).
+Validation and review: [docs/M16_VALIDATION.md](docs/M16_VALIDATION.md).
 
 Two-player host-authoritative **listen host + guest**, in two OS processes. Host is player
 1; guest owns player 2. No third server process, SDK, EOS, Steam or third-party dependency.
@@ -46,7 +49,7 @@ At most 32 partial messages live for 60 ticks; 128 recent completed IDs deduplic
 Lost fragments expire without reaching the codec. This avoids ENet oversized-unreliable
 packet warnings and keeps simulation independent of datagram MTU.
 
-Protocol **2**, wire revision **1**. Version 1 was M0's identity with no actual wire contract;
+Protocol **3**, wire revision **2**. Version 1 was M0's identity with no actual wire contract;
 the first real wire format is incompatible with it. Increment protocol for incompatible
 field order/type, units, authority, ack or required semantics. Compatible fixes retain it.
 Save schema remains **5**.
@@ -67,9 +70,9 @@ Unknown/malformed/incompatible packets are dropped and counted.
 |---|---|
 | 0 HELLO | `[map_id, map_version, checksum, profile, reconnect_bearer_or_empty]` |
 | 1 WELCOME | `[reconnect_bearer, snapshot_hz, host_profile, guest_profile]` |
-| 2 READY | `[]` (loaded and hints complete; retried) |
+| 2 READY | `[ready_bool, revision]` (monotonic guest intent; retried) |
 | 3 INPUT | `[sequence, tick, move_x, move_y, dash_x, dash_y, jump_pressed, jump_held, jump_released, dash_pressed, generation]` |
-| 4 SNAPSHOT | `[ack, clock_ticks, start_tick_or_minus1, paused, [host_state, guest_state], dynamics, events, winner_0_1_2, reconnect_ticks, [host_progress, guest_progress]]` |
+| 4 SNAPSHOT | `[ack, clock_ticks, start_tick_or_minus1, paused, [host_state, guest_state], dynamics, events, winner_0_1_2, reconnect_ticks, [host_progress, guest_progress], race_baseline]` |
 | 5 BYE | `[]`; timeout/transport disconnect is the fallback if lost |
 | 6 PING / 7 PONG | `[sender_service_tick]` |
 
@@ -90,7 +93,7 @@ ticks, motor tick, movement event mask, requested horizontal, wall side, previou
 flag, surface contact mask, spent contact mask. Velocity ±10000, Dash vector components ±1,
 timers 0..65535, event mask 0..63, contact masks 0..7. This preserves new-contact-only Dash.
 
-Dynamic row: `[registry_index, type, x, y, a, b, c, d, e, f]`, max 256. The registry is
+Dynamic row: `[registry_index, type, x, y, a, b, c, d, e, f, generation]`, max 256. The registry is
 deterministic tree order from the verified map, not an incoming path. Exact count, indices,
 types and state ranges must match before application. Type 0: moving platform (a=elapsed);
 1: breakable (a=state,b=remaining); 2: cycle hazard (a=phase,b=elapsed); 3: saw (a=elapsed);
@@ -98,8 +101,8 @@ types and state ranges must match before application. Type 0: moving platform (a
 c=vx,d=vy,e=radius,f=lifetime). Unused slots are zero. All numbers finite within ±10,000,000;
 phases additionally match enums, projectile active 0/1, target 1/2, radius 0..128.
 
-Event: `[id, host_tick, player_0_1_2, kind, detail]`. IDs monotonically increase for the
-session, including across death/reconnect, and are bounded to 31 bits. Kinds 0..12 are
+Event: `[id, host_tick, player_0_1_2, kind, detail, round_id, object_generation]`. IDs monotonically increase for the
+session, including across death/reconnect, and are bounded to 31 bits. Legacy kinds 0..12 are
 Jump, Double Jump, Wall Jump, Dash, land, death, respawn, checkpoint, Finish, start,
 hazard effect, disconnect, resume. Checkpoint detail is its reached count.
 
@@ -213,9 +216,89 @@ drops, snapshot age, history depth, correction count/error/hard snaps and buffer
 Logs are developer-only and local; no reconnect bearer, full persistent identity, secret
 or automatic upload. Launcher reports event counts and actionable stdout/stderr on failure.
 
-Limits: single-round developer harness, no series/lobby/results/spectator UX; same-process
+Limits: developer round/retry harness, no series/lobby/production results UX; same-process
 reconnect; current-world rather than historical dynamic collision replay. Stress can cause
 visible corrections; 150–200 ms comfort is not certified. Cycle/turret/projectile visuals
 correct at snapshot cadence. Sample profiles/default settings do not read saved preferences.
 No physical WAN/Linux/Steam Deck/controller validation is implied. EOS, relay/P2P,
 matchmaking/invites and full online UX require a separate authorized milestone.
+
+## M16 wire2 and durable race baseline
+
+Protocol3 is incompatible with protocol2/wire1. Both endpoints must update and create a
+new session; protocol rejection happens in the codec before HELLO or state mutation.
+No persisted wire state is migrated. Save schema5 is independent of protocol revision.
+
+SNAPSHOT appends `race_baseline` as field10 (eleven fields total):
+
+`[round_id, phase, finish_deadline_or_minus1, complete, accepted_ready_revision, guest_ready,
+event_watermark, [host_lifecycle, guest_lifecycle]]`
+
+Lifecycle row: `[ordered_reached_indices, safe_x, safe_y, death_ticks, deaths, finish_ticks_or_minus1]`.
+Checkpoint indices address the verified MapDefinition, not names supplied by a guest.
+Indices must be unique/in-range, and a strict map requires its exact prefix. This fixes
+count-only recovery for maps that disable strict ordering. Actor snapshot carries remaining
+invulnerability and movement state. A full baseline restores progress even if old effects
+expired; it never grants gameplay authority to a client.
+
+Phase enum: 0 loading, 1 countdown, 2 running, 3 finishing, 4 results, 5 reconnect, 6 ended.
+Match clock remains monotonic across retries; each recorded Finish is relative to that
+round's GO. World ticks freeze on reconnect, and clock also stops after results.
+First host-accepted valid Finish wins; same-tick second Finish retains the first winner,
+while both Finish times may be equal. Master only prescribes a draw for tied **series scores**.
+Winner camera follows the remaining player until results. No series implementation is claimed.
+
+READY now has `[bool, revision]`; each local ready change increments its revision.
+Duplicate/reordered revisions cannot undo withdrawal. Guest F6 toggles Ready; withdrawal
+before GO cancels the countdown. Host F7 retries only after results and guest Ready.
+Retry clears progress, death/Finish counts, events/history and pools, restores deterministic
+phases, then reruns hints/countdown. Entering Results withdraws guest Ready; guest F6 and host F7 confirm the next round.
+F8/F9 retain disconnect/reconnect behavior. Ready is a session intent, never a Finish claim.
+
+Every dynamic row appends a generation (eleven values total). Only projectile slots use
+nonzero generations: each activation increments it, retirement retains it, reuse never
+recycles an old generation. Slot index + generation identifies a projectile. Client rejects
+generation rollback and over-cap snapshots, resets interpolation on slot reuse, and never
+sets a visual slot active for gameplay. Host retains 5/target,10/global and engagement caps.
+
+Events append round ID and object generation (seven values total). IDs remain session-wide
+monotonic; `round_id` scopes presentation. New kinds13–24: skipped checkpoint, platform
+break, platform restore, Jump Pad, hazard phase, turret fire, projectile hit, pool return,
+round transition, winner, saw hit, laser hit. `detail` is dynamic registry ID for world
+effects, phase for round transitions, reached count for checkpoints; generation identifies
+the projectile for fire/hit/return. M9's synchronous death retirement may emit pool return
+before the confirming hit notification; consumers must never treat effects as lifecycle.
+Transient events are deduplicated and discarded outside their round; durable state does
+not depend on replaying them. Jump Pad increments actor generation to rebase prediction.
+
+All transports now pass session codec validation, including injected test transports.
+Host drops SNAPSHOT/WELCOME from guest before any state/heartbeat write. Thus checkpoint,
+death, Finish, winner, phase, turret and hit claims cannot enter a mutation path even if
+otherwise valid, duplicated, future, stale or reordered. Unknown/oversize/type-invalid
+messages fail codec/framing; diagnostics distinguish wire, scope and command rejections.
+
+Additional real-process tests from the main folder:
+
+```powershell
+./dev_tools/test_local_network.ps1 -Godot C:/Godot/Godot.exe -Race -Malicious -Map industrial
+./dev_tools/test_local_network.ps1 -Godot C:/Godot/Godot.exe -Race -Malicious -Map industrial -Profile stress
+./dev_tools/test_local_network.ps1 -Godot C:/Godot/Godot.exe -Race -Map industrial -Profile wan -Snapshots 30 -Reconnect
+./dev_tools/test_local_network.ps1 -Godot C:/Godot/Godot.exe -Race -Map industrial -Rendered
+./dev_tools/test_local_network.ps1 -Godot C:/Godot/Godot.exe -Race -Retry -Map industrial
+```
+
+Race fixture runs longer (2400 host /2280 guest service ticks) within the45-second process
+timeout, allowing reconnect hints and both actual Finish collisions. It loads the full
+official map. Host-only relocations exercise real saw/laser/breakable/Jump Pad/turret and
+checkpoint/Finish collisions; these are explicitly not autonomous route completion.
+Malicious guest sends every critical event class in forged snapshots through ENet while
+honest commands continue. Existing M15 log markers stay stable for tooling compatibility.
+
+Retry acceptance requires a second GO **and consumed new-round guest commands**, with
+bounded reconciliation history. Both host command queue and guest sequence reset on the
+new round ID. Old-generation input cannot bridge that reset. Moving-support enter/leave
+and Jump Pad contact rebase actor generations; current-world replay remains the stated limit.
+Within each before/after group, dynamic components retain deterministic map registry order:
+the preallocated projectile pool precedes map assembly, so turret shots first sweep on the
+next world step. Static fatal volumes and lifecycle run after the dynamic group. No render
+callback authorizes a hit, respawn or winner.

@@ -145,3 +145,13 @@ validated and included in PV-MAP-1. SoloCourse injects them into the M5 camera.
 The conservative shared code/format identity update publishes Training version 3;
 version 1/2 PB keys remain untouched on disk. check_trial_hash.ps1 bakes both maps.
 See docs/M14_INDUSTRIAL_TRACK.md for physical traversal evidence and human review.
+## M16 network map integration
+
+Training v5 and Industrial Foundry v4 use the existing PV-MAP-1 checksum. Shared gameplay
+signal/authority guards change the conservative code identity; official IDs and geometry,
+seven Industrial checkpoints and shortcuts stay stable. Both network endpoints instantiate
+and verify the complete selected map before Ready. The tree-order dynamic registry and
+checkpoint indices are local map identities, never incoming resource paths. Protocol3
+baselines restore the exact reached checkpoint set even for non-strict-order maps.
+Network rounds never create Solo PB/splits; historical keys remain stored under their old
+map identity. Save schema5 remains unchanged.

@@ -1,5 +1,6 @@
 class_name DeathZone
 extends Area2D
+signal hit(player: PlayerController)
 ## Rechecks persistent overlaps so expiry inside a hazard cannot grant immunity forever.
 
 @export var lethal: bool = true
@@ -15,4 +16,5 @@ func _physics_process(_delta: float) -> void:
 		return
 	for body: Node2D in get_overlapping_bodies():
 		if body is PlayerController:
-			(body as PlayerController).die()
+			if (body as PlayerController).die():
+				hit.emit(body)

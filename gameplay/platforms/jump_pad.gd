@@ -1,5 +1,6 @@
 class_name JumpPad
 extends StaticBody2D
+signal launched(player: PlayerController)
 ## Solid top-contact pad; controller/motor own the launch, including Dash interruption.
 
 @export var config: JumpPadConfig = preload("res://gameplay/platforms/default_jump_pad.tres")
@@ -21,3 +22,5 @@ func _ready() -> void:
 func on_player_contact(player: PlayerController, normal: Vector2) -> void:
 	if normal.dot(Vector2.UP) >= 0.7:
 		player.launch_from_platform(config.direction.normalized().rotated(global_rotation) * config.force)
+		if player.gameplay_authority and not player.replaying and not player.motor.machine.locked():
+			launched.emit(player)

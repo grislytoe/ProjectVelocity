@@ -215,3 +215,15 @@ Automated M11 checks inject unique OS-cache save paths; never point tests at rea
 ## M14
 
 M14: full validate.ps1 includes Industrial structural/fallback/PB/UI fixtures and input-driven main (30/60/144), express and eight-death recovery runs. Human clean completion, Normal feel, optional express entry, camera/telegraphs and hardware review remain open. Follow the exact checklist in docs/M14_INDUSTRIAL_TRACK.md before authorizing merge.
+## M16 review additions
+
+- Run full `dev_tools/validate.ps1`: M0–M15 retained plus M16 real world/packet/round tests
+  at render30/60/144 and actual separate host/client clean, stress malicious and wan reconnect.
+- Review [docs/M16_VALIDATION.md](docs/M16_VALIDATION.md) commands and declared coverage.
+- Verify early Finish feedback, per-player checkpoints, safe respawn/immunity, ready
+  withdrawal, both Finish/results, winner spectating and guest F6/host F7 round retry.
+- Confirm host rejection metrics while honest play continues; projectile caps/generations,
+  pool retirement and unique event presentation; no Solo records from network mode.
+- Inspect rendered HUD and local/remote presentation; manually review two-window play.
+- CI must pass official-template Windows export, ordinary/network boot and exported
+  separate-process scenario. Merge remains a separate user decision; no M17.

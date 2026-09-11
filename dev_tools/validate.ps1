@@ -114,6 +114,13 @@ foreach ($fps in @(30, 60, 144)) {
 & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Profile wan -Snapshots 30 -Reconnect -Port 24915
 & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Profile stress -Map industrial -Port 24916
 & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Lifecycle -Port 24917
+foreach ($fps in @(30, 60, 144)) {
+    Invoke-GodotCheck -Name "m16-race-$fps" -Arguments @("--headless", "--path", ".", "--fixed-fps", "$fps", "--script", "tests/network_race_test.gd") -Marker "PROJECTVELOCITY_M16_RACE_OK"
+}
+& (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Malicious -Map industrial -Port 24921
+& (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Malicious -Map industrial -Profile stress -Port 24922
+& (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Map industrial -Profile wan -Snapshots 30 -Reconnect -Port 24923
+& (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Retry -Map industrial -Port 24926
 
 git diff --cached --check
 if ($LASTEXITCODE -ne 0) { throw "Staged whitespace validation failed" }
@@ -125,7 +132,8 @@ if ($ExportWindows) {
     Invoke-GodotCheck -Name "export" -Arguments @("--headless", "--path", ".", "--export-debug", '"Windows Staging"', "builds/windows/ProjectVelocity.exe")
     $Godot = Join-Path $projectRoot "builds/windows/ProjectVelocity.exe"
     Invoke-GodotCheck -Name "export-boot" -Arguments @("--headless", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
-    Invoke-GodotCheck -Name "m15-export-boot" -Arguments @("--headless", "--quit-after", "30", "--", "--local-network", "--role=host", "--port=24920") -Marker "M15_READY role=host protocol=2"
+    Invoke-GodotCheck -Name "m15-export-boot" -Arguments @("--headless", "--quit-after", "30", "--", "--local-network", "--role=host", "--port=24920") -Marker "M15_READY role=host protocol=3"
+    & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Malicious -Map industrial -Port 24924
     $editorLog = Get-Content (Join-Path $logRoot "boot.stdout.log") -Raw
     $exportLog = Get-Content (Join-Path $logRoot "export-boot.stdout.log") -Raw
     if ($editorLog -notmatch 'PV_MAP_BOOT_HASH=([0-9a-f]{64})') { throw "Missing editor map identity" }
@@ -139,4 +147,4 @@ if ($ExportWindows) {
         throw "Export Industrial identity differs from editor"
     }
 }
-Write-Output "M0-M15 validation passed, including separate-process localhost network sessions."
+Write-Output "M0-M16 validation passed, including separate-process localhost network sessions."

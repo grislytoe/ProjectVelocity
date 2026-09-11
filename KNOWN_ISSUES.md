@@ -1,7 +1,7 @@
 # Known issues
 
-- M15 Local Network is a two-player, single-round developer path, without EOS/Steam,
-  lobby/series/results/spectator UX or persistent reconnect authentication. F9 retains
+- M16 Local Network is a two-player developer round/retry path, without EOS/Steam,
+  lobby/series/production results UX or persistent reconnect authentication. F9 retains
   an in-memory session bearer; restarting the guest app requires a new session.
 - Guest replay uses corrected current dynamic geometry, not historical platform transforms.
   Stress can produce visible corrections; WAN comfort is not certified. Cycle/turret/
@@ -84,3 +84,11 @@ M12 now provides Video/Audio/Controls/Accessibility settings; see SETTINGS.md.
 Physical controller/driver, Linux and Steam Deck validation remain manual. Automated
 controller events exercise Godot UI navigation only. On-screen keyboard supports the
 allowed alphabets and case; it is local, with no Steam Input dependency.
+
+## M16 delivery limits
+
+Protocol3/wire2 requires both endpoints to update; no old-protocol reconnect. Localhost/emulated
+Windows evidence is detailed in [docs/M16_VALIDATION.md](docs/M16_VALIDATION.md). Current-world
+dynamic replay can visibly correct under stress. No physical WAN/Linux/Steam Deck/controller
+certification, EOS, lobby, production series/results UI or M17. BuildInfo is 0.16.0-dev/22;
+project.godot editor metadata remains 0.15.0-dev under the byte-preservation agreement.

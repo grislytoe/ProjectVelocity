@@ -52,7 +52,7 @@ trigger_size = Vector2(45, 450)
 [resource]
 script = ExtResource("map")
 map_id = "solo_training"
-map_version = 4
+map_version = 5
 name_key = "TT_MAP"
 description_key = "TT_MAP_DESCRIPTION"
 preview = ExtResource("preview")
@@ -64,4 +64,4 @@ sections = Array[ExtResource("placement")]([SubResource("p1"), SubResource("p2")
 start = SubResource("start")
 finish = SubResource("finish")
 checkpoints = Array[ExtResource("point")]([SubResource("a"), SubResource("b")])
-declared_checksum = "83f108ec6e64f9e4d9a57dcb344f98f6c386bb2c0dce142ddc459e9a469e2c99"
+declared_checksum = "026530239ec31b2f2c75c11aabd7bf2bc29fa7b7fb92f3386443ccc2850bd699"

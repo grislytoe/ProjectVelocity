@@ -16,6 +16,8 @@ var _screenshots: int = 0
 var _retry_port: int = 24715
 var _last_physics_usec: int = 0
 var _maximum_physics_gap_usec: int = 0
+var race_fixture := NetworkRaceFixture.new()
+var _race_captures: Dictionary = {}
 
 func option(key: String, fallback: String = "") -> String:
 	for argument: String in OS.get_cmdline_user_args():
@@ -33,6 +35,10 @@ func _ready() -> void:
 	_retry_port = port
 	if role not in ["host", "client"] or port < 1024 or port > 65535:
 		push_error("Local Network requires role=host/client and port 1024..65535")
+		get_tree().quit(1)
+		return
+	if option("map") not in ["", "training", "industrial"]:
+		push_error("Local Network requires map=training or map=industrial")
 		get_tree().quit(1)
 		return
 	automated = option("auto", "false") == "true"
@@ -84,15 +90,27 @@ func _ready() -> void:
 	add_child(session)
 	var canvas := CanvasLayer.new()
 	add_child(canvas)
+	var panel := PanelContainer.new()
+	panel.position = Vector2(20, 20)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.025, 0.04, 0.05, 0.92)
+	style.content_margin_left = 12
+	style.content_margin_right = 12
+	style.content_margin_top = 8
+	style.content_margin_bottom = 8
+	panel.add_theme_stylebox_override("panel", style)
+	canvas.add_child(panel)
 	hud = Label.new()
-	hud.position = Vector2(30, 25)
-	hud.add_theme_font_size_override("font_size", 22)
-	canvas.add_child(hud)
-	DisplayServer.window_set_title("ProjectVelocity M15 Local Network — " + role)
-	print("M15_READY role=", role, " protocol=", config.protocol, " map=", course.definition.map_id)
+	hud.add_theme_font_size_override("font_size", 18)
+	panel.add_child(hud)
+	DisplayServer.window_set_title("ProjectVelocity M16 Local Network — " + role)
+	print("M15_READY role=", role, " protocol=", config.protocol,
+		" wire=", BuildInfo.NETWORK_WIRE_REVISION, " map=", course.definition.map_id)
 
 func bot_input() -> InputFrame:
 	var frame := InputFrame.new()
+	if option("race") == "true" and not session.host and session.clock_ticks >= 70:
+		return frame
 	var tick: int = session.clock_ticks if session.host else session.client_tick
 	var actor: PlayerController = course.actors[0 if session.host else 1]
 	var offset: float = actor.position.x - course.lives[0].start_position.x
@@ -119,6 +137,12 @@ func _physics_process(_delta: float) -> void:
 			retry_connection()
 	if automated and session.host and option("lifecycle") == "true":
 		lifecycle_fixture()
+	if automated and option("race") == "true":
+		race_fixture.step(session)
+	if automated and option("retry") == "true":
+		race_fixture.retry(session)
+	if automated and option("malicious") == "true":
+		race_fixture.attack(session)
 	_clock_monotonic = _clock_monotonic and session.clock_ticks >= _previous_clock
 	_previous_clock = session.clock_ticks
 	_remote_motion += course.remote.position.distance_to(_previous_remote)
@@ -127,7 +151,7 @@ func _physics_process(_delta: float) -> void:
 		course.actors[1].position += Vector2(180, -40)
 		injected = true
 	var emulator: NetworkEmulator = session.transport as NetworkEmulator
-	hud.text = ("M15 DEV • %s • player %d • session %s\n%s\n" % [
+	hud.text = ("M16 DEV • %s • player %d • session %s\n%s\n" % [
 		"HOST" if session.host else "CLIENT", 1 if session.host else 2,
 		session.session_id.left(8), session.status + countdown_text()]) + (
 		"Host tick %d / client %d | match %.3fs | RTT %dms %s\n" % [
@@ -139,10 +163,28 @@ func _physics_process(_delta: float) -> void:
 		"Corrections %d • error %.2fpx • hard %d • interpolation %d\n" % [
 		session.prediction.corrections, session.prediction.last_error, session.prediction.hard_snaps,
 		session.remote_buffer_depth()]) + "WASD / left stick • Space / A: Jump • Shift / RB: Dash\nF8: disconnect • F9: retry same session • close window to leave\nLocal developer session • no Time Trial records"
+	hud.text += "\nM16 round %d • %s • progress %s • deaths %s\nPool %d/10 • peak %d • hits %d • events %d • rejected %d" % [
+		session.round_id, RaceBaseline.Phase.keys()[session.phase()], str(session.progress), str(session.deaths),
+		course.world.active_count(), course.pool_high_water, course.projectile_hits,
+		session.events.sequence if session.host else session.events.received, session.scope_rejections]
+	hud.text += "\nGuest Ready: %s • F6 guest Ready • F7 host retry" % str(session.guest_ready)
+	hud.text += "\nInvulnerability %d ticks • %s" % [
+		course.actors[0 if session.host else 1].motor.invulnerability_ticks, course.phase_summary()]
 	if automated and DisplayServer.get_name() != "headless" and session.clock_ticks > 120 \
 		and _screenshots < 2 and session.service_tick % 120 == 0 and not option("evidence").is_empty():
 		_screenshots += 1
 		capture.call_deferred()
+	if automated and option("race") == "true" and DisplayServer.get_name() != "headless" \
+		and not option("evidence").is_empty():
+		for tick: int in [145, 225, 320, 540, 760, 1150, 1450]:
+			if session.clock_ticks >= tick and not _race_captures.has(tick):
+				_race_captures[tick] = true
+				_screenshots += 1
+				capture.call_deferred()
+		if session.round_complete and not _race_captures.has("results"):
+			_race_captures["results"] = true
+			_screenshots += 1
+			capture.call_deferred()
 	if limit > 0 and session.service_tick >= limit:
 		finish_test()
 
@@ -162,6 +204,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		session.disconnected()
 	elif event.keycode == KEY_F9 and not session.host and not session.joined:
 		retry_connection()
+	elif event.keycode == KEY_F6 and not session.host:
+		session.set_local_ready(not session.guest_ready)
+	elif event.keycode == KEY_F7 and session.host:
+		session.retry_round()
 
 func retry_connection() -> void:
 	var emulator: NetworkEmulator = session.transport as NetworkEmulator
@@ -198,6 +244,15 @@ func finish_test() -> void:
 		"packet_counts": session.packet_counts, "service_tick": session.service_tick,
 		"last_packet": session.last_packet_tick, "timeout_ticks": session.config.timeout_ticks,
 		"maximum_physics_gap_ms": _maximum_physics_gap_usec / 1000.0}
+	report.merge({"round": session.round_id, "phase": session.phase(), "winner": session.winner,
+		"round_complete": session.round_complete,
+		"input_ack": session.last_simulated_sequence,
+		"retry_started": session.round_id == 2 and (session.barrier.gate.released if session.host else session.phase() == RaceBaseline.Phase.RUNNING),
+		"progress": session.progress, "deaths": session.deaths, "claims_sent": race_fixture.claims_sent,
+		"authority_rejections": session.scope_rejections, "pool_peak": course.pool_high_water,
+		"projectile_hits": course.projectile_hits, "pool_active": course.world.active_count(),
+		"pool_nodes": course.world.projectiles.size(), "event_duplicates": session.events.duplicates,
+		"fixture_steps": race_fixture.fixture_steps})
 	print("M15_RESULT=", JSON.stringify(report))
 	session.shutdown()
 	print("PROJECTVELOCITY_M15_PROCESS_OK" if success else "M15_PROCESS_FAILED")

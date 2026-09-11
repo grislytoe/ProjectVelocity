@@ -4,6 +4,10 @@ extends Node2D
 
 var pool: HazardWorld
 var active: bool = false
+signal fired
+signal returned
+signal confirmed_hit(player_id: StringName, generation: int)
+var generation: int = 0
 var target_player_id: StringName = &""
 var source_id: int = 0
 var velocity: Vector2 = Vector2.ZERO
@@ -34,6 +38,7 @@ func _make_cast(mask: int) -> ShapeCast2D:
 
 func activate(id: StringName, origin: Vector2, direction: Vector2,
 		config: TurretConfig, turret_id: int) -> void:
+	generation += 1
 	target_player_id = id
 	source_id = turret_id
 	global_transform = Transform2D(0.0, origin)
@@ -54,9 +59,12 @@ func activate(id: StringName, origin: Vector2, direction: Vector2,
 	set_physics_process(true)
 	reset_physics_interpolation()
 	queue_redraw()
+	fired.emit()
 
 
 func recycle() -> void:
+	if active:
+		returned.emit()
 	active = false
 	visible = false
 	self_modulate = Color.WHITE
@@ -91,7 +99,10 @@ func _physics_process(_delta: float) -> void:
 	while _actors.is_colliding():
 		var other: CollisionObject2D = _actors.get_collider(0) as CollisionObject2D
 		if other == actor:
+			var hit_id: StringName = target_player_id
+			var hit_generation: int = generation
 			if actor.die():
+				confirmed_hit.emit(hit_id, hit_generation)
 				# died can synchronously return every projectile in this target channel.
 				recycle()
 				return

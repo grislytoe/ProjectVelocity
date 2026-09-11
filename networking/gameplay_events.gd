@@ -2,16 +2,19 @@ class_name GameplayEvents
 extends RefCounted
 
 enum Kind { JUMP, DOUBLE_JUMP, WALL_JUMP, DASH, LAND, DEATH, RESPAWN, CHECKPOINT,
-	FINISH, START, HAZARD, DISCONNECT, RESUME }
+	FINISH, START, HAZARD, DISCONNECT, RESUME, SKIPPED_CHECKPOINT, PLATFORM_BREAK,
+	PLATFORM_RESTORE, JUMP_PAD, HAZARD_PHASE, TURRET_FIRE, PROJECTILE_HIT, POOL_RETURN,
+	ROUND_TRANSITION, WINNER, SAW_HIT, LASER_HIT }
 var sequence: int = 0
 var recent: Array = []
 var seen: Dictionary = {}
 var received: int = 0
 var duplicates: int = 0
+var round_id: int = 1
 
-func emit_event(tick: int, player: int, kind: Kind, detail: int = 0) -> void:
+func emit_event(tick: int, player: int, kind: Kind, detail: int = 0, generation: int = 0) -> void:
 	sequence += 1
-	recent.append([sequence, tick, player, kind, detail])
+	recent.append([sequence, tick, player, kind, detail, round_id, generation])
 	while recent.size() > 128:
 		recent.pop_front()
 

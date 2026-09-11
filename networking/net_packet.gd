@@ -67,7 +67,9 @@ static func decode(bytes: PackedByteArray, config: NetworkConfig) -> NetPacket:
 		Kind.WELCOME:
 			valid = payload.size() == 4 and hex(payload[0], 32) \
 				and integer(payload[1], 20, 30) and profile(payload[2]) and profile(payload[3])
-		Kind.READY, Kind.BYE:
+		Kind.READY:
+			valid = payload.size() == 2 and payload[0] is bool and integer(payload[1], 0, 2147483647)
+		Kind.BYE:
 			valid = payload.is_empty()
 		Kind.INPUT:
 			valid = InputCommand.decode(payload) != null
@@ -80,7 +82,7 @@ static func decode(bytes: PackedByteArray, config: NetworkConfig) -> NetPacket:
 	return make(type as Kind, value[2], int(value[3]), payload)
 
 static func valid_snapshot(payload: Array) -> bool:
-	if payload.size() != 10 or not integer(payload[0], 0, 65535) \
+	if payload.size() != 11 or not RaceBaseline.valid(payload[10]) or not integer(payload[0], 0, 65535) \
 		or not integer(payload[1], 0, 2147483647) or not integer(payload[2], -1, 2147483647) \
 		or not payload[3] is bool or not payload[4] is Array or payload[4].size() != 2 \
 		or not payload[5] is Array or payload[5].size() > 256 \
@@ -93,15 +95,16 @@ static func valid_snapshot(payload: Array) -> bool:
 		if ActorState.decode(state) == null:
 			return false
 	for dynamic: Variant in payload[5]:
-		if not dynamic is Array or dynamic.size() != 10 or not integer(dynamic[0], 0, 255) \
-			or not integer(dynamic[1], 0, 5):
+		if not dynamic is Array or dynamic.size() != 11 or not integer(dynamic[0], 0, 255) \
+			or not integer(dynamic[1], 0, 5) or not integer(dynamic[10], 0, 2147483647):
 			return false
 		for i: int in range(2, 10):
 			if not number(dynamic[i], 10000000):
 				return false
 	for event: Variant in payload[6]:
-		if not event is Array or event.size() != 5 or not integer(event[0], 1, 2147483647) \
+		if not event is Array or event.size() != 7 or not integer(event[0], 1, 2147483647) \
 			or not integer(event[1], 0, 2147483647) or not integer(event[2], 0, 2) \
-			or not integer(event[3], 0, 12) or not integer(event[4], 0, 65535):
+			or not integer(event[3], 0, GameplayEvents.Kind.LASER_HIT) or not integer(event[4], 0, 65535) \
+			or not integer(event[5], 1, 2147483647) or not integer(event[6], 0, 2147483647):
 			return false
 	return true
