@@ -554,6 +554,8 @@ func prepare_reconnect() -> void:
 	paused = false
 	sequence = 65535
 	ready_revision += 1
+	# F9 confirms return/load even if Results or a withdrawal had cleared race Ready.
+	guest_ready = true
 	_hint_ticks = 0
 	prediction.clear()
 	interpolation.clear()

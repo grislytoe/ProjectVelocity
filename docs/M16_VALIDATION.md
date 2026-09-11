@@ -65,6 +65,13 @@ on both endpoints, consumed guest sequence111, rejected0 commands and ended with
 history4 and pool active0. The launcher now requires consumed input after second GO, not
 merely a round2 state. Its report preserves the last simulated ack across disconnect cleanup.
 
+F9 now confirms return even if Results had cleared Ready. A separate real-process Results
+reconnect (`m15-clean-20-60-6be18af389be41bdbba8ff75153f75e8`, disconnect tick1900) passed:
+both endpoints retained clock1411, winner2, progress7/7, exactly2 Finish and1 RESUME, pool0.
+This case is included in the full validator alongside running-round reconnect.
+The complete delivery-tree local run also passed (`builds/validation/m16-delivery-head.log`)
+before this focused reconnect fix; the fix has its own race regression and process pass.
+
 Normal renderer captures from the rendered run were inspected for both endpoints, actual
 saw death, respawn immunity, breakable contact, remote alpha/name and winner spectating.
 Geometry crossed under diagnostics in the initial captures; M16 adds an opaque dark HUD
@@ -100,6 +107,7 @@ Reproducible adversarial/collision fixture (not a route-playing bot):
 ./dev_tools/test_local_network.ps1 -Godot C:/Godot/Godot.exe -Race -Malicious -Map industrial -Profile stress
 ./dev_tools/test_local_network.ps1 -Godot C:/Godot/Godot.exe -Race -Map industrial -Profile wan -Snapshots 30 -Reconnect
 ./dev_tools/test_local_network.ps1 -Godot C:/Godot/Godot.exe -Race -Retry -Map industrial
+./dev_tools/test_local_network.ps1 -Godot C:/Godot/Godot.exe -Race -Reconnect -DisconnectTick 1900 -Map industrial
 ./dev_tools/validate.ps1 -Godot C:/Godot/Godot.exe
 ```
 

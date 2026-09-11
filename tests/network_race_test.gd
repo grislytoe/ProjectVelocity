@@ -117,6 +117,9 @@ func run() -> void:
 		guest.accept_snapshot(NetPacket.make(NetPacket.Kind.SNAPSHOT, session.session_id, 100, snapshot(session)))
 		check(guest.round_id == 2 and guest.sequence == 65535 and guest.prediction.commands.is_empty(),
 			"new round baseline rebases guest sequence together with host command queue")
+		guest.guest_ready = false
+		guest.prepare_reconnect()
+		check(guest.guest_ready, "explicit reconnect confirms return after Results withdrew Ready")
 		viewport.free()
 		for row: Array in course.capture_dynamics():
 			if int(row[1]) == 0 or int(row[1]) == 3:

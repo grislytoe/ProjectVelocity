@@ -121,6 +121,7 @@ foreach ($fps in @(30, 60, 144)) {
 & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Malicious -Map industrial -Profile stress -Port 24922
 & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Map industrial -Profile wan -Snapshots 30 -Reconnect -Port 24923
 & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Retry -Map industrial -Port 24926
+& (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Reconnect -DisconnectTick 1900 -Map industrial -Port 24927
 
 git diff --cached --check
 if ($LASTEXITCODE -ne 0) { throw "Staged whitespace validation failed" }

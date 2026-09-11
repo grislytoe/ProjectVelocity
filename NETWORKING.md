@@ -254,6 +254,8 @@ before GO cancels the countdown. Host F7 retries only after results and guest Re
 Retry clears progress, death/Finish counts, events/history and pools, restores deterministic
 phases, then reruns hints/countdown. Entering Results withdraws guest Ready; guest F6 and host F7 confirm the next round.
 F8/F9 retain disconnect/reconnect behavior. Ready is a session intent, never a Finish claim.
+F9 confirms return after loading even when Results or a previous withdrawal cleared Ready;
+a finished guest remains finished on the host after its safe reconnect relocation.
 
 Every dynamic row appends a generation (eleven values total). Only projectile slots use
 nonzero generations: each activation increments it, retirement retains it, reuse never

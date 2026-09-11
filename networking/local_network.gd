@@ -130,10 +130,11 @@ func _physics_process(_delta: float) -> void:
 		_maximum_physics_gap_usec = maxi(_maximum_physics_gap_usec, now - _last_physics_usec)
 	_last_physics_usec = now
 	if automated and not session.host and option("reconnect") == "true":
-		if session.service_tick == 700:
+		var disconnect_tick: int = int(option("disconnect-tick", "700"))
+		if session.service_tick == disconnect_tick:
 			session.transport.close()
 			session.disconnected()
-		elif session.service_tick == 745:
+		elif session.service_tick == disconnect_tick + 45:
 			retry_connection()
 	if automated and session.host and option("lifecycle") == "true":
 		lifecycle_fixture()
