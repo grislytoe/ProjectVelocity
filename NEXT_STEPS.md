@@ -1,8 +1,8 @@
 # Next steps
 
-M14 is implemented on feature/m14-industrial-track in C:/Godot Projects/ProjectVelocity.
-Review its PR into dev, docs/M14_INDUSTRIAL_TRACK.md and docs/MAP_AUTHORING.md. Test F5 →
-New Game → Solo → Map Select → Hint/Countdown/Run/Result and F6 map_framework.tscn.
+M15 is implemented on feature/m15-network-core in C:/Godot Projects/ProjectVelocity.
+Review its PR into dev, NETWORKING.md and docs/M15_VALIDATION.md. Launch the separate
+Local Network Host/Client endpoints, test movement/reconnect, and recheck offline Solo.
 Merge only after explicit user authorization. Do not start the next milestone in this task.
 
 Each milestone uses a separate Codex task, always this main folder. No worktrees or

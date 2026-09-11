@@ -1,5 +1,24 @@
 # Architecture
 
+## M15 network composition
+
+`networking/local_network.tscn` composes InputLayer, default SettingsRuntime/WorldPresentation,
+NetworkCourse, NetworkSession and a loopback transport wrapped by NetworkEmulator. It opens
+no SaveStore/TrialRecords. NetworkCourse reuses SoloCourse's assembly and M7/M9 primitives,
+registers both players and disables independent component ticks; host schedules them in
+fixed order. Guest predicts its owned PlayerController. Explicit authority/replay guards
+default to prior offline behavior. Both maps and all 22 playground stations remain available.
+
+MultiplayerTransport exposes typed packets. ENet appears only in LocalENetTransport;
+PacketFragments bounds MTU-sized wire assembly. InputCommand/ActorState/NetPacket validate
+intent and rollback/wire values. CommandQueue, PredictionHistory, SnapshotBuffer and
+GameplayEvents independently own bounded state. Host owns collision, lifecycle and time;
+presentation observes detached frames. See NETWORKING.md for schema and limitations.
+
+Main bootstrap dispatches the development `--local-network` flag before save initialization.
+This supports official export templates, which disable CLI scene-path overrides.
+
+
 ## M12 settings composition
 
 Bootstrap now owns SettingsRuntime and SettingsSession alongside InputPreferences.

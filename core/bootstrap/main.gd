@@ -14,6 +14,13 @@ var _smoke_directory: String = ""
 
 
 func _ready() -> void:
+	if OS.get_cmdline_user_args().has("--local-network"):
+		# Export templates disable CLI scene overrides; dispatch before touching player saves.
+		if OS.is_debug_build():
+			get_tree().change_scene_to_file.call_deferred("res://networking/local_network.tscn")
+		else:
+			get_tree().quit(1)
+		return
 	if save_store == null:
 		if OS.get_cmdline_user_args().has("--smoke-test"):
 			_smoke_directory = OS.get_cache_dir().path_join(

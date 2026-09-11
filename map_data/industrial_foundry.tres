@@ -155,7 +155,7 @@ trigger_size = Vector2(70, 1000)
 [resource]
 script = ExtResource("map")
 map_id = "industrial_foundry"
-map_version = 2
+map_version = 3
 name_key = "IND_MAP"
 description_key = "IND_DESCRIPTION"
 preview = ExtResource("preview")
@@ -168,4 +168,4 @@ sections = Array[ExtResource("p")]([SubResource("p1"), SubResource("p2"), SubRes
 start = SubResource("start")
 finish = SubResource("finish")
 checkpoints = Array[ExtResource("point")]([SubResource("cp1"), SubResource("cp2"), SubResource("cp3"), SubResource("cp4"), SubResource("cp5"), SubResource("cp6"), SubResource("cp7")])
-declared_checksum = "734392eeb66fbade4f9dd9e3d1e2d8527b7d4c077906b744f81fdc7be969517b"
+declared_checksum = "6a874602a4d46889e1a76a61ffa084457f3bb923889937969161483f087f9d0b"

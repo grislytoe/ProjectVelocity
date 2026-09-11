@@ -15,6 +15,9 @@ var input_provider: Callable
 var motor: PlayerMotor
 var spawn_position: Vector2
 var start_blocked: bool = false
+## Network prediction may move this body but cannot mutate world/lifecycle authority.
+var gameplay_authority: bool = true
+var replaying: bool = false
 var contacts := MovementContacts.new()
 var _neutral := InputFrame.new()
 var _left_probe := KinematicCollision2D.new()
@@ -70,22 +73,25 @@ func advance(frame: InputFrame) -> void:
 		for index: int in get_slide_collision_count():
 			var hit: KinematicCollision2D = get_slide_collision(index)
 			var body: Object = hit.get_collider()
-			if body != null and body.has_method("on_player_contact"):
+			if body != null and body.has_method("on_player_contact") and (
+				gameplay_authority or body is JumpPad):
 				body.on_player_contact(self, hit.get_normal())
 	var selected: Vector2 = frame.dash_direction
 	if motor.events & PlayerMotor.Event.DASH_STARTED:
 		clear_selection()
 		selected = Vector2.ZERO
-		dash_started.emit()
+		if not replaying:
+			dash_started.emit()
 	if motor.events & PlayerMotor.Event.DOUBLE_JUMPED:
-		double_jumped.emit()
+		if not replaying:
+			double_jumped.emit()
 	if motor.machine.locked():
 		selected = Vector2.ZERO
 	publish_visuals(selected)
 
 
 func publish_visuals(selected: Vector2 = Vector2.ZERO) -> void:
-	if is_instance_valid(presentation):
+	if not replaying and is_instance_valid(presentation):
 		presentation.present(PlayerVisualFrame.from_motor(motor), selected)
 
 
@@ -116,11 +122,13 @@ func accept_normal(normal: Vector2) -> void:
 
 
 func clear_selection() -> void:
-	if input_layer != null:
+	if not replaying and input_layer != null:
 		input_layer.clear_dash_selection()
 
 
 func die(ignore_invulnerability: bool = false) -> bool:
+	if not gameplay_authority:
+		return false
 	if ignore_invulnerability:
 		gameplay_manipulated.emit()
 	if motor.machine.current in [PlayerStateMachine.State.DEATH, PlayerStateMachine.State.FINISH]:
@@ -163,4 +171,8 @@ func launch_from_platform(impulse: Vector2) -> void:
 	motor.launch(impulse)
 	velocity = motor.velocity
 	contacts.clear()
+	_relocated = true
+
+
+func invalidate_collision_cache() -> void:
 	_relocated = true

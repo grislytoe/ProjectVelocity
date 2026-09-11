@@ -1,5 +1,19 @@
 # Testing checklist
 
+## M15
+
+- Full `dev_tools/validate.ps1`: M0–M14 plus network core at render30/60/144,
+  separate-process clean sessions at those caps, wan/30Hz reconnect, Industrial stress,
+  and collision lifecycle events. Physics remains60. MTU framing has adversarial tests.
+- Run `dev_tools/test_local_network.ps1 -Godot C:/Godot/Godot.exe -Rendered`. Inspect both
+  endpoint screenshots/HUD and move both windows manually: alpha30%, no remote selector,
+  local camera, fresh Dash, no mutual collision. CI exports/boots Windows Staging.
+- Verify F8 guest → host pause; F9 guest → authenticated Ready/respawn/resume. Host close
+  → guest ended. Two-process tests isolate data/logs, enforce hard timeouts and exact-handle
+  cleanup; in-tree actors do not substitute for them. See docs/M15_VALIDATION.md.
+- Simulated stress is not physical WAN/Linux/Steam Deck certification; see NETWORKING.md.
+
+
 Run dev_tools/validate.ps1 for the complete M0–M5 suite; add -ExportWindows when matching export templates are installed. CI uses that switch on Windows.
 
 ## Automated
