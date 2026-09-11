@@ -71,7 +71,8 @@ try {
     Write-Output "PROJECTVELOCITY_M15_LOCALHOST_OK $runRoot"
 } finally {
     foreach ($process in $processes) {
-        if (-not $process.HasExited) { $process.Kill(); $process.WaitForExit() }
+        # CI's console launcher owns an engine child; timeout cleanup must include that child.
+        if (-not $process.HasExited) { $process.Kill($true); $process.WaitForExit() }
         $process.Dispose()
     }
 }

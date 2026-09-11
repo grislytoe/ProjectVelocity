@@ -13,7 +13,7 @@ function Invoke-GodotCheck {
     $process = Start-Process -FilePath $Godot -ArgumentList $Arguments -PassThru -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr
     $processHandle = $process.Handle
     if (-not $process.WaitForExit(120000)) {
-        $process.Kill()
+        $process.Kill($true)
         throw "$Name timed out"
     }
     $process.WaitForExit()
