@@ -2,7 +2,8 @@ param([string]$Godot = 'godot', [switch]$Extended, [switch]$Rendered)
 $ErrorActionPreference = 'Stop'
 $runCases = @(
     @{ Profile='rtt150'; Race=$true; Malicious=$true; Map='industrial' },
-    @{ Profile='combined'; Race=$true; Map='industrial'; Reconnect=$true; Snapshots=30 }
+    @{ Profile='combined'; Race=$true; Map='industrial'; Reconnect=$true; Snapshots=30 },
+    @{ Profile='combined'; Race=$true; Map='industrial'; Retry=$true; Snapshots=30 }
 )
 if ($Extended) {
     $runCases = @()
@@ -16,7 +17,8 @@ if ($Extended) {
         @{ Profile='rtt150'; Race=$true; Malicious=$true; Map='industrial'; Fps=144; Rendered=[bool]$Rendered; Resolution='1920x1080' },
         @{ Profile='combined'; Race=$true; Map='industrial'; Reconnect=$true; Snapshots=30 },
         @{ Profile='clean'; ProfileChange=$true; Map='industrial' },
-        @{ Profile='rtt250'; HostDrop=$true; DisconnectTick=900; Map='industrial' }
+        @{ Profile='rtt250'; HostDrop=$true; DisconnectTick=900; Map='industrial' },
+        @{ Profile='combined'; Race=$true; Map='industrial'; Retry=$true; Snapshots=30 }
     )
 }
 $index = 0

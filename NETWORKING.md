@@ -446,6 +446,15 @@ warning for high-latency scenario. Existing M16 host collision fixtures demonstr
 death, Finish, turret/projectile, pool and event authority under impairment. Final cleanup must
 have zero queues/history/interpolation/events/active projectiles. Functional success is separate
 from comfort: master has no numerical error budget from which to certify subjective quality.
-PR CI retains every M0–M16 gate and adds M17 unit30/60/144 plus rtt150 malicious and combined30
-running reconnect. The extended12-case matrix is local/manual dispatch (`extended_network`),
+PR CI retains every M0–M16 gate and adds M17 unit30/60/144 plus rtt150 malicious, combined30 retry and combined30
+running reconnect. The extended13-case matrix is local/manual dispatch (`extended_network`),
 avoiding repeating every40s boundary/render fixture on each PR. Existing20min job cap retained.
+
+### Reliable session controls (CI hardening)
+
+HELLO/WELCOME/READY/BYE use ENet reliable delivery; INPUT/SNAPSHOT/PING/PONG remain
+unreliable. This protects session intent from ENet's own unreliable throttle under scheduling
+variance. Application-message loss still applies after ENet reassembly/ack, so controls must
+retain their existing idempotent retries. No payload/framing/protocol change. The final
+mandatory M17 gate includes combined30 running reconnect AND combined30 round retry; the
+optional extended matrix has13 cases. See the recorded CI failure in M17_VALIDATION.md.

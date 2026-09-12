@@ -34,7 +34,12 @@ func send(packet: NetPacket) -> void:
 	if not connected or _peer == null:
 		return
 	_peer.set_target_peer(_remote)
-	_peer.transfer_mode = MultiplayerPeer.TRANSFER_MODE_UNRELIABLE
+	# ENet may throttle unreliable traffic under scheduler-induced RTT variance even
+	# on loopback. Control intent must survive that throttle; application shaping
+	# still drops decoded controls and exercises the existing idempotent retries.
+	_peer.transfer_mode = MultiplayerPeer.TRANSFER_MODE_RELIABLE if packet.kind in [
+		NetPacket.Kind.HELLO, NetPacket.Kind.WELCOME, NetPacket.Kind.READY, NetPacket.Kind.BYE
+	] else MultiplayerPeer.TRANSFER_MODE_UNRELIABLE
 	_peer.transfer_channel = 0
 	var bytes: PackedByteArray = packet.encode(config)
 	if bytes.size() <= config.max_packet_bytes:

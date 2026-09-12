@@ -141,3 +141,28 @@ conditions. F8 drops, guest F9 reconnects; F6 Ready and host F7 retries Results.
 motion/corrections, warning and resume; then close both windows and review offline Solo.
 Detailed commands, custom JSON fields, sampling formulas and cleanup policy: NETWORKING.md.
 User manual review and separate merge authorization remain required. Do not merge or start M18.
+
+### CI control-delivery hardening
+
+Initial implementation3f435d7 passed both push/PR CI including exported real processes.
+Cleanup-only5227fd2 passed PR CI34712668952, but its push CI34712665255 exposed an
+intermittent M16 clean retry failure: guest handed89 READY messages to ENet, host received3,
+with emulator loss0 and wire rejection0. Both endpoints completed round1 but did not start
+round2. This failure is preserved in ignored m17-ci-34712665255 logs/artifacts, not hidden by
+retrying CI or extending timeouts.
+
+All messages previously used ENet unreliable mode. ENet documents probabilistic throttling
+of unreliable packets based on reliable RTT fluctuations; this is a plausible explanation
+for the observed asymmetric delivery, not a directly measured throttle counter:
+[Godot ENetPacketPeer documentation](https://docs.godotengine.org/en/4.6/classes/class_enetpacketpeer.html#class-enetpacketpeer-method-throttle-configure).
+HELLO/WELCOME/READY/BYE now use ENet reliable delivery. Input/snapshot/PING/PONG stay
+unreliable. The emulator still drops decoded reliable controls after ENet delivery, so
+application-level idempotent retries remain exercised. Framing, payloads, authority and
+protocol3/wire2 are unchanged; no heartbeat/time budget was enlarged.
+
+A new mandatory combined30 retry case verifies second GO AND consumed guest input; the
+same case extends the optional matrix to13. Focused pass:
+`m15-combined-30-60-8a62972c17814d30b80c64732c35255a` (m17-reliable-control-retry.log).
+The table above records the initial monotonic-RTT matrix, before this control-delivery
+hardening; impairment configuration and telemetry definitions are unchanged. Full final
+validator and matrix results are checked on the delivery revision and reported with the PR.
