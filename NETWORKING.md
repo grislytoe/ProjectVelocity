@@ -369,6 +369,7 @@ builds reject the composition before save initialization. Interactive launcher o
 windows, reports exact PIDs and leaves them for user play; closing windows releases ports.
 Automated launchers enforce45s/90s shared deadlines (ordinary/race), kill only owned PID
 trees on failure, restore inherited APPDATA/LOCALAPPDATA and use unique ignored run folders.
+After exit they remove only that run's engine cache directories; report/log/image evidence remains.
 The local network adapter binds loopback only; no firewall/internet dependency.
 
 `-HostSeed 15 -ClientSeed 29`, `-Snapshots 20|30`, `-Fps 30|60|144`,

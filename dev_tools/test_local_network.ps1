@@ -143,4 +143,11 @@ try {
         if (-not $process.HasExited) { & taskkill.exe /PID $process.Id /T /F | Out-Null; $process.WaitForExit(5000) | Out-Null }
         $process.Dispose()
     }
+    # Retain evidence; remove only engine caches belonging to this unique run.
+    $ownedRoot = [IO.Path]::GetFullPath($runRoot).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+    foreach ($role in @('host','client')) {
+        $cachePath = [IO.Path]::GetFullPath((Join-Path $runRoot "$role/Godot"))
+        if (-not $cachePath.StartsWith($ownedRoot, [StringComparison]::OrdinalIgnoreCase)) { throw 'Cleanup escaped owned run directory' }
+        if (Test-Path -LiteralPath $cachePath) { Remove-Item -LiteralPath $cachePath -Recurse -Force }
+    }
 }

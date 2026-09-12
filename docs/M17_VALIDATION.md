@@ -58,7 +58,7 @@ Master bands have measured functional evidence: clean near-ideal,80 profile comf
 150 profile playable,200/250 profiles in warning band. This certifies the listed functional
 invariants, not subjective near-ideal/comfortable/playable feel. No numeric comfort threshold
 was invented. First full local M0–M17 pass: `builds/validation/m17-full.log`; final delivery
-revalidation writes `builds/validation/m17-delivery.log`. Full legacy parsers/replays/M0–M16
+revalidation also passed: `builds/validation/m17-delivery.log`. Full legacy parsers/replays/M0–M16
 scenarios remain gating, plus M17 unit30/60/144 and two representative true-process cases.
 
 ## Reproducibility, telemetry and warning
@@ -105,7 +105,9 @@ Successful final monotonic-RTT matrix folders (under ignored `builds/validation`
 Each folder contains host/client stress.json, evaluation.json, local logs and rendered
 screen-*.png where requested. No images/logs/private paths/bearers/persistent UUID are committed.
 Unit logs: m17-unit-recovery.*, full unit render variants m17-stress-*.stdout.log.
-Windows PowerShell5.1 actual two-process pass: m17-powershell51.log.
+Windows PowerShell5.1 actual two-process passes: m17-powershell51.log and
+m17-powershell51-cleanup.log. The cleanup follow-up removed both owned engine cache folders
+while retaining report/log/image evidence.
 
 ## Failures found and limitations
 
