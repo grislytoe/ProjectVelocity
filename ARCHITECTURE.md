@@ -185,3 +185,18 @@ signals into round-scoped gameplay events; guest reconstructs effects and cannot
 state. Ready revisions prevent reordered intent, host retry restores canonical map/pools,
 and moving-support/Jump Pad transitions rebase existing prediction generations. See
 [NETWORKING.md](NETWORKING.md) and [M16 requirements](docs/M16_REQUIREMENTS.md).
+
+## M17 development network stress boundary
+
+NetworkConditionProfile validates/copies condition data; NetworkEmulator is still the sole
+MultiplayerTransport decorator around LocalENetTransport. Application messages receive
+inbound delay/loss/dup/reorder and independent outbound loss, with60Hz service scheduling.
+Fractional tick error diffusion preserves exact mean ms and leaves physics/snapshot rates alone.
+No wire fields or gameplay/map/checksum code changed. BuildInfo0.17.0-dev/23 retains protocol3/wire2.
+
+NetworkTelemetry observes the developer composition without owning a session reference or
+changing gameplay state. PredictionHistory and SnapshotBuffer add bounded diagnostics only.
+The composition handles local profile selection, drop/reconnect and reports in isolated runs.
+The warning is a local UI observer of existing tick-echo RTT. No SaveStore/TrialRecords,
+production setting, upload or service dependency is introduced. Schema and units are documented
+in NETWORKING.md; evaluator compares existing host-authoritative race fixture outcomes.

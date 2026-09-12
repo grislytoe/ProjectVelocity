@@ -1,10 +1,15 @@
-name: M0-M16 validation
+name: M0-M17 validation
 on:
   push:
     branches: [dev, 'feature/**']
   pull_request:
     branches: [main, dev, 'feature/**']
   workflow_dispatch:
+    inputs:
+      extended_network:
+        description: Run the extended M17 network stress matrix
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -41,16 +46,20 @@ jobs:
       - name: Validate and build Windows staging
         shell: pwsh
         run: ./dev_tools/validate.ps1 -Godot "$pwd/.tools/godot/Godot_v4.7.2-stable_win64_console.exe" -ExportWindows
+      - name: Extended network stress matrix
+        if: github.event_name == 'workflow_dispatch' && inputs.extended_network
+        shell: pwsh
+        run: ./dev_tools/test_network_stress.ps1 -Godot "$pwd/.tools/godot/Godot_v4.7.2-stable_win64_console.exe" -Extended
       - name: Upload staging build
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ProjectVelocity-M15-Windows-staging
+          name: ProjectVelocity-M17-Windows-staging
           path: builds/windows/
           if-no-files-found: error
       - name: Upload validation logs
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: M15-validation-logs
+          name: M17-validation-logs
           path: builds/validation/
           if-no-files-found: warn

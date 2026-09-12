@@ -1,4 +1,4 @@
-# Networking — M16
+# Networking — M17
 
 M16 requirements extraction: [docs/M16_REQUIREMENTS.md](docs/M16_REQUIREMENTS.md).
 Validation and review: [docs/M16_VALIDATION.md](docs/M16_VALIDATION.md).
@@ -32,8 +32,8 @@ explicit **M15 defaults**, not quotations from the specification, in `NetworkCon
 | Packet / receive work / emulation queue | 65536 bytes / 128 per poll / 256 pending |
 
 Service ticks count fixed physics callbacks even on pause. Host simulation ticks freeze
-during reconnect. No OS wall clock controls movement, GO or results. RTT echoes service
-ticks; 12 ticks (200 ms) displays the connection warning.
+during reconnect. No OS wall clock controls movement, GO or results. RTT retains the legacy service-tick echo; M17 measures elapsed monotonic time around
+the same echo for the developer warning (see M17 policy below).
 
 ## Transport, wire and identity
 
@@ -218,7 +218,8 @@ or automatic upload. Launcher reports event counts and actionable stdout/stderr 
 
 Limits: developer round/retry harness, no series/lobby/production results UX; same-process
 reconnect; current-world rather than historical dynamic collision replay. Stress can cause
-visible corrections; 150–200 ms comfort is not certified. Cycle/turret/projectile visuals
+visible corrections. M17 supplies measured functional coverage at150/200ms simulated RTT;
+subjective comfort has no numerical master criterion (see M17 validation). Cycle/turret/projectile visuals
 correct at snapshot cadence. Sample profiles/default settings do not read saved preferences.
 No physical WAN/Linux/Steam Deck/controller validation is implied. EOS, relay/P2P,
 matchmaking/invites and full online UX require a separate authorized milestone.
@@ -304,3 +305,146 @@ Within each before/after group, dynamic components retain deterministic map regi
 the preallocated projectile pool precedes map assembly, so turret shots first sweep on the
 next world step. Static fatal volumes and lifecycle run after the dynamic group. No render
 callback authorizes a hit, respawn or winner.
+
+## M17 condition emulator and measurement contract
+
+See [M17 requirements](docs/M17_REQUIREMENTS.md) and [validation](docs/M17_VALIDATION.md).
+Runtime build0.17.0-dev/23; protocol3/wire2 and save5 unchanged. This remains debug-only.
+The master does not define whether its latency bands are RTT or one-way. M17 explicitly
+uses measured RTT for quality labels and, following the current request, warns strictly
+above200ms. These are documented conventions rather than missing master quotations.
+
+| Profile | Simulated one-way / RTT ms | Jitter range, uniform ms | Loss in/out | Dup / reorder |
+|---|---:|---:|---:|---:|
+| clean | 0 /0 | 0 | 0 /0 | 0 /0 |
+| rtt80 | 40 /80 | 0 | 0 /0 | 0 /0 |
+| rtt150 | 75 /150 | 0 | 0 /0 | 0 /0 |
+| rtt200 | 100 /200 | 0 | 0 /0 | 0 /0 |
+| rtt250 | 125 /250 | 0 | 0 /0 | 0 /0 |
+| combined | 75 /150 | ±25 | 5% /2% | 3% /15% |
+| wan | 66.667 /133.333 | ±33.333 | 5% /0 | 3% /15% |
+| stress | 100 /200 | ±50 | 10% /0 | 10% /20% |
+
+Loss percentages are independent probabilities, not target counts per run. Combined rates
+are M17 test settings: master gives no numerical jitter/loss/burst target. Both endpoints
+shape their incoming messages once; outgoing messages have independent loss only. With
+combined at both endpoints, survival per direction is(1-.02)*(1-.05)=.931. Delay is never
+added on both send and receive. ENet still has its own network/reassembly/scheduling costs.
+Counters count complete decoded application messages, NOT UDP datagrams or reliable ENet
+retransmits. Out/delivered means handed to the inner adapter, not acknowledged by the peer.
+In/sent means received by the shaper, not global peer traffic. Wire rejected is separate.
+
+The fixed60Hz service clock drives all delays, independent of rendering. Convert sampled
+nonnegative delay d ms via floor(d*60/1000+residual); carry its fractional remainder to the
+next admitted message. Thus 40ms alternates2/3ticks and75ms4/5ticks, with <1tick cumulative
+rounding error, instead of rounding away a complete band. Jitter is continuous uniform,
+or the mean of two uniform draws for triangular. Reorder adds66.667ms by default;
+duplication adds a second delivery1tick later. Sort by due tick, then admission ordinal.
+Bound256 pending entries; each decoded packet<=65536bytes; duplicate rows share the packet.
+Expiry240ticks, maximum configured delay180ticks; a stalled poll expires old data before
+returning it. No bandwidth cap was added. Invalid profiles leave current profile/queue
+unchanged. Apply copies values, reseeds two independent direction RNGs and resets fractional
+residual; already queued messages retain due times and are never starved by profile changes.
+Close drops/counts pending messages and refuses new queue entries until explicit reopen.
+
+Same seed PLUS same packet types/order/arrival tick schedule produces equal decisions and
+counters. A bounded inbound schedule digest excludes timestamps/session/paths. Different
+OS arrivals, ENet fragmentation or render scheduling can change application packet order;
+whole-process counters are NOT expected to be bit-identical. Legacy wan/stress preserve
+nominal settings; M17 continuous jitter has a new impairment schedule, not old RNG hashes.
+
+Interactive commands (Windows PowerShell5.1 supported; run in main folder):
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\dev_tools\start_local_network.ps1 -Godot C:/Godot/Godot.exe -Profile rtt150
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\dev_tools\test_local_network.ps1 -Godot C:/Godot/Godot.exe -Profile rtt200 -Race -Malicious -Map industrial -Rendered
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\dev_tools\test_network_stress.ps1 -Godot C:/Godot/Godot.exe -Extended -Rendered
+./dev_tools/validate.ps1 -Godot C:/Godot/Godot.exe
+```
+
+F2 selects NEXT locally; F3 applies; F4 selects/applies clean; F5 resets metric windows.
+Apply each window separately for symmetric conditions. F6 Ready, F7 host round retry,
+F8 local transport drop, F9 same-process guest reconnect retain M16 semantics. Production
+builds reject the composition before save initialization. Interactive launcher opens both
+windows, reports exact PIDs and leaves them for user play; closing windows releases ports.
+Automated launchers enforce45s/90s shared deadlines (ordinary/race), kill only owned PID
+trees on failure, restore inherited APPDATA/LOCALAPPDATA and use unique ignored run folders.
+The local network adapter binds loopback only; no firewall/internet dependency.
+
+`-HostSeed 15 -ClientSeed 29`, `-Snapshots 20|30`, `-Fps 30|60|144`,
+`-Resolution 1280x800|1920x1080`, `-Reconnect -DisconnectTick 700 -DropDuration 45`,
+`-DisconnectTick 1900` for Results reconnect, `-HostDrop -DisconnectTick 900`, and
+`-ProfileChange` (rtt250 at service800, clean at1000) control automated scenarios.
+Game flags: `--emulation=rtt150 --seed=15 --drop-at=700 --drop-duration=45`.
+Disconnect ticks are endpoint-local service ticks, never synchronized match ticks.
+The profile duration specifies time before guest reconnect attempt; actual recovery includes
+ENet/handshake/hints and is measured separately. Host drop ends the guest; no host migration.
+
+Optional `-ConditionFile <local.json>` / game `--condition-file=<local.json>` loads strict
+JSON<=4096bytes. Supported fields: id(one of built-ins), one_way_ms[0,1000], jitter_ms[0,1000],
+jitter_distribution(uniform/triangular), inbound_loss/outbound_loss/duplication/
+reorder_probability[0,1], reorder_ms[0,1000], seed_value[0,2147483647],
+disconnect_tick[-1,2147480947], reconnect_after_ticks[1,2700]. Omitted fields use clean
+defaults; id is a label, not an instruction to inherit preset values. No paths are reported.
+Example: `{"id":"combined","one_way_ms":75,"jitter_ms":25,"inbound_loss":0.05,"outbound_loss":0.02,"seed_value":29}`.
+
+### Telemetry definitions and scope
+
+Reports: ignored `builds/validation/m15-<profile>-<rate>-<fps>-<unique>/{host,client}/stress.json`
+and comparison `evaluation.json`. Legacy folder/marker prefixes retained for M15/M16 tooling.
+Schema1 identifies build/protocol/wire, map/checksum, scenario values, seed, role, physics and
+snapshot rates, viewport, profile-change count, session duration and cleanup. Only an ephemeral
+session prefix appears in legacy functional diagnostics; no bearer, persistent UUID, credentials,
+private user paths or automatic upload. Reports/logs are local dev-only artifacts.
+
+- Measured RTT uses monotonic microseconds from local PING send to its first accepted PONG;
+  at most32 pending timestamps, no timestamp wire change. Legacy service_clock_rtt_ms is
+  (service tick−echoed tick)*1000/60 and can skew under scheduling stalls. Neither metric
+  controls gameplay. Estimated one-way=measured RTT/2. UI labels measured versus simulated. Report labels bands by median
+  measured RTT, not scenario name. Boundaries80/150/200 belong to lower band.
+- Warning enters after30 ticks of fresh RTT>200, clears after60ticks RTT<=180; deadband180–200
+  prevents flicker. Fresh means last PONG<=120ticks while joined. RU/EN presentation is local
+  and cannot change movement, timer, authority, records or results.
+- Ordinary error=max(distance between predicted ack-state and authoritative ack-state,
+  displacement between pre-correction and replayed current body), in world pixels. Correction
+  epsilon0.5px, hard correction96px remain M15 defaults. Moving-error subset samples when
+  pre-reconcile motor speed>1px/s. Report both all ordinary and moving evidence.
+- Epoch/blocked-state rebases, history overflow rebases and explicit injected divergence are
+  separately classified, excluded from ordinary percentiles. Lifecycle takes precedence if an
+  injection overlaps a lifecycle update. Legacy maximum_error/hard_snaps remain inclusive.
+- Rewinds count reconciliations; replayed_commands sums unacknowledged commands replayed by
+  the common motor; ack_lag_commands is pending count after ack pruning/rebase. History peak
+  is retained capped depth, overflow_rebases identifies overflow instead of hiding it.
+- Correction rate=ordinary count/(session service ticks/60), including loading/results time;
+  do not interpret it as active-motion-only rate. Current/peak/p50/p95/p99 error are distinct.
+- Snapshot age is local service ticks since last accepted snapshot; gaps are successive
+  authoritative snapshot tick differences. Interpolation records underflow before oldest/empty,
+  interpolation, bounded extrapolation or hold after its cap; high-water remains<=32.
+- Queue per-direction/type counters cover sent/delivered/dropped/duplicated/reordered/expired/
+  teardown_dropped where applicable. Reordered means extra reorder delay selected, not proof
+  the delayed message crossed another. Depth/high-water bounded256; ENet fragment cap unchanged.
+- Event duplicate suppression and authority rejections are retained from M16 functional data.
+  Final paired clock skew is in evaluator; Results must converge to the same winner/progress.
+  Disconnect duration counts observed paused/ended service ticks, including final orderly
+  shutdown waiting. reconnect_service_ms and reconnect_wall_ms separately measure observed
+  joined→disconnected→joined intervals in service ticks and monotonic time, excluding initial
+  connection and incomplete final disconnect; they include reopen/handshake, not later hints.
+- Percentiles use nearest-rank ceil(p*N) over last300 samples per metric; peak since window
+  reset. Each metric's sampling frequency is explicit above. Physics depth samples60Hz.
+  Round change clears windows, F5 clears observer and prediction windows. Session counters
+  (corrections/impairments/warnings/interpolation/reconnect) persist through rounds and profile
+  changes; a new process/session composition starts at zero. Profile switches do not silently
+  relabel/reset cumulative counters: profile_changes flags mixed sessions.
+- Bounded 1Hz trace120rows records clock/RTT/error/positions. Separate rolling300row60Hz
+  motion trace and remote displacement percentiles exclude generation transitions. These are
+  numerical motion evidence; screenshots alone do not certify smoothness.
+
+Evaluator fails crash/missing marker/report, identity mismatch, cap or cleanup violation,
+clock inconsistency, race winner/progress/event mismatch, missing forgery rejection and missing
+warning for high-latency scenario. Existing M16 host collision fixtures demonstrate checkpoint,
+death, Finish, turret/projectile, pool and event authority under impairment. Final cleanup must
+have zero queues/history/interpolation/events/active projectiles. Functional success is separate
+from comfort: master has no numerical error budget from which to certify subjective quality.
+PR CI retains every M0–M16 gate and adds M17 unit30/60/144 plus rtt150 malicious and combined30
+running reconnect. The extended12-case matrix is local/manual dispatch (`extended_network`),
+avoiding repeating every40s boundary/render fixture on each PR. Existing20min job cap retained.

@@ -7,3 +7,6 @@ No online service, persistent identity, Solo save or SDK belongs in this layer.
 
 RaceBaseline carries durable round/lifecycle progress; pooled slots carry generations.
 NetworkRaceFixture is a debug-only local acceptance driver, never a production input source.
+
+M17 profiles, measured telemetry, runtime controls and exact commands: see ../NETWORKING.md
+and ../docs/M17_VALIDATION.md. Protocol3/wire2 and host gameplay authority are unchanged.

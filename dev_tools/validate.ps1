@@ -1,4 +1,4 @@
-param([string]$Godot = "godot", [switch]$ExportWindows)
+﻿param([string]$Godot = "godot", [switch]$ExportWindows)
 $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path $PSScriptRoot -Parent
 Set-Location -LiteralPath $projectRoot
@@ -122,6 +122,11 @@ foreach ($fps in @(30, 60, 144)) {
 & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Map industrial -Profile wan -Snapshots 30 -Reconnect -Port 24923
 & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Retry -Map industrial -Port 24926
 & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Reconnect -DisconnectTick 1900 -Map industrial -Port 24927
+foreach ($fps in @(30, 60, 144)) {
+    Invoke-GodotCheck -Name "m17-stress-$fps" -Arguments @("--headless", "--path", ".", "--fixed-fps", "$fps", "--script", "tests/network_stress_test.gd") -Marker "PROJECTVELOCITY_M17_STRESS_OK"
+}
+& (Join-Path $PSScriptRoot "test_network_stress.ps1") -Godot $Godot
+
 
 git diff --cached --check
 if ($LASTEXITCODE -ne 0) { throw "Staged whitespace validation failed" }
@@ -148,4 +153,4 @@ if ($ExportWindows) {
         throw "Export Industrial identity differs from editor"
     }
 }
-Write-Output "M0-M16 validation passed, including separate-process localhost network sessions."
+Write-Output "M0-M17 validation passed, including separate-process localhost network sessions."

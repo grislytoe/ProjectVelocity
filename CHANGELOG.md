@@ -198,3 +198,15 @@
 - Schema v3 validates UUID/map/version/hash-bound PBs and segment minima, migrates legacy
   data without promoting unverified records, and retains the previous PB on write failure.
 - RU/EN results, keyboard/gamepad hints, basic control rebinding and isolated integration QA.
+
+## M17 — Network Stress Tools
+
+- Runtime0.17.0-dev/23, protocol3/wire2/save5; user-owned project.godot and map identities retained.
+- Extended existing ENet message emulator with exact-mean ms profiles80/150/200/250 RTT,
+  seeded jitter, independent directional loss, bounded reorder/dup queues and scheduled drop/reconnect.
+- Local F2–F5 profile/metric controls, explicit measured versus simulated units, RU/EN connection
+  warning above200ms with hysteresis; no authority, gameplay tuning or saved-settings mutation.
+- Bounded reconciliation/interpolation/transport/motion diagnostics and schema1 JSON/evaluator,
+  lifecycle/divergence exclusions, cleanup and true-process authority/convergence gates.
+- Windows PowerShell5.1 automated launcher, extended matrix and retained M0–M16 CI gates.
+- See docs/M17_VALIDATION.md for measured evidence and limits; no subjective comfort certification.

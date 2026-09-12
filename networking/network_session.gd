@@ -27,6 +27,10 @@ var last_snapshot_tick: int = -1
 var last_snapshot_service: int = 0
 var reconnect_remaining: int = 0
 var rtt_ticks: int = 0
+var last_pong_service: int = -1000
+var measured_rtt_ms: float = 0
+var _ping_times: Dictionary = {}
+var telemetry := NetworkTelemetry.new()
 var winner: int = 0
 var finish_deadline: int = -1
 var round_complete: bool = false
@@ -140,6 +144,9 @@ func notify(message: String) -> void:
 	status_changed.emit(message)
 
 func send(kind: NetPacket.Kind, data: Array = []) -> void:
+	if OS.is_debug_build() and kind == NetPacket.Kind.PING:
+		_ping_times[int(data[0])] = Time.get_ticks_usec()
+		while _ping_times.size() > 32: _ping_times.erase(_ping_times.keys()[0])
 	transport.send(NetPacket.make(kind, session_id, host_tick, data))
 
 func _physics_process(_delta: float) -> void:
@@ -265,6 +272,11 @@ func receive(packet: NetPacket) -> void:
 			if int(packet.data[0]) <= service_tick:
 				last_packet_tick = service_tick
 				rtt_ticks = service_tick - int(packet.data[0])
+				var echo: int = int(packet.data[0])
+				if _ping_times.has(echo):
+					measured_rtt_ms = (Time.get_ticks_usec() - int(_ping_times[echo])) / 1000.0
+					_ping_times.erase(echo)
+					last_pong_service = service_tick
 		NetPacket.Kind.BYE:
 			disconnected()
 
@@ -374,6 +386,8 @@ func accept_snapshot(packet: NetPacket) -> void:
 		or not RaceBaseline.matches_map(packet.data[10], course.definition):
 		scope_rejections += 1
 		return
+	if last_snapshot_tick >= 0:
+		telemetry.add("snapshot_gap_ticks", packet.tick - last_snapshot_tick)
 	last_packet_tick = service_tick
 	last_snapshot_tick = packet.tick
 	last_snapshot_service = service_tick
@@ -388,6 +402,7 @@ func accept_snapshot(packet: NetPacket) -> void:
 	var old_round: int = round_id
 	RaceBaseline.apply(packet.data[10], self)
 	if round_id != old_round:
+		prediction.metrics.reset_window(round_id)
 		sequence = 65535
 		prediction.clear()
 		interpolation.clear()
@@ -527,6 +542,7 @@ func apply_profiles() -> void:
 		course.actors[i].presentation.apply_profile(value)
 
 func shutdown() -> void:
+	_ping_times.clear()
 	if is_instance_valid(course) and is_instance_valid(course.world):
 		for projectile: HazardProjectile in course.world.projectiles:
 			projectile.recycle()
@@ -546,6 +562,8 @@ func shutdown() -> void:
 	barrier.actors.clear()
 
 func prepare_reconnect() -> void:
+	_ping_times.clear()
+	last_pong_service = -1000
 	# Explicit same-process retry retains only the ephemeral bearer token, never a nickname identity.
 	if host:
 		return
