@@ -1,4 +1,4 @@
-name: M0-M15 validation
+name: M0-M16 validation
 on:
   push:
     branches: [dev, 'feature/**']

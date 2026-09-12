@@ -48,6 +48,72 @@ var progress: Array[int] = [0, 0]
 var packet_counts: Dictionary = {}
 var scope_rejections: int = 0
 var _paused_blocks: Array[bool] = [true, true]
+var round_id: int = 1
+var remote_phase: int = RaceBaseline.Phase.LOADING
+var deaths: Array[int] = [0, 0]
+var finish_times: Array[int] = [-1, -1]
+var ready_revision: int = 0
+var guest_ready: bool = true
+var _accepted_ready_revision: int = -1
+var _previous_phase: int = -1
+var _intent_window: int = 0
+var _intent_count: int = 0
+var _round_started_clock: int = 0
+var _support_ids: Array[int] = [-1, -1]
+var last_simulated_sequence: int = 65535
+
+func update_support(index: int) -> void:
+	var actor: PlayerController = course.actors[index]
+	var support: int = -1
+	for i: int in actor.get_slide_collision_count():
+		var collision: KinematicCollision2D = actor.get_slide_collision(i)
+		if collision.get_collider() is MovingPlatform and collision.get_normal().dot(Vector2.UP) > 0.7:
+			support = course.dynamics.find(collision.get_collider())
+	if support != _support_ids[index]:
+		_support_ids[index] = support
+		epochs[index] += 1
+		if index == 1:
+			queue.pending.clear()
+
+func phase() -> int:
+	if ended: return RaceBaseline.Phase.ENDED
+	if not host: return remote_phase
+	if paused: return RaceBaseline.Phase.RECONNECT
+	if round_complete: return RaceBaseline.Phase.RESULTS
+	if winner != 0: return RaceBaseline.Phase.FINISHING
+	if barrier.gate.released: return RaceBaseline.Phase.RUNNING
+	if barrier.gate.start_tick >= 0: return RaceBaseline.Phase.COUNTDOWN
+	return RaceBaseline.Phase.LOADING
+
+func set_local_ready(value: bool) -> void:
+	guest_ready = value
+	ready_revision += 1
+	if not host and joined:
+		send(NetPacket.Kind.READY, [value, ready_revision])
+
+func retry_round() -> bool:
+	if not host or not joined or paused or not round_complete or not guest_ready:
+		return false
+	queue.clear()
+	prediction.clear()
+	interpolation.clear()
+	_host_remote_buffer.clear()
+	_visual_events.clear()
+	events.recent.clear()
+	round_id += 1
+	course.reset_world()
+	barrier.arm(course.actors, [&"1", &"2"])
+	barrier.gate.set_ready(&"2", true)
+	winner = 0
+	finish_deadline = -1
+	round_complete = false
+	deaths = [0, 0]
+	finish_times = [-1, -1]
+	progress = [0, 0]
+	_support_ids = [-1, -1]
+	last_simulated_sequence = 65535
+	_hint_ticks = 0
+	return true
 
 func _ready() -> void:
 	process_physics_priority = 0
@@ -65,6 +131,8 @@ func _ready() -> void:
 			course.actors[i].relocated.connect(_respawn.bind(i))
 			course.lives[i].checkpoint_activated.connect(_checkpoint.bind(i))
 			course.lives[i].completed.connect(_finish.bind(i))
+			course.lives[i].notification.connect(_lifecycle_notice.bind(i))
+		course.world_event.connect(_world_event)
 	apply_profiles()
 
 func notify(message: String) -> void:
@@ -93,13 +161,31 @@ func _physics_process(_delta: float) -> void:
 		advance_host()
 	else:
 		advance_client()
+	course.update_spectator(winner, round_complete)
 
 func receive(packet: NetPacket) -> void:
 	packet_counts[packet.kind] = int(packet_counts.get(packet.kind, 0)) + 1
+	# Enforce codec even for injected/custom transports. Direction precedes heartbeat/state mutation.
+	if NetPacket.decode(packet.encode(config), config) == null:
+		scope_rejections += 1
+		return
+	if (host and packet.kind in [NetPacket.Kind.WELCOME, NetPacket.Kind.SNAPSHOT]) \
+		or (not host and packet.kind in [NetPacket.Kind.HELLO, NetPacket.Kind.READY, NetPacket.Kind.INPUT]):
+		scope_rejections += 1
+		return
+	if packet.kind not in [NetPacket.Kind.INPUT, NetPacket.Kind.SNAPSHOT]:
+		if service_tick - _intent_window >= 60:
+			_intent_window = service_tick
+			_intent_count = 0
+		_intent_count += 1
+		if _intent_count > 90:
+			scope_rejections += 1
+			return
 	if host and packet.kind == NetPacket.Kind.HELLO:
 		var data: Array = packet.data
 		if data[0] != course.definition.map_id or int(data[1]) != course.definition.map_version \
 			or data[2] != course.definition.declared_checksum:
+			scope_rejections += 1
 			notify("Incompatible map ID/version/checksum")
 			return
 		if (paused or joined) and data[4] != reconnect_token:
@@ -135,9 +221,16 @@ func receive(packet: NetPacket) -> void:
 	match packet.kind:
 		NetPacket.Kind.READY:
 			if host:
+				if int(packet.data[1]) < _accepted_ready_revision:
+					scope_rejections += 1
+					return
+				if int(packet.data[1]) == _accepted_ready_revision:
+					return
+				_accepted_ready_revision = int(packet.data[1])
+				guest_ready = packet.data[0]
 				last_packet_tick = service_tick
-				barrier.gate.set_ready(&"2", true)
-				if paused:
+				barrier.gate.set_ready(&"2", guest_ready)
+				if paused and guest_ready:
 					queue.clear()
 					var target: Vector2 = course.lives[1].respawn_position
 					if not RespawnSafety.valid(course.actors[1], target):
@@ -145,6 +238,8 @@ func receive(packet: NetPacket) -> void:
 					if not RespawnSafety.valid(course.actors[1], target):
 						return
 					course.actors[1].respawn_at(target, true)
+					if finish_times[1] >= 0:
+						course.actors[1].finish_run()
 					for i: int in 2:
 						course.actors[i].start_blocked = _paused_blocks[i]
 					paused = false
@@ -158,6 +253,8 @@ func receive(packet: NetPacket) -> void:
 				if command.generation == epochs[1]:
 					if queue.accept(command, host_tick, service_tick):
 						client_tick = command.tick
+				else:
+					scope_rejections += 1
 		NetPacket.Kind.SNAPSHOT:
 			if not host:
 				accept_snapshot(packet)
@@ -181,7 +278,10 @@ func advance_host() -> void:
 		reconnect_remaining -= 1
 		if reconnect_remaining <= 0:
 			winner = 1
+			round_complete = true
 			ended = true
+			emit_event(1, GameplayEvents.Kind.WINNER)
+			emit_event(0, GameplayEvents.Kind.ROUND_TRANSITION, RaceBaseline.Phase.ENDED)
 			notify("Reconnect window expired; host wins round")
 		return
 	host_tick += 1
@@ -191,14 +291,17 @@ func advance_host() -> void:
 			barrier.gate.set_ready(&"1", true)
 			barrier.gate.schedule(host_tick + config.countdown_ticks, host_tick)
 	if barrier.advance(host_tick):
+		_round_started_clock = clock_ticks
 		emit_event(0, GameplayEvents.Kind.START)
 		notify("GO")
 	if barrier.gate.released and not round_complete:
 		clock_ticks += 1
 		course.advance_world(true)
 		var frames: Array[InputFrame] = [sample_input(), queue.consume()]
+		last_simulated_sequence = queue.ack
 		for i: int in 2:
 			course.actors[i].advance(frames[i])
+			update_support(i)
 			movement_events(i)
 		course.advance_world(false)
 		if finish_deadline >= 0 and clock_ticks >= finish_deadline:
@@ -208,6 +311,11 @@ func advance_host() -> void:
 			notify("Round complete")
 	else:
 		queue.consume()
+	if phase() != _previous_phase:
+		_previous_phase = phase()
+		if _previous_phase == RaceBaseline.Phase.RESULTS:
+			guest_ready = false
+		emit_event(0, GameplayEvents.Kind.ROUND_TRANSITION, _previous_phase)
 	if joined and service_tick % (60 / config.snapshot_hz) == 0:
 		events.prune(host_tick, config.event_lifetime)
 		var states: Array = []
@@ -215,7 +323,8 @@ func advance_host() -> void:
 			states.append(ActorState.capture(course.actors[i], epochs[i]).values())
 			progress[i] = course.lives[i].progress.reached.size()
 		send(NetPacket.Kind.SNAPSHOT, [queue.ack, clock_ticks, barrier.gate.start_tick, paused,
-			states, course.capture_dynamics(), events.recent, winner, reconnect_remaining, progress])
+			states, course.capture_dynamics(), events.recent, winner, reconnect_remaining, progress,
+			RaceBaseline.capture(self)])
 		snapshot_count += 1
 		last_snapshot_service = service_tick
 		_host_remote_buffer.insert(host_tick, ActorState.capture(course.actors[1], epochs[1]))
@@ -230,7 +339,7 @@ func advance_client() -> void:
 		return
 	_hint_ticks += 1
 	if _hint_ticks >= config.hint_ticks and (barrier.gate.start_tick < 0 or service_tick % 30 == 0):
-		send(NetPacket.Kind.READY)
+		send(NetPacket.Kind.READY, [guest_ready, ready_revision])
 	if paused:
 		return
 	client_tick += 1
@@ -260,7 +369,10 @@ func advance_client() -> void:
 			movement_samples += 1
 
 func accept_snapshot(packet: NetPacket) -> void:
-	if packet.tick <= last_snapshot_tick or not course.valid_dynamics(packet.data[5]):
+	if packet.tick <= last_snapshot_tick or not course.valid_dynamics(packet.data[5]) \
+		or int(packet.data[10][0]) < round_id \
+		or not RaceBaseline.matches_map(packet.data[10], course.definition):
+		scope_rejections += 1
 		return
 	last_packet_tick = service_tick
 	last_snapshot_tick = packet.tick
@@ -272,8 +384,19 @@ func accept_snapshot(packet: NetPacket) -> void:
 	winner = int(packet.data[7])
 	reconnect_remaining = int(packet.data[8])
 	progress.assign(packet.data[9])
+	var old_phase: int = remote_phase
+	var old_round: int = round_id
+	RaceBaseline.apply(packet.data[10], self)
+	if round_id != old_round:
+		sequence = 65535
+		prediction.clear()
+		interpolation.clear()
+		_visual_events.clear()
+	if remote_phase == RaceBaseline.Phase.RESULTS and old_phase != remote_phase:
+		guest_ready = false
+		ready_revision += 1
 	for i: int in course.checkpoints.size():
-		course.checkpoints[i].local_active = i < progress[1]
+		course.checkpoints[i].local_active = course.definition.checkpoint_ids[i] in course.lives[1].progress.reached
 		course.checkpoints[i].queue_redraw()
 	_dynamics = packet.data[5].duplicate(true)
 	course.apply_dynamics(_dynamics)
@@ -282,6 +405,8 @@ func accept_snapshot(packet: NetPacket) -> void:
 	interpolation.insert(packet.tick, ActorState.decode(packet.data[4][0]))
 	snapshot_count += 1
 	for event: Array in events.ingest(packet.data[6], packet.tick, config.event_lifetime):
+		if int(event[5]) != round_id:
+			continue
 		event_received.emit(event)
 		if int(event[2]) == 1:
 			_visual_events.append(event)
@@ -291,6 +416,8 @@ func accept_snapshot(packet: NetPacket) -> void:
 			notify("Match resumed")
 		elif int(event[3]) == GameplayEvents.Kind.FINISH:
 			notify("Player %d finished; winner %d" % [int(event[2]), winner])
+		elif int(event[3]) == GameplayEvents.Kind.SKIPPED_CHECKPOINT:
+			notify("Player %d: skipped mandatory checkpoint" % int(event[2]))
 
 func movement_events(index: int) -> void:
 	var bits: int = course.actors[index].motor.events
@@ -302,7 +429,12 @@ static func movement_bit(kind: int) -> int:
 	return [1, 2, 4, 8, 32][kind] if kind >= 0 and kind < 5 else 0
 
 func emit_event(player_id: int, kind: GameplayEvents.Kind, detail: int = 0) -> void:
-	events.emit_event(host_tick, player_id, kind, detail)
+	events.round_id = round_id
+	var generation: int = 0
+	if kind in [GameplayEvents.Kind.TURRET_FIRE, GameplayEvents.Kind.PROJECTILE_HIT,
+		GameplayEvents.Kind.POOL_RETURN] and detail < course.dynamics.size():
+		generation = course.dynamics[detail].generation
+	events.emit_event(host_tick, player_id, kind, detail, generation)
 	if player_id == 2:
 		_visual_events.append(events.recent.back())
 	event_received.emit(events.recent.back())
@@ -323,6 +455,7 @@ func remote_buffer_depth() -> int:
 	return _host_remote_buffer.samples.size() if host else interpolation.samples.size()
 
 func _death(index: int) -> void:
+	deaths[index] += 1
 	epochs[index] += 1
 	if index == 1:
 		queue.pending.clear()
@@ -339,16 +472,30 @@ func _checkpoint(_id: StringName, index: int) -> void:
 	emit_event(index + 1, GameplayEvents.Kind.CHECKPOINT, course.lives[index].progress.reached.size())
 
 func _finish(index: int) -> void:
+	finish_times[index] = clock_ticks - _round_started_clock
 	epochs[index] += 1
 	emit_event(index + 1, GameplayEvents.Kind.FINISH)
 	if winner == 0:
 		winner = index + 1
+		emit_event(index + 1, GameplayEvents.Kind.WINNER)
 		finish_deadline = clock_ticks + 1800
 		notify("Round winner: player %d; 30 seconds remain" % winner)
 	elif course.actors[0].motor.machine.current == PlayerStateMachine.State.FINISH \
 		and course.actors[1].motor.machine.current == PlayerStateMachine.State.FINISH:
 		round_complete = true
 		notify("Both players finished")
+
+func _lifecycle_notice(key: String, index: int) -> void:
+	if key == "M7_SKIPPED_CHECKPOINT":
+		emit_event(index + 1, GameplayEvents.Kind.SKIPPED_CHECKPOINT)
+		notify("Player %d: skipped mandatory checkpoint" % (index + 1))
+
+func _world_event(player_id: int, kind: int, object_id: int) -> void:
+	if kind == GameplayEvents.Kind.JUMP_PAD and player_id in [1, 2]:
+		epochs[player_id - 1] += 1
+		if player_id == 2:
+			queue.pending.clear()
+	emit_event(player_id, kind as GameplayEvents.Kind, object_id)
 
 func disconnected() -> void:
 	if not joined:
@@ -380,6 +527,9 @@ func apply_profiles() -> void:
 		course.actors[i].presentation.apply_profile(value)
 
 func shutdown() -> void:
+	if is_instance_valid(course) and is_instance_valid(course.world):
+		for projectile: HazardProjectile in course.world.projectiles:
+			projectile.recycle()
 	if transport != null:
 		if joined:
 			send(NetPacket.Kind.BYE)
@@ -403,6 +553,9 @@ func prepare_reconnect() -> void:
 	ended = false
 	paused = false
 	sequence = 65535
+	ready_revision += 1
+	# F9 confirms return/load even if Results or a withdrawal had cleared race Ready.
+	guest_ready = true
 	_hint_ticks = 0
 	prediction.clear()
 	interpolation.clear()

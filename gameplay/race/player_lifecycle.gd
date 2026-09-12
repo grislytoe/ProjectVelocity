@@ -51,6 +51,8 @@ func advance() -> void:
 
 
 func checkpoint(id: StringName, position: Vector2) -> bool:
+	if not player.gameplay_authority:
+		return false
 	if player.start_blocked or player.motor.machine.locked() or not progress.can_activate(id):
 		return false
 	if not RespawnSafety.valid(player, position):
@@ -64,6 +66,8 @@ func checkpoint(id: StringName, position: Vector2) -> bool:
 
 
 func finish() -> bool:
+	if not player.gameplay_authority:
+		return false
 	if player.start_blocked or player.motor.machine.locked():
 		return false
 	if not progress.can_finish():

@@ -249,7 +249,7 @@ func collision_tests() -> void:
 		check(course.valid_dynamics(course.capture_dynamics()), "dynamic snapshot registry")
 		var rows: Array = course.capture_dynamics()
 		var payload: Array = [0, 0, -1, false, [ActorState.capture(course.actors[0]).values(),
-			ActorState.capture(course.actors[1]).values()], rows, [], 0, 0, [0, 0]]
+			ActorState.capture(course.actors[1]).values()], rows, [], 0, 0, [0, 0], RaceBaseline.capture(session)]
 		var packet := NetPacket.make(NetPacket.Kind.SNAPSHOT, scope, 100, payload)
 		check(NetPacket.decode(packet.encode(config), config) != null, "complete snapshot wire roundtrip")
 		var viewport := SubViewport.new()

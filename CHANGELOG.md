@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.16.0-dev — M16 Networked Hazards and Race Logic (build22)
+
+- Extend the M15 host-authoritative stack with durable round/lifecycle/checkpoint baselines,
+  ready withdrawal/revision, results/retry, safe reconnect progress and winner spectating.
+- Replicate map hazard/platform/Jump Pad effects and target-bound projectile fire/hit/return;
+  preserve real M7/M8/M9 collisions, caps, speed1224, opacity and pool generations.
+- Reject forged critical snapshots before state mutation; test each critical class, real
+  full-map collisions, two separate ENet processes, stress and reconnect. Keep M0–M15 suites.
+- Protocol3/wire2; save schema5; Training v5 / Industrial v4 semantic code identities.
+  Preserve user project.godot bytes and all historical PBs; BuildInfo supplies runtime version.
+- Add developer HUD, manual adversarial guide and CI exported host/client scenario.
+  No EOS/M17, automatic merge or physical WAN certification.
+
+
 ## 0.15.0-dev — M15 Network Core Without EOS (build 21)
 
 - Add transport-independent two-player host authority, validated protocol 2 packets,

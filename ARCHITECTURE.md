@@ -175,3 +175,13 @@ res://dev_tools/map_framework.tscn; tests and tools remain excluded from exports
 ## M14
 
 M14 adds industrial_foundry through the existing MapCatalog/MapAssembly/SoloCourse path. Eight serialized scenes use M8/M9 modules. MapDefinition camera bounds/zones are validated, hashed and injected into M5. No movement, network, streaming or save authority changes. See docs/M14_INDUSTRIAL_TRACK.md.
+## M16 network race extension
+
+`NetworkSession` remains the only network simulation owner. `RaceBaseline` adds strict,
+durable per-player lifecycle/round data to its snapshots; `NetworkCourse` still composes
+the real M7/M8/M9 and M13/M14 world. M9 projectiles expose fire/return/confirmed-hit signals
+and monotonic pool generations, without any dependency on transport. Host consumes these
+signals into round-scoped gameplay events; guest reconstructs effects and cannot authorize
+state. Ready revisions prevent reordered intent, host retry restores canonical map/pools,
+and moving-support/Jump Pad transitions rebase existing prediction generations. See
+[NETWORKING.md](NETWORKING.md) and [M16 requirements](docs/M16_REQUIREMENTS.md).
