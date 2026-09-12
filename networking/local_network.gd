@@ -4,6 +4,7 @@ extends Node
 var session: NetworkSession
 var course: NetworkCourse
 var hud: Label
+var countdown: Label
 var automated: bool = false
 var limit: int = 0
 var injected: bool = false
@@ -18,6 +19,7 @@ var _last_physics_usec: int = 0
 var _maximum_physics_gap_usec: int = 0
 var race_fixture := NetworkRaceFixture.new()
 var _race_captures: Dictionary = {}
+var _last_start_status: String = ""
 
 func option(key: String, fallback: String = "") -> String:
 	for argument: String in OS.get_cmdline_user_args():
@@ -103,6 +105,17 @@ func _ready() -> void:
 	hud = Label.new()
 	hud.add_theme_font_size_override("font_size", 18)
 	panel.add_child(hud)
+	countdown = Label.new()
+	countdown.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	countdown.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	countdown.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	countdown.add_theme_font_size_override("font_size", 144)
+	countdown.add_theme_color_override("font_color", Color("f5fbff"))
+	countdown.add_theme_color_override("font_outline_color", Color("101c26"))
+	countdown.add_theme_constant_override("outline_size", 16)
+	canvas.add_child(countdown)
+	countdown.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	countdown.hide()
 	DisplayServer.window_set_title("ProjectVelocity M16 Local Network — " + role)
 	print("M15_READY role=", role, " protocol=", config.protocol,
 		" wire=", BuildInfo.NETWORK_WIRE_REVISION, " map=", course.definition.map_id)
@@ -125,6 +138,7 @@ func bot_input() -> InputFrame:
 func _physics_process(_delta: float) -> void:
 	if session == null:
 		return
+	update_countdown()
 	var now: int = Time.get_ticks_usec()
 	if _last_physics_usec > 0:
 		_maximum_physics_gap_usec = maxi(_maximum_physics_gap_usec, now - _last_physics_usec)
@@ -154,7 +168,7 @@ func _physics_process(_delta: float) -> void:
 	var emulator: NetworkEmulator = session.transport as NetworkEmulator
 	hud.text = ("M16 DEV • %s • player %d • session %s\n%s\n" % [
 		"HOST" if session.host else "CLIENT", 1 if session.host else 2,
-		session.session_id.left(8), session.status + countdown_text()]) + (
+		session.session_id.left(8), start_status()]) + (
 		"Host tick %d / client %d | match %.3fs | RTT %dms %s\n" % [
 		session.host_tick, session.client_tick, session.clock_ticks / 60.0,
 		session.rtt_ticks * 1000 / 60, "CONNECTION WARNING" if session.rtt_ticks >= 12 else ""]) + (
@@ -171,6 +185,10 @@ func _physics_process(_delta: float) -> void:
 	hud.text += "\nGuest Ready: %s • F6 guest Ready • F7 host retry" % str(session.guest_ready)
 	hud.text += "\nInvulnerability %d ticks • %s" % [
 		course.actors[0 if session.host else 1].motor.invulnerability_ticks, course.phase_summary()]
+	var current_start_status: String = start_status()
+	if session.clock_ticks == 0 and current_start_status != _last_start_status:
+		_last_start_status = current_start_status
+		print("M16_START ", "host" if session.host else "client", " ", current_start_status)
 	if automated and DisplayServer.get_name() != "headless" and session.clock_ticks > 120 \
 		and _screenshots < 2 and session.service_tick % 120 == 0 and not option("evidence").is_empty():
 		_screenshots += 1
@@ -196,6 +214,35 @@ func capture() -> void:
 func countdown_text() -> String:
 	var remaining: int = session.barrier.gate.start_tick - session.host_tick
 	return " • %d" % ceili(remaining / 60.0) if remaining > 0 else ""
+
+func update_countdown() -> void:
+	var remaining: int = session.barrier.gate.start_tick - session.host_tick
+	var active: bool = session.joined and not session.paused and not session.ended \
+		and session.barrier.gate.start_tick >= 0 and not session.round_complete
+	countdown.text = ""
+	if active and session.phase() == RaceBaseline.Phase.COUNTDOWN and remaining > 0:
+		countdown.text = str(ceili(remaining / 60.0))
+	elif active and session.phase() == RaceBaseline.Phase.RUNNING and remaining > -60:
+		countdown.text = "GO"
+	countdown.visible = not countdown.text.is_empty()
+
+func start_status() -> String:
+	if session.paused or session.ended or session.clock_ticks > 0 or session.round_complete:
+		return session.status + countdown_text()
+	if session.status.begins_with("Incompatible"):
+		return session.status
+	if not session.transport.connected:
+		return ("Waiting for CLIENT" if session.host else "Connecting to HOST; F9 retries") \
+			+ " at 127.0.0.1:%d — keep both windows open" % _retry_port
+	if not session.joined:
+		return "Peer connected; waiting for handshake"
+	if not session.guest_ready:
+		return "Guest is not ready — press F6 in the CLIENT window"
+	if session.barrier.gate.start_tick >= 0:
+		return "Starting" + countdown_text()
+	if session._hint_ticks < session.config.hint_ticks:
+		return "Preparing start • %ds" % ceili((session.config.hint_ticks - session._hint_ticks) / 60.0)
+	return "Waiting for guest readiness" if session.host else "Ready sent; waiting for host countdown"
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo or session == null:

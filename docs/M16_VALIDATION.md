@@ -87,6 +87,21 @@ ignored local evidence. The exact delivery commit also runs the complete CI suit
 
 ## Manual review from the main folder
 
+Recommended: launch both interactive windows with one command. This avoids a terminal
+waiting for the first Godot process before launching the second, and keeps logs separate:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\dev_tools\start_local_network.ps1 -Godot C:/Godot/Godot.exe
+```
+
+Keep both windows open. First-round Ready is automatic; F6 toggles it off/on. The HUD
+distinguishes waiting for a peer, handshake, hints, guest readiness and countdown.
+Movement is enabled only after GO, using A/D, Space and Shift in the focused window.
+The launcher supports Windows PowerShell5.1, opens visible game windows and restores the
+caller's environment after assigning isolated child log/save paths. Its rendered two-process
+check reached GO on both endpoints. Manual review confirmed movement and approved the
+large centered3/2/1/GO overlay; it uses the existing host tick and hides GO after60 ticks.
+
 Open two PowerShell terminals in `C:/Godot Projects/ProjectVelocity`:
 
 ```powershell
