@@ -9,7 +9,7 @@
 | actions/upload-artifact | v4.6.2, ea165f8d65b6e75b540449e92b4886f43607fa02 | https://github.com/actions/upload-artifact | MIT; CI only, not bundled | CI |
 
 EOSG 2.3.0 remains the exact approved candidate. **M18 verdict: BLOCKED**. Official tag
-`e84320567a3a17d305478f5796707e69d2bdac4f`, EOS SDK1.19.1.2; Windows native-only evaluation
+`e84320567a3a17d305478f5796707e69d2bdac4f`, EOS SDK1.19.1.2; Windows/Linux native-only evaluation
 passed, but full addon installation/export, configured services and SteamOS are unproven.
 Native evaluation files are ignored and never bundled in ordinary exports. Wrapper MIT
 does not relicense Epic SDK/XAudio; complete SDK notices and package redistribution review

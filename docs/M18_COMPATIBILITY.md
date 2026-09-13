@@ -3,7 +3,7 @@
 ## Executive verdict: BLOCKED — stop for developer review
 
 This is a documented blocker delivery, **not production EOS integration or overall
-compatibility proof**. Windows native-only evaluation passed. A configured EOS platform,
+compatibility proof**. Windows and Linux native-only evaluation passed. A configured EOS platform,
 online identities, Lobby/P2P, full plugin installation/export, and SteamOS acceptance
 have not been proven. No incompatible replacement dependency or transport is introduced.
 
@@ -121,7 +121,7 @@ Windows11Pro10.0.26200 x64, exact Godot4.7.2.stable.official.ed1daf0bf:
 | Scene reload, created-platform teardown, leak/handle/thread accounting | BLOCKED | Only global SDK lifecycle and process exit tested; no created-platform lifecycle proof |
 | Windows editor plugin enabled / cold full addon import | BLOCKED | Native subset only; autoload/export/disable behavior not accepted |
 | Windows EOS-bearing debug/staging/release export | BLOCKED | Local templates absent; native package/notices and full export plugin behavior unverified |
-| Linux x86_64 headless native/API/lifecycle on clean CI checkout | BLOCKED pending CI | Dedicated workflow runs20 processes +3 invalid-platform cases; record completed run before claiming PASS |
+| Linux x86_64 headless native/API/lifecycle on clean CI checkout | PASS | CI34751290263/job103708170118:20 processes +3 invalid-platform cases, exit0 |
 | Linux renderer/editor/full plugin/export | BLOCKED | No full plugin/export evidence at this report revision |
 | SteamOS/Steam Deck x86_64 | BLOCKED | No representative SteamOS/Deck runner; Ubuntu is not Deck certification |
 | Auth account identity → Connect Product User ID | BLOCKED | No live credentials/test accounts/dev-auth process; no identity returned |
@@ -136,6 +136,15 @@ passes. No mock/unit result is counted as live service evidence. No live Epic cr
 were present in the invoking process (EOS/EPIC/PV_EOS environment names checked without
 printing values); unprovided external accounts or repository secrets are not assumed absent
 from the developer's possession.
+
+Real CI evidence on commit `8139d7f25398476f07216af8943a2a9b3d1130e5`:
+[native run34751290263](https://github.com/grislytoe/ProjectVelocity/actions/runs/34751290263)
+completed successfully for both Windows and Linux. Linux environment: Ubuntu24.04.5LTS,
+kernel6.17.0-1022-azure x86_64, glibc2.39-0ubuntu8.8. Each job performed a fresh checkout/import,
+20 native process starts and3 invalid-platform process starts. Sanitized evidence artifacts:
+`M18-linux-native-evidence` (id10315866198) and `M18-windows-native-evidence` (id10315564624).
+They contain only logs/hash inventories; no binaries. Final PR19 head CI is checked again
+at delivery, separately from these immutable historical run references.
 
 Global lifecycle observation: an initial exploratory harness tried initialize→shutdown
 twice in one process. First returned0/0, second initialize returned15 (`AlreadyConfigured`),
@@ -241,6 +250,14 @@ certification. Full per-binary SHA256 inventory is reproducible with the inspect
 Linux CI records ELF architecture/dynamic dependencies; no Windows inference is used as
 Linux load evidence.
 
+Linux wrapper ELF headers:64-bit LSB x86-64. Debug build ID
+`00486ef41fa6a4acd1e0aca0807c14ed8f144c48`, release build ID
+`8db20c53428e51c1369033d67fe1a77c3aac8cf6`. Both declare dependencies on
+`libEOSSDK-Linux-Shipping.so`, `libm.so.6`, `libc.so.6`, `ld-linux-x86-64.so.2`.
+Initial CI inventory's `ldd --version | head -1` emitted harmless broken-pipe diagnostics;
+the delivered workflow prints the full version and includes the SDK ELF dependency list.
+No native failure was hidden or retried to obtain that run's PASS.
+
 Wrapper debug/release SHA256, respectively:
 
 ```text
@@ -248,6 +265,9 @@ Windows e6a199753d1ae46b0d453480040a65d51144ebdfe2506f8ff7498baac2d4dcd3
         4f04f557ebc8e4fb873b389b2363db70f0e4187cf6b3094dd644cd00e46b9c00
 Linux   3a949ab966a536522cc4f1872e279e526bb30101fc3652701d4cd2a01238881d
         db52da6ed320b23bcc61fea566d90a7ccbb6d4134dd2f4ca0c7ae98e7390b2f0
+EOSSDK-Win64-Shipping.dll     9c498fe31c8df1d9085dfa9c71c6d50ec6b569acdb29f1decb97be105b6341dc
+libEOSSDK-Linux-Shipping.so   943bd5247b1b6cb783209b70ef672bfabb12b80a88151e6cfd7eca57dcbfcc4d
+xaudio2_9redist.dll           0e01f400baa09694cacfd2cfbff0d721c17b56785d2d6e29b6fdd117f70ccc1e
 ```
 
 All fetched source stays ignored. No third-party script executes in ordinary builds;

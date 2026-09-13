@@ -48,10 +48,10 @@ jobs:
         run: |
           chmod +x .tools/m18/engine/Godot_v4.7.2-stable_linux.x86_64
           uname -a
-          ldd --version | head -1
+          ldd --version
           cat /etc/os-release
           unzip -q .tools/m18/candidate.zip -d .tools/m18/audit
-          find .tools/m18/audit -name '*.so' -path '*x86_64*' -exec file {} \; -exec readelf -d {} \;
+          find .tools/m18/audit \( -name '*x86_64.so' -o -name 'libEOSSDK-Linux-Shipping.so' \) -exec file {} \; -exec readelf -d {} \;
       - name: Twenty independent headless native starts and shutdowns
         shell: pwsh
         run: |

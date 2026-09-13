@@ -38,6 +38,11 @@ func _run() -> void:
 		print("M18_OPT_IN_REQUIRED")
 		quit(2)
 		return
+	var engine: Dictionary = Engine.get_version_info()
+	if engine.major != 4 or engine.minor != 7 or engine.patch != 2 or engine.status != "stable":
+		print("M18_BLOCKED category=engine_version_required_4_7_2_stable")
+		quit(2)
+		return
 	var candidate: String = OS.get_environment("PV_EOSG_PROBE_EXTENSION")
 	if candidate.is_empty() or not FileAccess.file_exists(candidate):
 		print("M18_BLOCKED category=missing_native_library")
@@ -68,7 +73,12 @@ func _run() -> void:
 			quit(1)
 			return
 	print("M18_API_SURFACE_OK live_services=false")
-	print("M18_SDK_VERSION %s" % str(_sdk.call("version_interface_get_version")))
+	var sdk_version: String = str(_sdk.call("version_interface_get_version"))
+	print("M18_SDK_VERSION %s" % sdk_version)
+	if sdk_version != "1.19.1.2-53289219":
+		print("M18_FAIL category=sdk_version_mismatch")
+		quit(1)
+		return
 	# EOS global shutdown is terminal for this process. Repeat using separate OS processes.
 	for cycle: int in range(1):
 		var init_result: int = int(_sdk.call("platform_interface_initialize", InitializeOptions.new()))
