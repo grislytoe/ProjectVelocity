@@ -20,6 +20,10 @@ var _maximum_physics_gap_usec: int = 0
 var race_fixture := NetworkRaceFixture.new()
 var _race_captures: Dictionary = {}
 var _last_start_status: String = ""
+var selected_profile: int = 0
+var scheduled_reconnect: int = -1
+var profile_changes: int = 0
+var warning_label: Label
 
 func option(key: String, fallback: String = "") -> String:
 	for argument: String in OS.get_cmdline_user_args():
@@ -74,7 +78,24 @@ func _ready() -> void:
 	var emulator := NetworkEmulator.new()
 	emulator.inner = local
 	emulator.config = config
-	emulator.configure(option("emulation", "clean"), int(option("seed", "15")))
+	for numeric_option: String in ["seed", "drop-at", "drop-duration"]:
+		if not option(numeric_option, "0").is_valid_int():
+			push_error("Invalid integer in network profile")
+			get_tree().quit(1)
+			return
+	var condition := NetworkConditionProfile.preset(option("emulation", "clean"), int(option("seed", "15")))
+	condition.disconnect_tick = int(option("drop-at", "-1"))
+	condition.reconnect_after_ticks = int(option("drop-duration", "45"))
+	if not option("condition-file").is_empty():
+		var source := FileAccess.open(option("condition-file"), FileAccess.READ)
+		var data: Variant = null
+		if source != null and source.get_length() <= 4096: data = JSON.parse_string(source.get_as_text())
+		condition = NetworkConditionProfile.from_dictionary(data) if data is Dictionary else null
+	if condition == null or not emulator.apply_profile(condition):
+		push_error("Invalid network condition profile")
+		get_tree().quit(1)
+		return
+	selected_profile = NetworkConditionProfile.NAMES.find(condition.id)
 	session = NetworkSession.new()
 	session.host = course.host
 	session.course = course
@@ -103,20 +124,30 @@ func _ready() -> void:
 	panel.add_theme_stylebox_override("panel", style)
 	canvas.add_child(panel)
 	hud = Label.new()
-	hud.add_theme_font_size_override("font_size", 18)
+	hud.add_theme_font_size_override("font_size", 20)
 	panel.add_child(hud)
 	countdown = Label.new()
 	countdown.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	countdown.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	countdown.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	countdown.add_theme_font_size_override("font_size", 144)
+	countdown.add_theme_font_size_override("font_size", 204)
 	countdown.add_theme_color_override("font_color", Color("f5fbff"))
 	countdown.add_theme_color_override("font_outline_color", Color("101c26"))
 	countdown.add_theme_constant_override("outline_size", 16)
 	canvas.add_child(countdown)
 	countdown.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	countdown.hide()
-	DisplayServer.window_set_title("ProjectVelocity M16 Local Network — " + role)
+	warning_label = Label.new()
+	warning_label.position = Vector2(24, 400)
+	warning_label.add_theme_font_size_override("font_size", 20)
+	warning_label.add_theme_color_override("font_color", Color("ffcc55"))
+	warning_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	warning_label.add_theme_constant_override("outline_size", 6)
+	canvas.add_child(warning_label)
+	DisplayServer.window_set_title("ProjectVelocity M17 Local Network — " + role)
+	var size_parts: PackedStringArray = option("capture-size", "1280x800").split("x")
+	if size_parts.size() == 2 and option("capture-size", "1280x800") in ["1280x800", "1920x1080"]:
+		DisplayServer.window_set_size(Vector2i(int(size_parts[0]), int(size_parts[1])))
 	print("M15_READY role=", role, " protocol=", config.protocol,
 		" wire=", BuildInfo.NETWORK_WIRE_REVISION, " map=", course.definition.map_id)
 
@@ -139,6 +170,17 @@ func _physics_process(_delta: float) -> void:
 	if session == null:
 		return
 	update_countdown()
+	session.telemetry.observe(session)
+	var condition: NetworkConditionProfile = (session.transport as NetworkEmulator).profile
+	if condition.disconnect_tick >= 0 and session.service_tick == condition.disconnect_tick:
+		session.disconnected()
+		if not session.host: scheduled_reconnect = session.service_tick + condition.reconnect_after_ticks
+	if scheduled_reconnect == session.service_tick:
+		retry_connection()
+		scheduled_reconnect = -1
+	if option("profile-change") == "true":
+		if session.service_tick == 800: apply_selected_profile("rtt250")
+		if session.service_tick == 1000: apply_selected_profile("clean")
 	var now: int = Time.get_ticks_usec()
 	if _last_physics_usec > 0:
 		_maximum_physics_gap_usec = maxi(_maximum_physics_gap_usec, now - _last_physics_usec)
@@ -163,28 +205,30 @@ func _physics_process(_delta: float) -> void:
 	_remote_motion += course.remote.position.distance_to(_previous_remote)
 	_previous_remote = course.remote.position
 	if automated and not session.host and session.clock_ticks > 120 and not injected:
+		session.prediction.injected_pending = true
 		course.actors[1].position += Vector2(180, -40)
 		injected = true
 	var emulator: NetworkEmulator = session.transport as NetworkEmulator
-	hud.text = ("M16 DEV • %s • player %d • session %s\n%s\n" % [
-		"HOST" if session.host else "CLIENT", 1 if session.host else 2,
-		session.session_id.left(8), start_status()]) + (
-		"Host tick %d / client %d | match %.3fs | RTT %dms %s\n" % [
-		session.host_tick, session.client_tick, session.clock_ticks / 60.0,
-		session.rtt_ticks * 1000 / 60, "CONNECTION WARNING" if session.rtt_ticks >= 12 else ""]) + (
-		"Sim loss %.0f%% • dropped %d • snapshot age %d • history %d\n" % [
-		emulator.loss * 100, emulator.dropped, session.service_tick - session.last_snapshot_service,
-		session.prediction.commands.size()]) + (
-		"Corrections %d • error %.2fpx • hard %d • interpolation %d\n" % [
-		session.prediction.corrections, session.prediction.last_error, session.prediction.hard_snaps,
-		session.remote_buffer_depth()]) + "WASD / left stick • Space / A: Jump • Shift / RB: Dash\nF8: disconnect • F9: retry same session • close window to leave\nLocal developer session • no Time Trial records"
-	hud.text += "\nM16 round %d • %s • progress %s • deaths %s\nPool %d/10 • peak %d • hits %d • events %d • rejected %d" % [
-		session.round_id, RaceBaseline.Phase.keys()[session.phase()], str(session.progress), str(session.deaths),
-		course.world.active_count(), course.pool_high_water, course.projectile_hits,
-		session.events.sequence if session.host else session.events.received, session.scope_rejections]
-	hud.text += "\nGuest Ready: %s • F6 guest Ready • F7 host retry" % str(session.guest_ready)
-	hud.text += "\nInvulnerability %d ticks • %s" % [
-		course.actors[0 if session.host else 1].motor.invulnerability_ticks, course.phase_summary()]
+	var hud_text: String = "M17 DEV • %s • round %d • %s\n%s" % [
+		"HOST" if session.host else "CLIENT", session.round_id, RaceBaseline.Phase.keys()[session.phase()], start_status().left(85)]
+	hud_text += "\nMeasured RTT %.1fms • estimated one-way %.1fms • clock %.3fs" % [
+		session.measured_rtt_ms, session.measured_rtt_ms / 2, session.clock_ticks / 60.0]
+	hud_text += "\n%s: simulated one-way %.1fms / RTT %.1fms • jitter ±%.1fms" % [
+		condition.id, condition.one_way_ms, condition.one_way_ms * 2, condition.jitter_ms]
+	hud_text += "\nLoss in/out %.0f/%.0f%% • queue %d/256 (peak %d)" % [
+		condition.inbound_loss * 100, condition.outbound_loss * 100, emulator.pending.size(), emulator.queue_high_water]
+	hud_text += "\nOrdinary error p95 %.2fpx • corrections %d • rebases %d" % [
+		session.prediction.metrics.metric("ordinary_error_px").p95,
+		session.prediction.ordinary_corrections, session.prediction.lifecycle_rebases]
+	hud_text += "\nHistory %d/240 • interpolation %d/32 • snapshot age %d ticks" % [
+		session.prediction.commands.size(), session.remote_buffer_depth(), session.service_tick - session.last_snapshot_service]
+	hud_text += "\nProgress %s • pool %d/10 • rejects %d • Ready %s" % [
+		str(session.progress), course.world.active_count(), session.scope_rejections, str(session.guest_ready)]
+	hud_text += "\nF2 next [%s] • F3 apply • F4 clean • F5 metrics reset" % NetworkConditionProfile.NAMES[selected_profile]
+	hud_text += "\nF6 Ready • F7 round retry • F8 drop • F9 reconnect"
+	hud_text += "\nWASD / stick • Space / A Jump • Shift / RB Dash • no Solo records"
+	hud.text = hud_text
+	warning_label.text = ("Плохое соединение / Connection warning • measured RTT >200ms" if session.telemetry.warning else "")
 	var current_start_status: String = start_status()
 	if session.clock_ticks == 0 and current_start_status != _last_start_status:
 		_last_start_status = current_start_status
@@ -247,7 +291,16 @@ func start_status() -> String:
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo or session == null:
 		return
-	if event.keycode == KEY_F8:
+	if event.keycode == KEY_F2:
+		selected_profile = (selected_profile + 1) % NetworkConditionProfile.NAMES.size()
+	elif event.keycode == KEY_F3:
+		apply_selected_profile(NetworkConditionProfile.NAMES[selected_profile])
+	elif event.keycode == KEY_F4:
+		apply_selected_profile("clean")
+	elif event.keycode == KEY_F5:
+		session.telemetry.reset_window(session.round_id)
+		session.prediction.metrics.reset_window(session.round_id)
+	elif event.keycode == KEY_F8:
 		session.transport.close()
 		session.disconnected()
 	elif event.keycode == KEY_F9 and not session.host and not session.joined:
@@ -257,10 +310,17 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	elif event.keycode == KEY_F7 and session.host:
 		session.retry_round()
 
+func apply_selected_profile(name_value: String) -> void:
+	var emulator: NetworkEmulator = session.transport as NetworkEmulator
+	if emulator.configure(name_value, emulator.profile.seed_value):
+		profile_changes += 1
+		selected_profile = NetworkConditionProfile.NAMES.find(name_value)
+
 func retry_connection() -> void:
 	var emulator: NetworkEmulator = session.transport as NetworkEmulator
 	var local: LocalENetTransport = emulator.inner as LocalENetTransport
 	if local.open(false, _retry_port) == OK:
+		emulator.reopen()
 		session.prepare_reconnect()
 
 func lifecycle_fixture() -> void:
@@ -286,7 +346,7 @@ func finish_test() -> void:
 		"remote_motion": _remote_motion, "snapshots": session.snapshot_count,
 		"corrections": session.prediction.corrections, "hard_snaps": session.prediction.hard_snaps,
 		"maximum_error": session.prediction.maximum_error, "history": session.prediction.commands.size(),
-		"rtt_ticks": session.rtt_ticks, "events": event_counts, "status": session.status,
+		"rtt_ticks": session.rtt_ticks, "measured_rtt_ms": session.measured_rtt_ms, "events": event_counts, "status": session.status,
 		"rejected_commands": session.queue.rejected, "connected": session.transport.connected,
 		"wire_rejected": session.transport.rejected, "wire_error": session.transport.error,
 		"packet_counts": session.packet_counts, "service_tick": session.service_tick,
@@ -301,7 +361,39 @@ func finish_test() -> void:
 		"projectile_hits": course.projectile_hits, "pool_active": course.world.active_count(),
 		"pool_nodes": course.world.projectiles.size(), "event_duplicates": session.events.duplicates,
 		"fixture_steps": race_fixture.fixture_steps})
-	print("M15_RESULT=", JSON.stringify(report))
+	var emulator: NetworkEmulator = session.transport as NetworkEmulator
+	var buffer: SnapshotBuffer = session._host_remote_buffer if session.host else session.interpolation
+	var stress_report: Dictionary = {"schema": NetworkTelemetry.SCHEMA, "build": BuildInfo.VERSION,
+		"build_number": BuildInfo.BUILD_NUMBER, "protocol": BuildInfo.NETWORK_PROTOCOL_VERSION,
+		"wire": BuildInfo.NETWORK_WIRE_REVISION, "map": course.definition.map_id,
+		"map_checksum": course.definition.declared_checksum, "role": report.role,
+		"physics_hz": 60, "snapshot_hz": session.config.snapshot_hz,
+		"profile_changes": profile_changes, "viewport": [get_viewport().size.x, get_viewport().size.y], "emulator": emulator.report(), "telemetry": session.telemetry.report(),
+		"prediction": {"ordinary_error_px": session.prediction.metrics.metric("ordinary_error_px"),
+			"moving_error_px": session.prediction.metrics.metric("moving_error_px"),
+			"overflow_rebases": session.prediction.overflow_rebases,
+			"ordinary_corrections": session.prediction.ordinary_corrections,
+			"ordinary_correction_rate_hz": session.prediction.ordinary_corrections * 60.0 / maxi(1, session.service_tick),
+			"ordinary_hard_snaps": session.prediction.ordinary_hard_snaps,
+			"lifecycle_rebases": session.prediction.lifecycle_rebases,
+			"injected_corrections": session.prediction.injected_corrections,
+			"rewinds": session.prediction.reconciliations, "replayed_commands": session.prediction.replayed_commands,
+			"ack_lag_commands": session.prediction.metrics.metric("ack_lag_commands"),
+			"history_high_water": session.prediction.history_high_water},
+		"interpolation": {"underflow": buffer.underflow, "extrapolation": buffer.extrapolated,
+			"hold": buffer.held, "interpolated": buffer.interpolated, "high_water": buffer.high_water},
+		"functional": report.duplicate(true)}
 	session.shutdown()
+	stress_report["cleanup"] = {"queue": emulator.pending.size(), "history": session.prediction.commands.size(),
+		"interpolation": session.remote_buffer_depth(), "pool_active": course.world.active_count(),
+		"events": session.events.recent.size(), "ping_history": session._ping_times.size()}
+	var report_path: String = option("report")
+	if not report_path.is_empty():
+		var file := FileAccess.open(report_path, FileAccess.WRITE)
+		if file == null:
+			success = false
+		else:
+			file.store_string(JSON.stringify(stress_report, "\t"))
+	print("M15_RESULT=", JSON.stringify(report))
 	print("PROJECTVELOCITY_M15_PROCESS_OK" if success else "M15_PROCESS_FAILED")
 	get_tree().quit(0 if success else 1)

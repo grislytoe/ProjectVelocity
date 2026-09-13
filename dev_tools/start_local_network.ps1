@@ -1,5 +1,7 @@
-param(
+﻿param(
     [string]$Godot = 'godot',
+    [string]$ConditionFile = '',
+    [ValidateSet('clean','rtt80','rtt150','rtt200','rtt250','combined','wan','stress')][string]$Profile = 'clean',
     [ValidateSet('training', 'industrial')][string]$Map = 'industrial',
     [ValidateRange(1024, 65535)][int]$Port = 24715
 )
@@ -13,9 +15,11 @@ try {
         New-Item -ItemType Directory -Force -Path $roleRoot | Out-Null
         $arguments = @('--path', ('"' + $projectRoot + '"'),
             '--log-file', ('"' + (Join-Path $roleRoot 'godot.log') + '"'),
-            '--', '--local-network', "--role=$role", "--port=$Port", "--map=$Map")
+            '--', '--local-network', "--role=$role", "--port=$Port", "--map=$Map", "--emulation=$Profile",
+            "--seed=$(if ($role -eq 'host') { 15 } else { 29 })")
         # Windows PowerShell 5.1 has no Start-Process -Environment parameter.
         # Children inherit these process-local values; restore the caller immediately.
+        if ($ConditionFile) { $arguments += ('"--condition-file=' + (Resolve-Path -LiteralPath $ConditionFile).Path + '"') }
         $previousAppData = $env:APPDATA
         $previousLocalAppData = $env:LOCALAPPDATA
         try {

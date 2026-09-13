@@ -92,3 +92,20 @@ Windows evidence is detailed in [docs/M16_VALIDATION.md](docs/M16_VALIDATION.md)
 dynamic replay can visibly correct under stress. No physical WAN/Linux/Steam Deck/controller
 certification, EOS, lobby, production series/results UI or M17. BuildInfo is 0.16.0-dev/22;
 project.godot editor metadata remains 0.15.0-dev under the byte-preservation agreement.
+
+## M17 measured network limits
+
+The master omits RTT/one-way semantics and numerical comfort/error/loss/jitter budgets.
+M17 adopts measured RTT bands and the user's strict>200ms warning policy explicitly.
+Profiles denote additional emulation delay, so80/150/200ms simulated RTT can measure higher
+through ENet polling. No claim of exact measured profile RTT or subjective comfort certification.
+
+Current-world collision replay remains inherited from M15/M16. Moving geometry/Jump Pads can
+produce substantial ordinary prediction corrections under latency; see M17 measured tables.
+Lifecycle hard rebases and injected divergence are excluded, but the adversarial race fixture
+is not a human route-play or smoothness study. There is no historical dynamic-world rollback.
+
+Emulator shapes complete application messages above ENet, not individual network datagrams;
+no bandwidth/burst/WAN model, physical WAN/platform/controller certification, persistent
+reconnect, host migration, production online service or telemetry upload. Diagnostics remain
+local developer tools, with bounded windows rather than a complete indefinite trace.

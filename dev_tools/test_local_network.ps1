@@ -1,9 +1,16 @@
-param(
+﻿param(
     [string]$Godot = 'godot',
-    [ValidateSet('clean', 'wan', 'stress')][string]$Profile = 'clean',
+    [string]$ConditionFile = '',
+    [ValidateSet('clean', 'wan', 'stress', 'rtt80', 'rtt150', 'rtt200', 'rtt250', 'combined')][string]$Profile = 'clean',
     [ValidateSet(20, 30)][int]$Snapshots = 20,
     [ValidateSet(30, 60, 144)][int]$Fps = 60,
-    [int]$Port = 24715,
+    [ValidateRange(1024, 65535)][int]$Port = 24715,
+    [int]$HostSeed = 15,
+    [int]$ClientSeed = 29,
+    [ValidateSet('1280x800', '1920x1080')][string]$Resolution = '1280x800',
+    [switch]$ProfileChange,
+    [switch]$HostDrop,
+    [int]$DropDuration = 45,
     [switch]$Rendered,
     [switch]$Exported,
     [switch]$Reconnect,
@@ -25,32 +32,45 @@ try {
     foreach ($role in @('host', 'client')) {
         $roleRoot = Join-Path $runRoot $role
         New-Item -ItemType Directory -Force -Path $roleRoot | Out-Null
-        $arguments = @('--max-fps', "$Fps", '--log-file', ('"' + (Join-Path $roleRoot 'godot.log') + '"'))
+        $arguments = @('--resolution', $Resolution, '--max-fps', "$Fps", '--log-file', ('"' + (Join-Path $roleRoot 'godot.log') + '"'))
         # Official export templates load their adjacent pack and disable --path overrides.
         if (-not $Exported) { $arguments += @('--path', ('"' + $projectRoot + '"')) }
         if (-not $Rendered) { $arguments += '--headless' }
         $arguments += @('--', '--local-network', "--role=$role", "--port=$Port", '--auto=true',
             '--timeout-ticks=600',
             "--ticks=$(if ($Race) { if ($role -eq 'host') { 2400 } else { 2280 } } elseif ($role -eq 'host') { 1200 } else { 1080 })", "--emulation=$Profile",
-            "--snapshots=$Snapshots", "--seed=$(if ($role -eq 'host') { 15 } else { 29 })",
-            "--map=$Map", "--reconnect=$($Reconnect.ToString().ToLowerInvariant())",
+            "--snapshots=$Snapshots", "--capture-size=$Resolution", "--seed=$(if ($role -eq 'host') { $HostSeed } else { $ClientSeed })",
+            "--map=$Map",
             "--disconnect-tick=$DisconnectTick",
+            "--drop-at=$(if (($Reconnect -and $role -eq 'client') -or ($HostDrop -and $role -eq 'host')) { $DisconnectTick } else { -1 })",
+            "--drop-duration=$DropDuration", "--profile-change=$($ProfileChange.ToString().ToLowerInvariant())",
+            ('"--report=' + (Join-Path $roleRoot 'stress.json') + '"'),
             "--lifecycle=$($Lifecycle.ToString().ToLowerInvariant())",
             "--race=$($Race.ToString().ToLowerInvariant())", "--malicious=$($Malicious.ToString().ToLowerInvariant())",
             "--retry=$($Retry.ToString().ToLowerInvariant())",
             ('"--evidence=' + (Join-Path $roleRoot 'screen') + '"'))
-        $process = Start-Process -FilePath $Godot -ArgumentList $arguments -PassThru -WindowStyle Hidden `
-            -RedirectStandardOutput (Join-Path $roleRoot 'stdout.log') `
-            -RedirectStandardError (Join-Path $roleRoot 'stderr.log') `
-            -Environment @{ APPDATA = $roleRoot; LOCALAPPDATA = $roleRoot }
+        if ($ConditionFile) { $arguments += ('"--condition-file=' + (Resolve-Path -LiteralPath $ConditionFile).Path + '"') }
+        $previousAppData = $env:APPDATA
+        $previousLocalAppData = $env:LOCALAPPDATA
+        try {
+            $env:APPDATA = $roleRoot
+            $env:LOCALAPPDATA = $roleRoot
+            $process = Start-Process -FilePath $Godot -ArgumentList $arguments -PassThru -WindowStyle Hidden `
+                -RedirectStandardOutput (Join-Path $roleRoot 'stdout.log') `
+                -RedirectStandardError (Join-Path $roleRoot 'stderr.log')
+        } finally {
+            $env:APPDATA = $previousAppData
+            $env:LOCALAPPDATA = $previousLocalAppData
+        }
         $null = $process.Handle
         $processes += $process
         # Both run real time; no --fixed-fps, which accelerates headless clocks independently.
     }
     # Race fixtures need 40 seconds of physics plus startup/scheduling headroom on CI.
     $processTimeoutMs = if ($Race) { 90000 } else { 45000 }
+    $deadline = [DateTime]::UtcNow.AddMilliseconds($processTimeoutMs)
     foreach ($process in $processes) {
-        if (-not $process.WaitForExit($processTimeoutMs)) { throw "M15 process $($process.Id) timeout; $runRoot" }
+        if (-not $process.WaitForExit([Math]::Max(1, [int]($deadline - [DateTime]::UtcNow).TotalMilliseconds))) { throw "M15 process $($process.Id) timeout; $runRoot" }
         $process.WaitForExit()
     }
     $reports = @()
@@ -66,11 +86,14 @@ try {
         $reports += $line.Substring(11) | ConvertFrom-Json
     }
     if ($reports[0].session -ne $reports[1].session) { throw 'Host/guest session mismatch' }
-    if ([Math]::Abs($reports[0].clock - $reports[1].clock) -gt 30) { throw 'Match clock drift exceeds 500ms under emulation' }
-    if (-not $reports[0].round_complete -and ($reports[0].clock - $reports[1].clock) -ne ($reports[0].host_tick - $reports[1].host_tick)) {
+    if ($HostDrop) {
+        if (-not $reports[1].status.Contains('Host disconnected')) { throw 'Host drop did not end guest session' }
+    }
+    if (-not $HostDrop -and [Math]::Abs($reports[0].clock - $reports[1].clock) -gt 30) { throw 'Match clock drift exceeds 500ms under emulation' }
+    if (-not $HostDrop -and -not $reports[0].round_complete -and ($reports[0].clock - $reports[1].clock) -ne ($reports[0].host_tick - $reports[1].host_tick)) {
         throw 'Clock is inconsistent with authoritative host ticks'
     }
-    if ($Reconnect -and $reports[0].events.RESUME -lt 1) { throw 'Reconnect did not resume the match' }
+    if ($Reconnect -and ($reports[0].events.RESUME -lt 1 -or $reports[1].events.RESUME -lt 1)) { throw 'Reconnect did not resume the match' }
     if ($Lifecycle) {
         foreach ($report in $reports) {
             foreach ($event in @('DEATH', 'RESPAWN', 'CHECKPOINT', 'FINISH', 'HAZARD')) {
@@ -104,13 +127,27 @@ try {
             throw 'M16 forged packet rejection was not exercised'
         }
     }
-    if (-not $reports[0].status.Contains('paused')) { throw 'Missing orderly guest disconnect observation' }
+    if (-not $HostDrop -and -not $reports[0].status.Contains('paused')) { throw 'Missing orderly guest disconnect observation' }
+    if ($ProfileChange) {
+        foreach ($role in @('host','client')) {
+            $stress = Get-Content -LiteralPath (Join-Path $runRoot "$role/stress.json") -Raw | ConvertFrom-Json
+            if ($stress.profile_changes -ne 2) { throw 'Scheduled profile changes did not both apply' }
+        }
+    }
+    & (Join-Path $PSScriptRoot 'evaluate_network_stress.ps1') -RunRoot $runRoot -Race:$Race -HostDrop:$HostDrop
     $reports | ConvertTo-Json -Depth 6
     Write-Output "PROJECTVELOCITY_M15_LOCALHOST_OK $runRoot"
 } finally {
     foreach ($process in $processes) {
         # CI's console launcher owns an engine child; timeout cleanup must include that child.
-        if (-not $process.HasExited) { $process.Kill($true); $process.WaitForExit() }
+        if (-not $process.HasExited) { & taskkill.exe /PID $process.Id /T /F | Out-Null; $process.WaitForExit(5000) | Out-Null }
         $process.Dispose()
+    }
+    # Retain evidence; remove only engine caches belonging to this unique run.
+    $ownedRoot = [IO.Path]::GetFullPath($runRoot).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+    foreach ($role in @('host','client')) {
+        $cachePath = [IO.Path]::GetFullPath((Join-Path $runRoot "$role/Godot"))
+        if (-not $cachePath.StartsWith($ownedRoot, [StringComparison]::OrdinalIgnoreCase)) { throw 'Cleanup escaped owned run directory' }
+        if (Test-Path -LiteralPath $cachePath) { Remove-Item -LiteralPath $cachePath -Recurse -Force }
     }
 }

@@ -142,7 +142,10 @@ low-end-performance certification. No EOS/Steam/lobby/matchmaking/M17 or host mi
 Production series/results UX is outside this developer round path. Movement prediction
 still replays against corrected current world geometry, not a historical world rewind;
 moving-support contact changes and Jump Pad/lifecycle relocations rebase actor generation.
-Stress can produce visible corrections;150–200ms comfort is not certified.
+M17 follow-up now covers150/200ms simulated RTT with measured functional/convergence
+evidence: see [M17 validation](M17_VALIDATION.md). Visible corrections remain; the master
+provides no numerical criterion to certify subjective comfort. The tables above are the
+historical M16 evidence, not M17 measurements.
 
 Local export templates are absent. CI downloads checksum-verified official templates,
 exports Windows Staging, verifies both map identities and ordinary/network boots, then

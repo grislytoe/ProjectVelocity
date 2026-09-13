@@ -227,3 +227,19 @@ M14: full validate.ps1 includes Industrial structural/fallback/PB/UI fixtures an
 - Inspect rendered HUD and local/remote presentation; manually review two-window play.
 - CI must pass official-template Windows export, ordinary/network boot and exported
   separate-process scenario. Merge remains a separate user decision; no M17.
+
+## M17 network stress
+
+- [ ] Run full dev_tools/validate.ps1 (M0–M17, replay/map hashes, parsers, mandatory ENet gates).
+- [ ] Run dev_tools/test_network_stress.ps1 -Extended -Rendered; inspect both endpoint stress.json,
+  evaluation.json and images for clean/80/150/200/250ms, including1280x800 and1920x1080.
+- [ ] Confirm simulated one-way/RTT versus measured RTT labels, F2 next/F3 apply/F4 clean/F5 window.
+- [ ] Check RU/EN warning above200ms and hysteresis; it must not block movement or race progress.
+- [ ] Verify host/guest independent controls, full Industrial collision/event/Finish fixture,
+  forged claims rejected, winner/progress/event counts and clock convergence, cleanup zero.
+- [ ] Running and Results guest reconnect, host drop, repeated profile/session cleanup;
+  same seed/input trace equality is distinct from OS-dependent whole-process packet counts.
+- [ ] Review ordinary/moving error percentiles separately from lifecycle/injection counters.
+- [ ] Check measured motion traces; images are presentation evidence only.
+- [ ] PowerShell5.1 launcher run, exact PID cleanup and no real saves/logs/images committed.
+- [ ] User manual two-window review and explicit merge authorization; never auto-merge/start M18.

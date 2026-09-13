@@ -23,8 +23,8 @@ func _run() -> void:
 		"Compatibility renderer required")
 	_check(ProjectSettings.get_setting("display/window/stretch/aspect") == "keep",
 		"Competitive view must retain its aspect ratio")
-	_check(BuildInfo.VERSION == "0.16.0-dev" and BuildInfo.BUILD_NUMBER == 22,
-		"M16 runtime identity; project metadata retained per editor-file preservation agreement")
+	_check(BuildInfo.VERSION == "0.17.0-dev" and BuildInfo.BUILD_NUMBER == 23,
+		"M17 runtime identity; project metadata retained per editor-file preservation agreement")
 	_check(BuildInfo.NETWORK_PROTOCOL_VERSION == 3,
 		"M16 durable race baseline requires protocol 3")
 	_check(BuildInfo.is_development() == OS.is_debug_build(), "Build flag mismatch")
