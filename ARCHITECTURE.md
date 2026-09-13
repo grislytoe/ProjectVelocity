@@ -1,5 +1,14 @@
 # Architecture
 
+## M18 critical dependency gate
+
+M18 adds only an explicitly invoked native capability probe and archive/CI tooling under
+dev_tools. No EOS autoload, production transport adapter or core EOS reference is added.
+The probe dynamically loads an inspected official2.3.0 native subset into its own process;
+ordinary startup/ENet stays independent. Native SDK lifetime is process-wide: the observed
+post-shutdown reinitialization fails; scene/platform lifecycle remains unproven.
+See [M18 BLOCKED report](docs/M18_COMPATIBILITY.md) before any full plugin integration.
+
 ## M15 network composition
 
 `networking/local_network.tscn` composes InputLayer, default SettingsRuntime/WorldPresentation,

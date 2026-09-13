@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.18.0-dev — M18 EOS Compatibility Gate (build24; BLOCKED)
+
+- Pin and inspect the official EOSG2.3.0 Windows/Linux archives; add opt-in native-only
+  load/API/global lifecycle/invalid-platform probes and fresh-runner CI evidence.
+- Record missing live Epic configuration, full SDK notices/export clearance, full plugin
+  lifecycle and SteamOS proof as explicit blockers; no production EOS integration.
+- Retain ENet default, simulation, M17 stress gates, protocol3/wire2, schema5 and map hashes.
+  Preserve project.godot byte-for-byte. Stop for developer review; see M18_COMPATIBILITY.md.
+
 ## 0.16.0-dev — M16 Networked Hazards and Race Logic (build22)
 
 - Extend the M15 host-authoritative stack with durable round/lifecycle/checkpoint baselines,

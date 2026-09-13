@@ -1,4 +1,10 @@
-# Networking — M17
+# Networking — M18 compatibility gate (gameplay remains M17)
+
+M18 is **BLOCKED**, not a production EOS integration. The explicit native-only capability
+probe under dev_tools never enters NetworkSession/MultiplayerTransport or ordinary F5.
+ENet stays default; protocol3/wire2 and schema5 are unchanged. No Auth/Lobby/P2P success
+is claimed. Exact matrix, lifecycle findings, SDK notice and test-credential blockers:
+[docs/M18_COMPATIBILITY.md](docs/M18_COMPATIBILITY.md). Stop for developer review.
 
 M16 requirements extraction: [docs/M16_REQUIREMENTS.md](docs/M16_REQUIREMENTS.md).
 Validation and review: [docs/M16_VALIDATION.md](docs/M16_VALIDATION.md).
