@@ -16,26 +16,28 @@ $audit | Set-Content (Join-Path $reportRoot 'archive.json')
 $candidate = Join-Path $reportRoot 'candidate'
 New-Item -ItemType Directory -Path $candidate | Out-Null
 [IO.File]::WriteAllText((Join-Path $candidate '.gdignore'), '')
-$zip = [IO.Compression.ZipFile]::OpenRead((Resolve-Path -LiteralPath $Archive).Path)
-try {
-    $prefix = 'epic-online-services-godot/addons/epic-online-services-godot/'
-    foreach ($entry in $zip.Entries) {
-        if (-not $entry.FullName.StartsWith($prefix) -or
-            $entry.FullName -notmatch '\.(dll|so)$|/eosg\.gdextension$|/LICENSE\.md$') { continue }
-        $destination = [IO.Path]::GetFullPath((Join-Path $candidate $entry.FullName.Substring($prefix.Length)))
-        if (-not $destination.StartsWith($candidate + [IO.Path]::DirectorySeparatorChar)) { throw 'M18_PATH_ESCAPE' }
-        New-Item -ItemType Directory -Force -Path (Split-Path $destination) | Out-Null
-        [IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $destination, $false)
-    }
-} finally { $zip.Dispose() }
 $ownedEnv = @('PV_EOSG_PROBE_EXTENSION', 'APPDATA', 'LOCALAPPDATA', 'XDG_DATA_HOME', 'XDG_CONFIG_HOME', 'XDG_CACHE_HOME')
 $previous = @{}
 foreach ($name in $ownedEnv) { $previous[$name] = [Environment]::GetEnvironmentVariable($name, 'Process') }
+$ownedDirectories = @($candidate)
 try {
+    $zip = [IO.Compression.ZipFile]::OpenRead((Resolve-Path -LiteralPath $Archive).Path)
+    try {
+        $prefix = 'epic-online-services-godot/addons/epic-online-services-godot/'
+        foreach ($entry in $zip.Entries) {
+            if (-not $entry.FullName.StartsWith($prefix) -or
+                $entry.FullName -notmatch '\.(dll|so)$|/eosg\.gdextension$|/LICENSE\.md$') { continue }
+            $destination = [IO.Path]::GetFullPath((Join-Path $candidate $entry.FullName.Substring($prefix.Length)))
+            if (-not $destination.StartsWith($candidate + [IO.Path]::DirectorySeparatorChar)) { throw 'M18_PATH_ESCAPE' }
+            New-Item -ItemType Directory -Force -Path (Split-Path $destination) | Out-Null
+            [IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $destination, $false)
+        }
+    } finally { $zip.Dispose() }
     [Environment]::SetEnvironmentVariable('PV_EOSG_PROBE_EXTENSION', (Join-Path $candidate 'eosg.gdextension'), 'Process')
     for ($i = 0; $i -lt $Repetitions; $i++) {
         $userRoot = Join-Path $reportRoot "user-$i"
         New-Item -ItemType Directory -Path $userRoot | Out-Null
+        $ownedDirectories += $userRoot
         foreach ($name in $ownedEnv | Where-Object {$_ -ne 'PV_EOSG_PROBE_EXTENSION'}) {
             [Environment]::SetEnvironmentVariable($name, $userRoot, 'Process')
         }
@@ -69,9 +71,17 @@ try {
     }
     Write-Output "M18_NATIVE_MATRIX_OK processes=$Repetitions platform=$Platform rendered=$Rendered online=BLOCKED"
 } finally {
-    foreach ($name in $ownedEnv) { [Environment]::SetEnvironmentVariable($name, $previous[$name], 'Process') }
+    foreach ($name in $ownedEnv) {
+        if ($null -eq $previous[$name]) {
+            [Environment]::SetEnvironmentVariable($name, [NullString]::Value, 'Process')
+        } else {
+            [Environment]::SetEnvironmentVariable($name, $previous[$name], 'Process')
+        }
+    }
     # Candidate contains proprietary native code. Keep evidence only; never upload this folder wholesale.
-    $resolved = [IO.Path]::GetFullPath($candidate)
-    if (-not $resolved.StartsWith([IO.Path]::GetFullPath($reportRoot) + [IO.Path]::DirectorySeparatorChar)) { throw 'M18_CLEANUP_ESCAPE' }
-    Remove-Item -LiteralPath $resolved -Recurse -Force
+    foreach ($directory in $ownedDirectories) {
+        $resolved = [IO.Path]::GetFullPath($directory)
+        if (-not $resolved.StartsWith([IO.Path]::GetFullPath($reportRoot) + [IO.Path]::DirectorySeparatorChar)) { throw 'M18_CLEANUP_ESCAPE' }
+        if (Test-Path -LiteralPath $resolved) { Remove-Item -LiteralPath $resolved -Recurse -Force }
+    }
 }

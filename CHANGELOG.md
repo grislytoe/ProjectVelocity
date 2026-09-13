@@ -2,6 +2,10 @@
 
 ## 0.18.0-dev — M18 EOS Compatibility Gate (build24; BLOCKED)
 
+- Recheck: clean native candidates and user caches on failed preparation/launch, restore
+  absent environment variables exactly, reject cold-import errors even with exit0, and
+  add launcher failure regression plus developer handoff. Gate remains BLOCKED.
+
 - Pin and inspect the official EOSG2.3.0 Windows/Linux archives; add opt-in native-only
   load/API/global lifecycle/invalid-platform probes and fresh-runner CI evidence.
 - Record missing live Epic configuration, full SDK notices/export clearance, full plugin

@@ -56,10 +56,13 @@ jobs:
         shell: pwsh
         run: |
           $engine = Join-Path $pwd '.tools/m18/engine/${{ matrix.executable }}'
-          & $engine --headless --path . --import
-          if ($LASTEXITCODE -ne 0) { throw 'M18_COLD_IMPORT_FAIL' }
+          $importOutput = (& $engine --headless --path . --import 2>&1 | Out-String)
+          $importExit = $LASTEXITCODE
+          Write-Output $importOutput
+          if ($importExit -ne 0 -or $importOutput -match 'SCRIPT ERROR:|ERROR:|Parse Error|WARNING:') { throw 'M18_COLD_IMPORT_FAIL' }
           ./dev_tools/test_eosg_native.ps1 -Godot $engine -Platform '${{ matrix.platform }}' -Archive .tools/m18/candidate.zip
           ./dev_tools/test_eosg_native.ps1 -Godot $engine -Platform '${{ matrix.platform }}' -Archive .tools/m18/candidate.zip -Repetitions 3 -InvalidPlatform
+          ./dev_tools/test_eosg_launcher.ps1 -Archive .tools/m18/candidate.zip -Platform '${{ matrix.platform }}'
       - name: Gate boundary
         shell: pwsh
         run: |

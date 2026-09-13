@@ -80,7 +80,7 @@ No Epic terms were accepted through a portal on the developer's behalf.
 ## Installation and native evidence scope
 
 The official installation copies the addon into `res://addons/` and enables its editor
-plugin. Source inspection found11 autoload additions, a per-frame `IEOS.tick()` controller,
+plugin. Source inspection found10 autoload additions, a per-frame `IEOS.tick()` controller,
 an export hook selecting `features[2]`, and a disable hook that omits removing HSessions.
 These are integration review concerns, not demonstrated runtime incompatibility.
 We deliberately did **not** enable that editor plugin or modify project autoloads.
@@ -95,7 +95,7 @@ The committed probe uses only the pinned IEOS low-level signatures. Native optio
 the fields actually read by the pinned C++ source; no replacement EOS SDK is implemented.
 
 Inspection before installation: Windows56 entries/25761913 expanded bytes; Linux57 entries/
-121525281 bytes. Common contents:21 GDScripts, plugin.cfg, GDExtension descriptor, UID
+121525281 bytes. Common contents:20 GDScripts, plugin.cfg, GDExtension descriptor, UID
 metadata, README/LICENSE and platform binaries. No `.import` payload, installer EXE,
 PowerShell or shell script was found in the Windows archive. The inspector rejects
 traversal, absolute/colon/backslash paths, unexpected roots, duplicate paths, symlinks and
@@ -216,6 +216,7 @@ release above into ignored `.tools/m18/`; no download is required for ordinary F
 ./dev_tools/test_eosg_native.ps1 -Godot C:/Godot/Godot.exe -Platform windows -Archive .tools/m18/windows.zip
 ./dev_tools/test_eosg_native.ps1 -Godot C:/Godot/Godot.exe -Platform windows -Archive .tools/m18/windows.zip -Rendered -Repetitions 5
 ./dev_tools/test_eosg_native.ps1 -Godot C:/Godot/Godot.exe -Platform windows -Archive .tools/m18/windows.zip -InvalidPlatform -Repetitions 3
+./dev_tools/test_eosg_launcher.ps1 -Archive .tools/m18/windows.zip
 ./dev_tools/validate.ps1 -Godot C:/Godot/Godot.exe
 ```
 
@@ -229,7 +230,8 @@ to distinguish them, not a misleading credential error.
 
 The launcher isolates APPDATA/LOCALAPPDATA/XDG paths for every child, bounds each process
 to30s, disposes/kills only its exact owned process and restores the parent's environment.
-It removes its exact extracted native candidate after use and retains sanitized local
+It removes its exact extracted native candidate and owned user/cache directories on
+success or failure, including extraction failure, and retains sanitized local
 logs. No native files/cache/save folders may be uploaded with those logs.
 Direct exploratory extraction remains ignored under `.tools/m18/native-windows`.
 
@@ -279,6 +281,17 @@ proof that every possible secret format is absent. Staged content must also be r
 before commit; real product credentials, saves, native caches, binaries and logs are excluded.
 
 ## Developer decision gate
+
+Recheck/handoff: [M18_HANDOFF.md](M18_HANDOFF.md). Review found and fixed an early
+extraction-failure cleanup gap and a PowerShell absent-environment restoration defect.
+The new missing-executable regression initially failed because an absent variable became
+an empty variable; the fix uses explicit null removal and now preserves both states.
+Owned user/cache directories are removed too. Native CI now rejects cold-import errors/
+warnings even if Godot exits0. Repeated Windows20 headless +3 invalid +5 rendered native
+runs passed after these fixes. Full local M0–M17 recheck also passed (exit0,
+`builds/validation/m18-recheck-full.log`); real online/export/SteamOS statuses are unchanged.
+Archive/source recount corrected the original report's off-by-one counts to20 scripts
+and10 autoload additions. The original native evidence remains valid; no new PROVEN claim.
 
 Accept this **BLOCKED** report/tooling PR for review only, or provide the exact SDK/notices,
 secure Epic test configuration and a suitable SteamOS runner to resume M18 in a separately
