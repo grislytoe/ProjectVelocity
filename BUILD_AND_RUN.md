@@ -1,5 +1,12 @@
 # Build and run
 
+M18 runtime build: **0.18.0-dev /24**, schema5, protocol3/wire2; EOSG candidate2.3.0 is
+**BLOCKED** for full integration. User-owned project.godot metadata remains preserved.
+Ordinary F5/Solo/ENet needs no EOS files, credentials or network. The full M0–M17 validator
+remains required. Native-only test commands and outstanding export/SteamOS gates are in
+[docs/M18_COMPATIBILITY.md](docs/M18_COMPATIBILITY.md); a green native CI job is not overall
+EOS compatibility proof. Do not publish an EOS-bearing build from this gate.
+
 ## Requirements
 
 Godot 4.7.2 Stable (standard GDScript edition), Git, and PowerShell. No external GDScript test framework or runtime SDK is needed. Windows staging export additionally needs the matching official 4.7.2 export templates.
@@ -53,7 +60,7 @@ provides active-device rebinding. Course content is gameplay/race/solo_course.ts
 
 ## Current entry point
 
-Current build: **0.16.0-dev / build 22**, save schema **5**, protocol **3**.
+Current build: **0.18.0-dev / build 24**, save schema **5**, protocol **3 /wire2**.
 From C:/Godot Projects/ProjectVelocity open project.godot with Godot 4.7.2 and press F5.
 Complete language/nickname onboarding, then New Game → Solo → Map Select → Foundry Run or Training Circuit.
 Profile header, Customization, Settings → Controls and Level Editor are available.

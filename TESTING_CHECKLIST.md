@@ -243,3 +243,14 @@ M14: full validate.ps1 includes Industrial structural/fallback/PB/UI fixtures an
 - [ ] Check measured motion traces; images are presentation evidence only.
 - [ ] PowerShell5.1 launcher run, exact PID cleanup and no real saves/logs/images committed.
 - [ ] User manual two-window review and explicit merge authorization; never auto-merge/start M18.
+
+## M18 critical gate addition
+
+- Retain the complete `dev_tools/validate.ps1` M0–M17 regression and exported ENet gates.
+- Run checksum/path inspection before native evaluation and retain only sanitized evidence.
+- Native load/global init/shutdown/invalid config must be reported separately from services.
+- Full plugin import/export, configured platform tick, scene teardown, Auth/Connect,
+  two-identity Lobby/P2P, negative online cases and SteamOS remain blocking until executed.
+- Review SDK1.19.1.2 notices and commercial/free redistribution package before distribution.
+- See [M18 matrix and commands](docs/M18_COMPATIBILITY.md); stop for developer review,
+  with no automatic merge or production integration.

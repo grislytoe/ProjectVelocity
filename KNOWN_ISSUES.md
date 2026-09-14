@@ -1,5 +1,12 @@
 # Known issues
 
+- **M18 BLOCKED:** Windows native subset loading does not prove full EOSG plugin4.7.2
+  compatibility. Live Auth/Connect/Lobby/P2P, configured platform/scene teardown, EOS-bearing
+  exports and SteamOS need evidence. Official candidate archives lack the full Epic SDK
+  notices package; redistribution clearance remains unverified. Global SDK reinitialization
+  after shutdown failed in an exploratory test. No EOS production path is enabled.
+  See [M18 compatibility gate](docs/M18_COMPATIBILITY.md).
+
 - M16 Local Network is a two-player developer round/retry path, without EOS/Steam,
   lobby/series/production results UX or persistent reconnect authentication. F9 retains
   an in-memory session bearer; restarting the guest app requires a new session.
