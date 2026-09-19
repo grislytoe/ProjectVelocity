@@ -46,6 +46,21 @@ M18 native20+3 and launcher failure checks remain separate Windows/Linux CI jobs
 EOS-bearing export is attempted without templates/full package review. No modified vendor binary
 or full addon is installed. Ordinary Windows Staging/exported ENet is covered by existing PR CI.
 
+## CI evidence and infrastructure blocker
+
+On code commit `49a2765ef18a83fc24f8473b11b58736b6ceece5`, native PR run
+[35457018993](https://github.com/grislytoe/ProjectVelocity/actions/runs/35457018993)
+completed all cold-import/M19 policy/M18 native20+3/launcher-cleanup checks on both Windows
+and Ubuntu24.04. Both jobs then **failed** at Upload sanitized text evidence:
+GitHub reported its artifact storage quota was exhausted. Overall workflow is FAILURE,
+not a green CI claim. No tests were bypassed and upload failure was not suppressed.
+No historical artifacts were deleted. Repository administration must review storage/retention
+and restore artifact availability, then rerun the failed workflows on the intended review SHA.
+GitHub reports usage recalculation can take6–12h; a blind immediate rerun is not a fix.
+Full Windows validator/export workflow status and final head are checked separately at delivery.
+The additional rendered13-case M17 run writes `builds/validation/m19-extended.log`;
+its completed result is reported at delivery, separately from the already-passed mandatory matrix.
+
 ## Reproduce
 
 ```powershell
