@@ -1,5 +1,17 @@
 # Testing checklist
 
+## M19 — BLOCKED, not live acceptance
+
+- Full validator includes `tests/eos_adapter_test.gd`: non-live code/metadata/identity/lobby/
+  authenticated-envelope policy only, marker `PROJECTVELOCITY_M19_POLICY_OK live=false native=false`.
+- Windows/Linux native CI also runs the same policy tests without credentials. M18 native
+  probe and all existing ordinary/ENet/stress/export gates remain intact.
+- M11 RU/EN tests check disabled Create/Join and Back focus; rendered captures show unavailable.
+- Run `dev_tools/check_eos_prerequisites.ps1` for names/booleans only; `-RequireLive` exits2.
+- Do not mark Auth/Connect/Lobby/P2P/Internet/exports/SteamOS PASS from these tests. Native
+  parser/sender provenance, private search, SDK notices and live prerequisites are unresolved.
+  [M19 validation](docs/M19_VALIDATION.md), [acceptance preparation](docs/M19_EOS_INTEGRATION.md).
+
 ## M15
 
 - Full `dev_tools/validate.ps1`: M0–M14 plus network core at render30/60/144,

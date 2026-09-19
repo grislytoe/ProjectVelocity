@@ -246,7 +246,7 @@ func show_new_game() -> void:
 func show_online() -> void:
 	screen = "online"
 	_panel("UI_ONLINE")
-	label(tr("UI_IN_DEVELOPMENT"), 34)
+	label(tr(EOSCapability.unavailable_key()), 24)
 	for key: String in ["UI_CREATE_LOBBY", "UI_JOIN_LOBBY"]:
 		var item: Button = button(key, Callable())
 		item.disabled = true

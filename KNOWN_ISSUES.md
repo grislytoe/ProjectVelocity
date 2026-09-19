@@ -1,5 +1,12 @@
 # Known issues
 
+- **M19 BLOCKED:** nine required environment names/full SDK package are absent here. Native
+  identity/lobby/P2P executor and full online UI are not implemented/enabled. Source review
+  found pre-GDScript packet-header validation and sender-provenance concerns; private
+  searchable-code permissions need confirmation. Non-live fixture tests are only policy
+  evidence. No live Internet join, EOS-bearing export, native cleanup or SteamOS claim.
+  [Precise boundaries and options](docs/M19_BLOCKERS.md). No automatic candidate patch.
+
 - **M18 BLOCKED:** Windows native subset loading does not prove full EOSG plugin4.7.2
   compatibility. Live Auth/Connect/Lobby/P2P, configured platform/scene teardown, EOS-bearing
   exports and SteamOS need evidence. Official candidate archives lack the full Epic SDK

@@ -1,5 +1,16 @@
 # Architecture
 
+## M19 policy delivery — live integration BLOCKED
+
+`core/online` separates JoinCode, LobbyPolicy, LobbyService operation coordination,
+OnlineService identity state policy and EOSCapability. None initializes a native SDK.
+`networking/eos_p2p_transport.gd` implements MultiplayerTransport policy only via an
+explicit debug non-live fixture boundary; production open returns unavailable. It cannot
+be substituted for accepted native EOS transport in game composition. Existing simulation,
+emulator and ENet remain independent. M11 shows a localized unavailable screen with Back focus.
+See [ownership and unresolved native boundary](docs/M19_EOS_INTEGRATION.md). No secret or
+persistent identity storage, third-party dependency, new autoload or vendor patch is added.
+
 ## M18 critical dependency gate
 
 M18 adds only an explicitly invoked native capability probe and archive/CI tooling under

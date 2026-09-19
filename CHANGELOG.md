@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.19.0-dev — M19 EOS policy delivery (build25; BLOCKED)
+
+- Add non-live identity/lobby lifecycle, cryptographic six-character code policy, strict
+  compatibility/capacity/result selection and bounded P2P transport fixture validation.
+- Explain unavailable Online in RU/EN; preserve keyboard/controller Back focus and disabled
+  Create/Join until native integration is reviewed. No fake online success in the application.
+- Add boolean-only prerequisite checker, policy tests to Windows/Linux CI and explicit
+  native source/permission/security/export blockers. No SDK package or candidate patch.
+- M18 accepted blocker delivery is preserved; M19 Internet standalone acceptance remains unmet.
+
 ## 0.18.0-dev — M18 EOS Compatibility Gate (build24; BLOCKED)
 
 - Recheck: clean native candidates and user caches on failed preparation/launch, restore

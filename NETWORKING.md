@@ -1,4 +1,12 @@
-# Networking — M18 compatibility gate (gameplay remains M17)
+# Networking — M19 blocked EOS integration (gameplay remains M17)
+
+M19 authorized after M18 PR19 merge; **M19 live acceptance remains BLOCKED**. New project
+identity/lobby/transport policy is tested exclusively through non-live fixtures. No native
+EOS transport is enabled, no Internet join by code is proven. ENet/default gameplay and
+protocol3/wire2 remain unchanged. Online UI explains unavailable configuration/review state.
+See [M19 blockers](docs/M19_BLOCKERS.md), [integration contract](docs/M19_EOS_INTEGRATION.md)
+and [validation](docs/M19_VALIDATION.md). Runtime0.19.0-dev/build25. Do not infer native
+sender/size safety from project codec tests; the pinned-source concern is documented.
 
 M18 is **BLOCKED**, not a production EOS integration. The explicit native-only capability
 probe under dev_tools never enters NetworkSession/MultiplayerTransport or ordinary F5.

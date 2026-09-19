@@ -60,6 +60,10 @@ jobs:
           $importExit = $LASTEXITCODE
           Write-Output $importOutput
           if ($importExit -ne 0 -or $importOutput -match 'SCRIPT ERROR:|ERROR:|Parse Error|WARNING:') { throw 'M18_COLD_IMPORT_FAIL' }
+          $policyOutput = (& $engine --headless --path . --script tests/eos_adapter_test.gd 2>&1 | Out-String)
+          $policyExit = $LASTEXITCODE
+          Write-Output $policyOutput
+          if ($policyExit -ne 0 -or $policyOutput -match 'SCRIPT ERROR:|ERROR:|Parse Error|WARNING:' -or $policyOutput -notmatch 'PROJECTVELOCITY_M19_POLICY_OK live=false native=false') { throw 'M19_POLICY_FAIL' }
           ./dev_tools/test_eosg_native.ps1 -Godot $engine -Platform '${{ matrix.platform }}' -Archive .tools/m18/candidate.zip
           ./dev_tools/test_eosg_native.ps1 -Godot $engine -Platform '${{ matrix.platform }}' -Archive .tools/m18/candidate.zip -Repetitions 3 -InvalidPlatform
           ./dev_tools/test_eosg_launcher.ps1 -Archive .tools/m18/candidate.zip -Platform '${{ matrix.platform }}'

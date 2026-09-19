@@ -1,5 +1,10 @@
 # M18 — EOSG 2.3.0 critical compatibility gate
 
+M19 appendendum: PR19 was subsequently accepted as a documented-blocker delivery and
+merged into dev934d887. Developer explicitly authorized M19 in a separate task. This does
+not change any M18 BLOCKED cell below. M19 adds non-live project policies; native integration,
+SDK/notices and live acceptance remain blocked. [Current M19 report](M19_BLOCKERS.md).
+
 ## Executive verdict: BLOCKED — stop for developer review
 
 This is a documented blocker delivery, **not production EOS integration or overall

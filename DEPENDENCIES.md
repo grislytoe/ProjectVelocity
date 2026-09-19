@@ -1,5 +1,10 @@
 # Dependencies
 
+M19 adds no runtime dependency or vendor patch. EOSG2.3.0 / SDK1.19.1.2-53289219 remain
+pinned and unbundled; full SDK/notices/configuration are absent in this task's process.
+Native P2P source review and private-code search permissions remain additional integration
+boundaries. [M19 BLOCKED report](docs/M19_BLOCKERS.md); M18 evidence below remains historical.
+
 | Component | Version | Source | License / redistribution | Status |
 | --- | --- | --- | --- | --- |
 | Godot engine and official export templates | 4.7.2 Stable | https://godotengine.org/download/archive/4.7.2-stable/ | MIT; commercial Steam and free standalone redistribution permitted with required notices | Engine installed; export templates required for staging export |
