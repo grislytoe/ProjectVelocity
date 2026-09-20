@@ -279,6 +279,10 @@ func run() -> void:
 		await activate("UI_NEW_GAME")
 		await capture("new-game-" + locale)
 		await activate("UI_ONLINE")
+		check(not EOSCapability.live_enabled(), "EOS stays gated without native compatibility acceptance")
+		check(find_button("UI_CREATE_LOBBY").disabled and find_button("UI_JOIN_LOBBY").disabled,
+			"Unavailable Online never offers fake create/join")
+		check(root.gui_get_focus_owner() == find_button("UI_BACK"), "Unavailable Online retains Back focus")
 		await capture("online-" + locale)
 		await action("ui_cancel")
 		await activate("TT_SOLO")

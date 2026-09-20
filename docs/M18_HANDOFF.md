@@ -1,5 +1,11 @@
 # Передача M18 на следующий этап проверки
 
+Дополнение M19: PR19 принят как documented-blocker delivery и слит в dev934d887.
+Пользователь отдельно разрешил начать M19 в этом следующем чате. Исторические запреты
+автоматического старта ниже сохранены; они не отменяют это новое явное разрешение.
+M18 executive verdict и недоказанные ячейки остаются BLOCKED.
+[Текущая граница M19](M19_BLOCKERS.md): безопасные non-live policies, без native/live acceptance.
+
 **Вердикт: BLOCKED. Готово к developer review, не к production EOS или M19.**
 
 PR: [#19](https://github.com/grislytoe/ProjectVelocity/pull/19),

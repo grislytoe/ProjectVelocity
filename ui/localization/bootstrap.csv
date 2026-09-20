@@ -259,3 +259,12 @@ IND_PAD,Jump Pad / hold jump then jump again ↑,Jump Pad / держите пр�
 IND_LASER,LIVE LINE / watch the warning →,ЛИНИЯ / следите за предупреждением →
 IND_COVER,COVER / break line of sight →,УКРЫТИЕ / прервите линию огня →
 IND_FINAL,DISPATCH / final stretch →,ВЫПУСК / финишная прямая →
+EOS_UNAVAILABLE,Online unavailable: EOS setup and compatibility review required,Онлайн недоступен: требуется настройка и проверка EOS
+EOS_LINK_REQUIRED,Account linking requires a separate explicit flow,Привязка аккаунта требует отдельного подтверждения
+EOS_AUTH_FAILED,Sign-in failed,Не удалось войти
+EOS_TIMEOUT,Online operation timed out,Время ожидания истекло
+EOS_SEARCH_FAILED,Could not verify lobby search,Не удалось проверить поиск лобби
+EOS_CODE_AMBIGUOUS,Code conflict: ask the host to create a new lobby,Код совпал: попросите хоста создать новое лобби
+EOS_NOT_FOUND,No compatible available lobby found,Подходящее свободное лобби не найдено
+EOS_JOIN_FAILED,Could not join the lobby,Не удалось войти в лобби
+EOS_BACKPRESSURE,Connection queue is busy,Очередь соединения заполнена
