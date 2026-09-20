@@ -34,6 +34,8 @@ Get-ChildItem core,gameplay,networking,visuals,save_system,map_data,ui,tests,dev
 }
 Invoke-GodotCheck -Name "tests" -Arguments @("--headless", "--path", ".", "--script", "tests/bootstrap_test.gd") -Marker "PROJECTVELOCITY_TESTS_OK"
 Invoke-GodotCheck -Name "m19-policy" -Arguments @("--headless", "--path", ".", "--script", "tests/eos_adapter_test.gd") -Marker "PROJECTVELOCITY_M19_POLICY_OK live=false native=false"
+Invoke-GodotCheck -Name "m20-contract" -Arguments @("--headless", "--path", ".", "--script", "tests/lobby_contract_test.gd") -Marker "PROJECTVELOCITY_M20_CONTRACT_OK live=false native=false"
+Invoke-GodotCheck -Name "m20-ui" -Arguments @("--headless", "--path", ".", "--script", "tests/lobby_ui_test.gd") -Marker "PROJECTVELOCITY_M20_UI_OK live=false native=false"
 Invoke-GodotCheck -Name "m1-tests" -Arguments @("--headless", "--path", ".", "--script", "tests/save_foundation_test.gd") -Marker "PROJECTVELOCITY_M1_TESTS_OK"
 Invoke-GodotCheck -Name "m2-tests" -Arguments @("--headless", "--path", ".", "--script", "tests/input_layer_test.gd") -Marker "PROJECTVELOCITY_M2_TESTS_OK"
 Invoke-GodotCheck -Name "m3-motor" -Arguments @("--headless", "--path", ".", "--script", "tests/player_motor_test.gd") -Marker "PROJECTVELOCITY_M3_MOTOR_OK"

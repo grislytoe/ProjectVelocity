@@ -233,3 +233,7 @@
   lifecycle/divergence exclusions, cleanup and true-process authority/convergence gates.
 - Windows PowerShell5.1 automated launcher, extended matrix and retained M0–M16 CI gates.
 - See docs/M17_VALIDATION.md for measured evidence and limits; no subjective comfort certification.
+
+## M20 Online Lobby UI
+
+0.20.0-dev / build26: add service-backed lobby UI with canonical six-character code, controller code keyboard, two player slots, host settings, guest readiness, guarded Start intent, localized errors, cancellation/timeout and lifecycle cleanup. Deterministic tests only; production EOS stays unavailable. No gameplay wire/save schema change.

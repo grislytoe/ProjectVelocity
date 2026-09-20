@@ -220,3 +220,7 @@ The composition handles local profile selection, drop/reconnect and reports in i
 The warning is a local UI observer of existing tick-echo RTT. No SaveStore/TrialRecords,
 production setting, upload or service dependency is introduced. Schema and units are documented
 in NETWORKING.md; evaluator compares existing host-authoritative race fixture outcomes.
+
+## M20 Online Lobby UI
+
+M20 adds AppUI-owned LobbyPage and a detached LobbyClient/LobbyView/MatchSettings presentation port. Production capability remains unavailable; the test-only executor is excluded from exports. Generation/request IDs and host revisions protect asynchronous UI updates. M16 remains gameplay authority. See [M20 contract](docs/M20_VALIDATION.md).

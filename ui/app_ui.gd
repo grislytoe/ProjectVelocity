@@ -17,6 +17,8 @@ var form_origin: String = "menu"
 var splash_elapsed: float = 0.0
 var settings: SettingsSession
 var settings_page: SettingsPage
+var lobby_client: LobbyClient = LobbyClient.new()
+var lobby_page: LobbyPage
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -27,6 +29,9 @@ func _ready() -> void:
 	show_splash()
 
 func _panel(title: String) -> void:
+	if lobby_page != null and lobby_page.active and not screen.begins_with("online"):
+		lobby_page.active = false
+		lobby_client.leave()
 	generation += 1
 	if transition != null:
 		transition.kill()
@@ -244,14 +249,13 @@ func show_new_game() -> void:
 	button("UI_BACK", show_menu)
 
 func show_online() -> void:
-	screen = "online"
-	_panel("UI_ONLINE")
-	label(tr(EOSCapability.unavailable_key()), 24)
-	for key: String in ["UI_CREATE_LOBBY", "UI_JOIN_LOBBY"]:
-		var item: Button = button(key, Callable())
-		item.disabled = true
-		item.focus_mode = Control.FOCUS_NONE
-	button("UI_BACK", show_new_game)
+	if lobby_page == null:
+		lobby_page = LobbyPage.new(self, lobby_client)
+	lobby_page.entry()
+
+func _exit_tree() -> void:
+	if lobby_page != null:
+		lobby_page.dispose()
 
 func show_maps() -> void:
 	_leave()
@@ -532,6 +536,7 @@ func _prompts_changed() -> void:
 
 func _process(delta: float) -> void:
 	super._process(delta)
+	lobby_client.poll(Time.get_ticks_msec())
 	if settings_page != null and screen.begins_with("settings_"):
 		settings_page.poll()
 		if settings.previewing and is_instance_valid(modal) and modal is ConfirmationDialog:
@@ -576,6 +581,9 @@ func _input(event: InputEvent) -> void:
 
 func _back() -> void:
 	if busy:
+		return
+	if screen.begins_with("online") and lobby_page != null:
+		lobby_page.back()
 		return
 	if screen.begins_with("settings_"):
 		settings_page.cancel()

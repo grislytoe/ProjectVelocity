@@ -268,3 +268,40 @@ EOS_CODE_AMBIGUOUS,Code conflict: ask the host to create a new lobby,Код со
 EOS_NOT_FOUND,No compatible available lobby found,Подходящее свободное лобби не найдено
 EOS_JOIN_FAILED,Could not join the lobby,Не удалось войти в лобби
 EOS_BACKPRESSURE,Connection queue is busy,Очередь соединения заполнена
+LOB_PRIVATE,Private lobby · 2 players,Приватное лобби · 2 игрока
+LOB_TITLE,ONLINE / LOBBY,ОНЛАЙН / ЛОББИ
+LOB_CODE,JOIN CODE,КОД ВХОДА
+LOB_CODE_HELP,Enter the 6-character code. Letters and digits only; I L O 0 1 are excluded.,Введите код из 6 символов. Латинские буквы и цифры; I L O 0 1 исключены.
+LOB_INVALID_CODE,Use exactly 6 allowed letters or digits.,Используйте ровно 6 допустимых букв или цифр.
+LOB_FULL,The lobby is full.,Лобби заполнено.
+LOB_CANCELLED,Operation cancelled.,Операция отменена.
+LOB_DISCONNECTED,Connection lost. Join again to continue.,Соединение потеряно. Войдите заново.
+LOB_HOST_LEFT,The host left. The lobby is closed.,Хост вышел. Лобби закрыто.
+LOB_PROTOCOL,Network versions differ. Update both games.,Сетевые версии различаются. Обновите обе игры.
+LOB_BUILD,Game builds differ. Update both games.,Сборки игры различаются. Обновите обе игры.
+LOB_MAP,The lobby map is missing or has a different version.,Карта лобби отсутствует или имеет другую версию.
+LOB_CHECKSUM,Map checksums differ. Install the correct map.,Контрольные суммы карт различаются. Установите правильную карту.
+LOB_REJECTED,Operation rejected. Check current lobby state.,Операция отклонена. Проверьте состояние лобби.
+LOB_FAILURE,Online service failed. Please retry.,Ошибка онлайн-сервиса. Повторите попытку.
+LOB_RETRY,Retry,Повторить
+LOB_CREATING,Creating private lobby…,Создание приватного лобби…
+LOB_SEARCHING,Searching by code…,Поиск по коду…
+LOB_JOINING,Joining lobby…,Вход в лобби…
+LOB_HOST,HOST,ХОСТ
+LOB_GUEST,GUEST,ГОСТЬ
+LOB_LOCAL,YOU,ВЫ
+LOB_CONNECTED,Connected,Подключён
+LOB_WAITING,Waiting for a guest,Ожидание гостя
+LOB_READY,Ready,Готов
+LOB_NOT_READY,Not Ready,Не готов
+LOB_MAP_INFO,%s · %d sec · version %d · checksum %s,%s · %d сек · версия %d · сумма %s
+LOB_ROUNDS,Rounds / %d,Раунды / %d
+LOB_ROUNDS_LABEL,Round count,Число раундов
+LOB_START,Start,Начать
+LOB_STARTING,Start accepted. Waiting for authoritative match loading.,Старт принят. Ожидание загрузки матча хостом.
+LOB_UPDATING,Waiting for host confirmation…,Ожидание подтверждения хоста…
+LOB_RESET_HELP,Changing map or rounds resets guest Ready.,Смена карты или числа раундов сбрасывает готовность гостя.
+LOB_LEAVE,Leave lobby,Покинуть лобби
+LOB_COPY,Copy code,Скопировать код
+LOB_COPIED,Code copied.,Код скопирован.
+LOB_COPY_MANUAL,Clipboard unavailable. Share the code shown above.,Буфер обмена недоступен. Передайте код с экрана.
