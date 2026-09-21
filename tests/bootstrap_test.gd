@@ -23,10 +23,10 @@ func _run() -> void:
 		"Compatibility renderer required")
 	_check(ProjectSettings.get_setting("display/window/stretch/aspect") == "keep",
 		"Competitive view must retain its aspect ratio")
-	_check(BuildInfo.VERSION == "0.20.0-dev" and BuildInfo.BUILD_NUMBER == 26,
-		"M20 runtime identity; project metadata retained per editor-file preservation agreement")
-	_check(BuildInfo.NETWORK_PROTOCOL_VERSION == 3,
-		"M16 durable race baseline requires protocol 3")
+	_check(BuildInfo.VERSION == "0.21.0-dev" and BuildInfo.BUILD_NUMBER == 27,
+		"M21 runtime identity; project metadata retained per editor-file preservation agreement")
+	_check(BuildInfo.NETWORK_PROTOCOL_VERSION == 4 and BuildInfo.NETWORK_WIRE_REVISION == 3,
+		"M21 series baseline requires protocol 4 / wire 3")
 	_check(BuildInfo.is_development() == OS.is_debug_build(), "Build flag mismatch")
 	_check(BuildInfo.channel() == "DEV", "Editor tests must run as DEV")
 	var config: AppConfig = load("res://core/config/default_app_config.tres") as AppConfig

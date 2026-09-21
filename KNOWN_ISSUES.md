@@ -1,5 +1,18 @@
 # Known issues
 
+- **M21 live EOS Internet acceptance is BLOCKED.** The transport-independent lifecycle and
+  two-process loopback ENet series are local acceptance only. The M19 production platform,
+  Auth/Connect, native Lobby/P2P executor, authorized identities, sender-safety review and
+  Internet evidence are still absent; Production Online honestly remains unavailable.
+- Protocol4/wire3 is intentionally incompatible with M16/M17 protocol3/wire2. Both peers must
+  update; there is no cross-version reconnect or persisted network state migration. Save schema
+  stays5 because M21 adds no persisted data.
+- The result/series UI is connected to the development transport composition. M20's production
+  lobby cannot hand off until the blocked native executor exists. Physical WAN, Linux/SteamOS,
+  physical-controller and target-hardware performance certification remain open.
+- Prediction still replays against current, not historical, dynamic geometry. M17 latency
+  profiles provide functional convergence evidence, not a subjective comfort guarantee.
+
 - **M19 BLOCKED:** nine required environment names/full SDK package are absent here. Native
   identity/lobby/P2P executor and full online UI are not implemented/enabled. Source review
   found pre-GDScript packet-header validation and sender-provenance concerns; private
@@ -14,9 +27,9 @@
   after shutdown failed in an exploratory test. No EOS production path is enabled.
   See [M18 compatibility gate](docs/M18_COMPATIBILITY.md).
 
-- M16 Local Network is a two-player developer round/retry path, without EOS/Steam,
-  lobby/series/production results UX or persistent reconnect authentication. F9 retains
-  an in-memory session bearer; restarting the guest app requires a new session.
+- M21 Local Network remains a two-player developer transport path without EOS/Steam or
+  persistent reconnect authentication. F9 retains an in-memory session bearer; restarting the
+  guest app requires a new session.
 - Guest replay uses corrected current dynamic geometry, not historical platform transforms.
   Stress can produce visible corrections; WAN comfort is not certified. Cycle/turret/
   projectile visuals update at snapshot cadence. Developer sample profiles/preferences

@@ -67,7 +67,8 @@ func codec_tests() -> void:
 	base.append([10000, 10000])
 	check(InputCommand.decode(base) == null, "no transform claims or extra fields")
 	var hello := NetPacket.make(NetPacket.Kind.HELLO, "", 0,
-		["map", 1, "a".repeat(64), ["Guest", "ffffffff", "ffffffff"], ""])
+		["map", 1, "a".repeat(64), ["Guest", "ffffffff", "ffffffff"], "",
+			BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER])
 	check(NetPacket.decode(hello.encode(config), config) != null, "anonymous session handshake, no persistent identity")
 	hello.data[3][0] = "Invalid\nName"
 	check(NetPacket.decode(hello.encode(config), config) == null, "nickname control character rejected")
@@ -192,7 +193,8 @@ func collision_tests() -> void:
 		session.set_physics_process(false)
 		var original_scope: String = session.session_id
 		session.receive(NetPacket.make(NetPacket.Kind.HELLO, "", 0,
-			["wrong_map", 1, "a".repeat(64), ["Guest", "ffffffff", "ffffffff"], ""]))
+			["wrong_map", 1, "a".repeat(64), ["Guest", "ffffffff", "ffffffff"], "",
+				BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER]))
 		check(not session.joined and session.session_id == original_scope, "incompatible map handshake rejected")
 		check(course.actors[0].position == course.actors[1].position, "both players share Start")
 		check(is_equal_approx(course.actors[1].presentation.modulate.a, 0.3), "remote opacity")
@@ -202,6 +204,10 @@ func collision_tests() -> void:
 		session.barrier.gate.set_ready(&"2", true)
 		check(session.barrier.gate.schedule(60, 0), "host authorizes synchronized GO")
 		check(not session.barrier.advance(59) and session.barrier.advance(60), "exact host GO tick")
+		session.series.loaded = [true, true]
+		session.series.begin_hint(0, 0)
+		session.series.begin_countdown(60, 0)
+		session.series.begin_race(60)
 		var actor: PlayerController = course.actors[1]
 		var history := PredictionHistory.new()
 		history.epoch = 0

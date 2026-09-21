@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $rows = @('host','client') | ForEach-Object { Get-Content -LiteralPath (Join-Path $RunRoot "$_/stress.json") -Raw | ConvertFrom-Json }
 $checks = @()
 foreach ($row in $rows) {
-    if ($row.schema -ne 1 -or $row.protocol -ne 3 -or $row.wire -ne 2) { throw 'Stress report schema/identity mismatch' }
+    if ($row.schema -ne 1 -or $row.protocol -ne 4 -or $row.wire -ne 3) { throw 'Stress report schema/identity mismatch' }
     if (-not $row.functional.ok) { throw 'Stress functional failure' }
     if ($row.emulator.queue_high_water -gt 256 -or $row.prediction.history_high_water -gt 240 -or $row.interpolation.high_water -gt 32) { throw 'Stress bounds exceeded' }
     if ($row.emulator.profile.simulated_rtt_ms -gt 200 -and $row.telemetry.warning_entries -eq 0) { throw 'Missing measured connection warning in high latency scenario' }

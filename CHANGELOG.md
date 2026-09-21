@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.21.0-dev — M21 Online Match / Series (build27)
+
+- Add one host-authoritative OnlineSeries state machine for synchronized load, localized
+  controls hint, exact shared countdown/GO, racing, 30-second remaining-player window, round
+  results, both-Ready reset, 1–10 rounds and final winner/Draw.
+- Record immutable settings identity, participants, Finish/DNF times, progress/checkpoint
+  evidence, score, best times and complete round history; Play Again starts a clean generation.
+- Add presentation-only smooth winner spectating, adaptive online HUD data and RU/EN final
+  result actions with keyboard/mouse/controller focus.
+- Bind load/Ready/input/snapshots to session/series/round generations; reject stale, reordered
+  and client-authority attempts. Bump incompatible gameplay protocol3→4 and wire2→3; save5 stays.
+  Conservative shared camera-code identity bumps Training v6 / Industrial v5 and checksums.
+- Add fixed-FPS model/UI tests and a real two-process ENet series fixture including exact
+  1800-tick DNF. Local acceptance passes independently; live EOS remains explicitly BLOCKED.
+
 ## 0.19.0-dev — M19 EOS policy delivery (build25; BLOCKED)
 
 - Add non-live identity/lobby lifecycle, cryptographic six-character code policy, strict

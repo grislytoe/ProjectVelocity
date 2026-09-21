@@ -2,7 +2,7 @@ class_name NetPacket
 extends RefCounted
 ## JSON values only. No Variant object deserialization or resource paths cross this boundary.
 
-enum Kind { HELLO, WELCOME, READY, INPUT, SNAPSHOT, BYE, PING, PONG }
+enum Kind { HELLO, WELCOME, READY, INPUT, SNAPSHOT, BYE, PING, PONG, LOADED, SERIES_ACTION }
 var kind: Kind = Kind.HELLO
 var session: String = ""
 var tick: int = 0
@@ -53,7 +53,7 @@ static func decode(bytes: PackedByteArray, config: NetworkConfig) -> NetPacket:
 		return null
 	var value: Variant = parser.data
 	if not value is Array or value.size() != 5 or not integer(value[0], config.protocol, config.protocol) \
-		or not integer(value[1], 0, Kind.PONG) or not hex(value[2], 32, true) \
+		or not integer(value[1], 0, Kind.SERIES_ACTION) or not hex(value[2], 32, true) \
 		or not integer(value[3], 0, 2147483647) or not value[4] is Array:
 		return null
 	var type: int = int(value[1])
@@ -61,14 +61,28 @@ static func decode(bytes: PackedByteArray, config: NetworkConfig) -> NetPacket:
 	var valid: bool = false
 	match type:
 		Kind.HELLO:
-			valid = payload.size() == 5 and payload[0] is String and payload[0].length() <= 64 \
+			valid = payload.size() == 7 and payload[0] is String and payload[0].length() <= 64 \
 				and integer(payload[1], 1, 65535) and hex(payload[2], 64) \
-				and profile(payload[3]) and hex(payload[4], 32, true)
+				and profile(payload[3]) and hex(payload[4], 32, true) \
+				and integer(payload[5], 1, 65535) and integer(payload[6], 1, 2147483647)
 		Kind.WELCOME:
-			valid = payload.size() == 4 and hex(payload[0], 32) \
-				and integer(payload[1], 20, 30) and profile(payload[2]) and profile(payload[3])
+			valid = payload.size() == 9 and hex(payload[0], 32) \
+				and integer(payload[1], 20, 30) and profile(payload[2]) and profile(payload[3]) \
+				and integer(payload[4], 1, 10) and integer(payload[5], 1, 2147483647) \
+				and payload[6] is String and payload[6].length() <= 192 \
+				and integer(payload[7], 1, 65535) and integer(payload[8], 1, 2147483647)
 		Kind.READY:
-			valid = payload.size() == 2 and payload[0] is bool and integer(payload[1], 0, 2147483647)
+			valid = payload.size() == 4 and payload[0] is bool and integer(payload[1], 0, 2147483647) \
+				and integer(payload[2], 1, 2147483647) and integer(payload[3], 1, 2147483647)
+		Kind.LOADED:
+			valid = payload.size() == 7 and integer(payload[0], 1, 2147483647) \
+				and integer(payload[1], 1, 2147483647) and payload[2] is String and payload[2].length() <= 64 \
+				and integer(payload[3], 1, 65535) and hex(payload[4], 64) \
+				and integer(payload[5], 0, 2147483647) and payload[6] is bool
+		Kind.SERIES_ACTION:
+			valid = payload.size() == 4 and integer(payload[0], 0, OnlineSeries.Action.MAIN_MENU) \
+				and integer(payload[1], 0, 2147483647) and integer(payload[2], 1, 2147483647) \
+				and integer(payload[3], 1, 2147483647)
 		Kind.BYE:
 			valid = payload.is_empty()
 		Kind.INPUT:

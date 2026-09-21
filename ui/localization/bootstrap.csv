@@ -305,3 +305,23 @@ LOB_LEAVE,Leave lobby,Покинуть лобби
 LOB_COPY,Copy code,Скопировать код
 LOB_COPIED,Code copied.,Код скопирован.
 LOB_COPY_MANUAL,Clipboard unavailable. Share the code shown above.,Буфер обмена недоступен. Передайте код с экрана.
+M21_CONTROLS_HINT,"%s / %s Move   %s Jump   %s Dash","%s / %s Движение   %s Прыжок   %s Рывок"
+M21_LOADING,Waiting for both players to load…,Ожидание загрузки обоих игроков…
+M21_ROUND,Round %d / %d,Раунд %d / %d
+M21_SCORE,Series score %d — %d,Счёт серии %d — %d
+M21_TIME_LEFT,%d seconds remain,%d секунд осталось
+M21_ROUND_RESULTS,ROUND RESULTS,РЕЗУЛЬТАТЫ РАУНДА
+M21_READY,Ready for next round,Готов к следующему раунду
+M21_WAIT_READY,Waiting for both players…,Ожидание готовности обоих игроков…
+M21_SERIES_RESULTS,SERIES RESULTS,ИТОГИ СЕРИИ
+M21_DRAW,Draw,Ничья
+M21_WINNER,Player %d wins,Победил игрок %d
+M21_DNF,DNF,Сход
+M21_PLAY_AGAIN,Play Again,Сыграть снова
+M21_RETURN_LOBBY,Return to Lobby,Вернуться в лобби
+M21_MAIN_MENU,Main Menu,Главное меню
+M21_SPECTATING,Spectating remaining player,Наблюдение за оставшимся игроком
+M21_RECONNECT,Match paused · reconnect %d sec,Матч приостановлен · переподключение %d сек
+M21_HOST_LEFT,Host disconnected. Match ended.,Хост отключился. Матч завершён.
+M21_RESULT_ROW,Round %d   P1 %s   ·   P2 %s,Раунд %d   И1 %s   ·   И2 %s
+M21_BEST_ROW,Best   P1 %s   ·   P2 %s,Лучшее   И1 %s   ·   И2 %s

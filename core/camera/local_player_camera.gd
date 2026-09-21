@@ -39,15 +39,23 @@ func _ready() -> void:
 
 
 func follow_local(player: CharacterBody2D) -> void:
+	_set_target(player, true)
+
+func follow_spectator(player: CharacterBody2D) -> void:
+	# Preserve the current camera model so a presentation-only target change eases across.
+	_set_target(player, false)
+
+func _set_target(player: CharacterBody2D, snap: bool) -> void:
 	if is_instance_valid(local_target) and local_target.has_signal("relocated") and (
 		local_target.is_connected("relocated", _on_relocated)):
 		local_target.disconnect("relocated", _on_relocated)
 	local_target = player
-	model.initialized = false
 	model.active_zone = null
 	if is_instance_valid(local_target) and local_target.has_signal("relocated"):
 		local_target.connect("relocated", _on_relocated)
-	if is_node_ready() and is_instance_valid(local_target):
+	if snap:
+		model.initialized = false
+	if snap and is_node_ready() and is_instance_valid(local_target):
 		snap_to_target()
 
 

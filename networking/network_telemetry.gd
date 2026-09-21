@@ -103,7 +103,8 @@ func observe(session: NetworkSession) -> void:
 		add("snapshot_age_service_ms", (session.service_tick - session.last_snapshot_service) * 1000.0 / 60)
 	var remote_position: Vector2 = session.course.remote.position + session.course.remote.presentation.position
 	var remote_epoch: int = session.epochs[1] if session.host else session.interpolation.epoch
-	if session.joined and session.phase() == RaceBaseline.Phase.RUNNING and remote_epoch == _previous_epoch:
+	if session.joined and session.phase() in [OnlineSeries.Phase.RACING,
+		OnlineSeries.Phase.FINISH_WINDOW] and remote_epoch == _previous_epoch:
 		add("remote_step_px", remote_position.distance_to(_previous_remote))
 		motion_trace.append({"tick": session.service_tick, "x": remote_position.x, "y": remote_position.y})
 		if motion_trace.size() > SAMPLE_CAP: motion_trace.pop_front()

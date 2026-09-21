@@ -24,6 +24,7 @@ var selected_profile: int = 0
 var scheduled_reconnect: int = -1
 var profile_changes: int = 0
 var warning_label: Label
+var match_overlay: OnlineMatchOverlay
 
 func option(key: String, fallback: String = "") -> String:
 	for argument: String in OS.get_cmdline_user_args():
@@ -48,6 +49,7 @@ func _ready() -> void:
 		get_tree().quit(1)
 		return
 	automated = option("auto", "false") == "true"
+	race_fixture.series_mode = option("series") == "true"
 	limit = int(option("ticks", "0"))
 	var input := InputLayer.new()
 	add_child(input)
@@ -100,6 +102,8 @@ func _ready() -> void:
 	session.host = course.host
 	session.course = course
 	session.config = config
+	var default_rounds: String = "2" if option("series") == "true" or option("retry") == "true" else "1"
+	session.configured_rounds = clampi(int(option("rounds", default_rounds)), 1, 10)
 	session.transport = emulator
 	session.input_layer = input
 	course.actors[0 if course.host else 1].input_layer = input
@@ -144,6 +148,9 @@ func _ready() -> void:
 	warning_label.add_theme_color_override("font_outline_color", Color.BLACK)
 	warning_label.add_theme_constant_override("outline_size", 6)
 	canvas.add_child(warning_label)
+	match_overlay = OnlineMatchOverlay.new()
+	canvas.add_child(match_overlay)
+	match_overlay.bind(session, input)
 	DisplayServer.window_set_title("ProjectVelocity M17 Local Network — " + role)
 	var size_parts: PackedStringArray = option("capture-size", "1280x800").split("x")
 	if size_parts.size() == 2 and option("capture-size", "1280x800") in ["1280x800", "1920x1080"]:
@@ -170,6 +177,7 @@ func _physics_process(_delta: float) -> void:
 	if session == null:
 		return
 	update_countdown()
+	match_overlay.refresh()
 	session.telemetry.observe(session)
 	var condition: NetworkConditionProfile = (session.transport as NetworkEmulator).profile
 	if condition.disconnect_tick >= 0 and session.service_tick == condition.disconnect_tick:
@@ -209,8 +217,9 @@ func _physics_process(_delta: float) -> void:
 		course.actors[1].position += Vector2(180, -40)
 		injected = true
 	var emulator: NetworkEmulator = session.transport as NetworkEmulator
-	var hud_text: String = "M17 DEV • %s • round %d • %s\n%s" % [
-		"HOST" if session.host else "CLIENT", session.round_id, RaceBaseline.Phase.keys()[session.phase()], start_status().left(85)]
+	var hud_text: String = "M21 DEV • %s • round %d/%d • %s\n%s" % [
+		"HOST" if session.host else "CLIENT", session.series.round_index, session.series.rounds_total,
+		OnlineSeries.Phase.keys()[session.phase()], start_status().left(85)]
 	hud_text += "\nMeasured RTT %.1fms • estimated one-way %.1fms • clock %.3fs" % [
 		session.measured_rtt_ms, session.measured_rtt_ms / 2, session.clock_ticks / 60.0]
 	hud_text += "\n%s: simulated one-way %.1fms / RTT %.1fms • jitter ±%.1fms" % [
@@ -224,6 +233,10 @@ func _physics_process(_delta: float) -> void:
 		session.prediction.commands.size(), session.remote_buffer_depth(), session.service_tick - session.last_snapshot_service]
 	hud_text += "\nProgress %s • pool %d/10 • rejects %d • Ready %s" % [
 		str(session.progress), course.world.active_count(), session.scope_rejections, str(session.guest_ready)]
+	hud_text += "\nScore %d–%d • opponent %d/%d • reconnect %ds" % [session.series.score[0],
+		session.series.score[1], session.progress[1 if session.host else 0], course.checkpoints.size(),
+		ceili(session.reconnect_remaining / 60.0)]
+	hud_text += " • opponent %s" % opponent_direction()
 	hud_text += "\nF2 next [%s] • F3 apply • F4 clean • F5 metrics reset" % NetworkConditionProfile.NAMES[selected_profile]
 	hud_text += "\nF6 Ready • F7 round retry • F8 drop • F9 reconnect"
 	hud_text += "\nWASD / stick • Space / A Jump • Shift / RB Dash • no Solo records"
@@ -248,6 +261,11 @@ func _physics_process(_delta: float) -> void:
 			_race_captures["results"] = true
 			_screenshots += 1
 			capture.call_deferred()
+		if session.phase() == OnlineSeries.Phase.FINAL_SERIES_RESULTS \
+			and not _race_captures.has("final"):
+			_race_captures["final"] = true
+			_screenshots += 1
+			capture.call_deferred()
 	if limit > 0 and session.service_tick >= limit:
 		finish_test()
 
@@ -259,14 +277,32 @@ func countdown_text() -> String:
 	var remaining: int = session.barrier.gate.start_tick - session.host_tick
 	return " • %d" % ceili(remaining / 60.0) if remaining > 0 else ""
 
+func opponent_direction() -> String:
+	var local_actor: PlayerController = course.actors[0 if session.host else 1]
+	var delta: Vector2 = course.remote.global_position - local_actor.global_position
+	if absf(delta.x) < 120 and absf(delta.y) < 90:
+		return "•"
+	if absf(delta.x) >= absf(delta.y):
+		return "→" if delta.x > 0 else "←"
+	return "↓" if delta.y > 0 else "↑"
+
 func update_countdown() -> void:
 	var remaining: int = session.barrier.gate.start_tick - session.host_tick
 	var active: bool = session.joined and not session.paused and not session.ended \
 		and session.barrier.gate.start_tick >= 0 and not session.round_complete
 	countdown.text = ""
-	if active and session.phase() == RaceBaseline.Phase.COUNTDOWN and remaining > 0:
+	if active and session.phase() == OnlineSeries.Phase.CONTROLS_HINT:
+		countdown.add_theme_font_size_override("font_size", 42)
+		countdown.text = tr("M21_CONTROLS_HINT") % [
+			session.input_layer.prompt("move_left").get("label", ""),
+			session.input_layer.prompt("move_right").get("label", ""),
+			session.input_layer.prompt("jump").get("label", ""),
+			session.input_layer.prompt("dash").get("label", "")]
+	elif active and session.phase() == OnlineSeries.Phase.COUNTDOWN and remaining > 0:
+		countdown.add_theme_font_size_override("font_size", 204)
 		countdown.text = str(ceili(remaining / 60.0))
-	elif active and session.phase() == RaceBaseline.Phase.RUNNING and remaining > -60:
+	elif active and session.phase() == OnlineSeries.Phase.RACING and remaining > -60:
+		countdown.add_theme_font_size_override("font_size", 204)
 		countdown.text = "GO"
 	countdown.visible = not countdown.text.is_empty()
 
@@ -280,8 +316,10 @@ func start_status() -> String:
 			+ " at 127.0.0.1:%d — keep both windows open" % _retry_port
 	if not session.joined:
 		return "Peer connected; waiting for handshake"
-	if not session.guest_ready:
-		return "Guest is not ready — press F6 in the CLIENT window"
+	if session.phase() == OnlineSeries.Phase.SYNCHRONIZED_LOADING:
+		return "Loading %s" % str(session.series.loaded)
+	if session.phase() == OnlineSeries.Phase.BETWEEN_ROUND_READY:
+		return "Round results • Ready %s" % str(session.series.ready)
 	if session.barrier.gate.start_tick >= 0:
 		return "Starting" + countdown_text()
 	if session._hint_ticks < session.config.hint_ticks:
@@ -355,12 +393,17 @@ func finish_test() -> void:
 	report.merge({"round": session.round_id, "phase": session.phase(), "winner": session.winner,
 		"round_complete": session.round_complete,
 		"input_ack": session.last_simulated_sequence,
-		"retry_started": session.round_id == 2 and (session.barrier.gate.released if session.host else session.phase() == RaceBaseline.Phase.RUNNING),
+		"retry_started": session.round_id == 2 and (session.barrier.gate.released if session.host else session.phase() == OnlineSeries.Phase.RACING),
 		"progress": session.progress, "deaths": session.deaths, "claims_sent": race_fixture.claims_sent,
 		"authority_rejections": session.scope_rejections, "pool_peak": course.pool_high_water,
 		"projectile_hits": course.projectile_hits, "pool_active": course.world.active_count(),
 		"pool_nodes": course.world.projectiles.size(), "event_duplicates": session.events.duplicates,
-		"fixture_steps": race_fixture.fixture_steps})
+		"fixture_steps": race_fixture.fixture_steps,
+		"series_generation": session.series.series_generation,
+		"round_index": session.series.round_index, "rounds_total": session.series.rounds_total,
+		"score": session.series.score, "round_results": session.series.round_results,
+		"best_times": session.series.best_times, "final_winner": session.series.final_winner,
+		"settings_identity": session.series.settings_identity})
 	var emulator: NetworkEmulator = session.transport as NetworkEmulator
 	var buffer: SnapshotBuffer = session._host_remote_buffer if session.host else session.interpolation
 	var stress_report: Dictionary = {"schema": NetworkTelemetry.SCHEMA, "build": BuildInfo.VERSION,

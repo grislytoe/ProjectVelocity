@@ -19,6 +19,7 @@
     [switch]$Race,
     [switch]$Malicious,
     [switch]$Retry,
+    [switch]$Series,
     [ValidateSet('training', 'industrial')][string]$Map = 'training'
 )
 $ErrorActionPreference = 'Stop'
@@ -38,7 +39,7 @@ try {
         if (-not $Rendered) { $arguments += '--headless' }
         $arguments += @('--', '--local-network', "--role=$role", "--port=$Port", '--auto=true',
             '--timeout-ticks=600',
-            "--ticks=$(if ($Race) { if ($role -eq 'host') { 2400 } else { 2280 } } elseif ($role -eq 'host') { 1200 } else { 1080 })", "--emulation=$Profile",
+            "--ticks=$(if ($Series) { if ($role -eq 'host') { 3600 } else { 3480 } } elseif ($Race) { if ($role -eq 'host') { 2400 } else { 2280 } } elseif ($role -eq 'host') { 1200 } else { 1080 })", "--emulation=$Profile",
             "--snapshots=$Snapshots", "--capture-size=$Resolution", "--seed=$(if ($role -eq 'host') { $HostSeed } else { $ClientSeed })",
             "--map=$Map",
             "--disconnect-tick=$DisconnectTick",
@@ -48,6 +49,7 @@ try {
             "--lifecycle=$($Lifecycle.ToString().ToLowerInvariant())",
             "--race=$($Race.ToString().ToLowerInvariant())", "--malicious=$($Malicious.ToString().ToLowerInvariant())",
             "--retry=$($Retry.ToString().ToLowerInvariant())",
+            "--series=$($Series.ToString().ToLowerInvariant())", "--rounds=$(if ($Series -or $Retry) { 2 } else { 1 })",
             ('"--evidence=' + (Join-Path $roleRoot 'screen') + '"'))
         if ($ConditionFile) { $arguments += ('"--condition-file=' + (Resolve-Path -LiteralPath $ConditionFile).Path + '"') }
         $previousAppData = $env:APPDATA
@@ -67,7 +69,7 @@ try {
         # Both run real time; no --fixed-fps, which accelerates headless clocks independently.
     }
     # Race fixtures need 40 seconds of physics plus startup/scheduling headroom on CI.
-    $processTimeoutMs = if ($Race) { 90000 } else { 45000 }
+    $processTimeoutMs = if ($Series) { 120000 } elseif ($Race) { 90000 } else { 45000 }
     $deadline = [DateTime]::UtcNow.AddMilliseconds($processTimeoutMs)
     foreach ($process in $processes) {
         if (-not $process.WaitForExit([Math]::Max(1, [int]($deadline - [DateTime]::UtcNow).TotalMilliseconds))) { throw "M15 process $($process.Id) timeout; $runRoot" }
@@ -93,7 +95,13 @@ try {
     if (-not $HostDrop -and -not $reports[0].round_complete -and ($reports[0].clock - $reports[1].clock) -ne ($reports[0].host_tick - $reports[1].host_tick)) {
         throw 'Clock is inconsistent with authoritative host ticks'
     }
-    if ($Reconnect -and ($reports[0].events.RESUME -lt 1 -or $reports[1].events.RESUME -lt 1)) { throw 'Reconnect did not resume the match' }
+    if ($Reconnect) {
+        $reconnectedAfterFinal = ($reports[0].phase -eq 9 -and $reports[1].phase -eq 9 -and
+            $reports[0].round_complete -and $reports[1].round_complete)
+        if (-not $reconnectedAfterFinal -and ($reports[0].events.RESUME -lt 1 -or $reports[1].events.RESUME -lt 1)) {
+            throw 'Reconnect did not resume the match'
+        }
+    }
     if ($Lifecycle) {
         foreach ($report in $reports) {
             foreach ($event in @('DEATH', 'RESPAWN', 'CHECKPOINT', 'FINISH', 'HAZARD')) {
@@ -103,31 +111,60 @@ try {
     }
     if ($Race) {
         foreach ($report in $reports) {
-            foreach ($event in @('SKIPPED_CHECKPOINT', 'DEATH', 'RESPAWN', 'CHECKPOINT', 'FINISH',
-                'WINNER', 'SAW_HIT', 'LASER_HIT', 'TURRET_FIRE', 'PROJECTILE_HIT', 'POOL_RETURN', 'JUMP_PAD', 'PLATFORM_BREAK', 'PLATFORM_RESTORE')) {
+            $requiredEvents = if ($Series) { @('CHECKPOINT', 'FINISH', 'WINNER', 'START', 'ROUND_TRANSITION') } else {
+                @('SKIPPED_CHECKPOINT', 'DEATH', 'RESPAWN', 'CHECKPOINT', 'FINISH', 'WINNER',
+                    'SAW_HIT', 'LASER_HIT', 'TURRET_FIRE', 'PROJECTILE_HIT', 'POOL_RETURN', 'JUMP_PAD', 'PLATFORM_BREAK', 'PLATFORM_RESTORE')
+            }
+            foreach ($event in $requiredEvents) {
                 if ($report.events.$event -lt 1) { throw "M16 missing replicated event $event; $runRoot" }
             }
             if ($report.pool_nodes -ne 10) { throw 'M16 pool invariant' }
-            if ($Retry) {
+            if ($Series) {
+                # Complete-series assertions follow below.
+            } elseif ($Retry) {
                 if (-not $report.retry_started -or $report.winner -ne 0) { throw 'M16 ready/retry did not start round2' }
             } elseif (-not $report.round_complete -or $report.winner -ne 2) { throw 'M16 both Finish/winner did not complete round' }
         }
         if ($reports[0].pool_peak -gt 10) { throw 'M16 pool cap exceeded' }
-        if ($Retry -and ($reports[0].input_ack -eq 65535 -or $reports[0].input_ack -lt 30 -or $reports[1].history -gt 30)) {
+        if ($Retry -and -not $Series -and ($reports[0].input_ack -eq 65535 -or $reports[0].input_ack -lt 30 -or $reports[1].history -gt 30)) {
             throw 'M16 round2 input sequence was not consumed/reconciled'
         }
         if ($reports[0].pool_active -ne 0) { throw 'M16 pool not retired after results' }
         if (($reports[0].progress | ConvertTo-Json -Compress) -ne ($reports[1].progress | ConvertTo-Json -Compress)) {
             throw 'M16 durable progress failed to converge'
         }
-        foreach ($event in @('CHECKPOINT', 'FINISH', 'DEATH', 'SAW_HIT', 'LASER_HIT', 'PROJECTILE_HIT', 'WINNER')) {
+        $pairedEvents = if ($Series) { @('CHECKPOINT', 'FINISH', 'WINNER', 'START') } else {
+            @('CHECKPOINT', 'FINISH', 'DEATH', 'SAW_HIT', 'LASER_HIT', 'PROJECTILE_HIT', 'WINNER')
+        }
+        foreach ($event in $pairedEvents) {
             if ($reports[0].events.$event -ne $reports[1].events.$event) { throw "M16 event count mismatch/double presentation: $event" }
         }
         if ($Malicious -and ($reports[1].claims_sent -lt 100 -or $reports[0].authority_rejections -lt 100)) {
             throw 'M16 forged packet rejection was not exercised'
         }
     }
-    if (-not $HostDrop -and -not $reports[0].status.Contains('paused')) { throw 'Missing orderly guest disconnect observation' }
+    if ($Series) {
+        foreach ($report in $reports) {
+            if ($report.round_index -ne 2 -or $report.rounds_total -ne 2 -or $report.round_results.Count -ne 2) {
+                throw "M21 complete two-round series was not observed; $runRoot"
+            }
+            if ($report.phase -ne 9 -or $report.score[0] -ne 1 -or $report.score[1] -ne 1 -or $report.final_winner -ne 0) {
+                throw "M21 final Draw/score mismatch; $runRoot"
+            }
+            if ($report.best_times[0] -lt 0 -or $report.best_times[1] -lt 0) { throw 'M21 best times missing' }
+        }
+        for ($round = 0; $round -lt 2; $round++) {
+            if ($reports[0].round_results[$round][4] -ne $reports[1].round_results[$round][4] -or
+                $reports[0].round_results[$round][5][0] -ne $reports[1].round_results[$round][5][0] -or
+                $reports[0].round_results[$round][5][1] -ne $reports[1].round_results[$round][5][1] -or
+                $reports[0].round_results[$round][2] -ne $reports[1].round_results[$round][2]) {
+                throw 'M21 authoritative round history did not converge'
+            }
+        }
+    }
+    if (-not $HostDrop -and -not $Series -and $reports[0].phase -ne 9 -and -not $reports[0].status.Contains('paused')) {
+        throw 'Missing orderly guest disconnect observation'
+    }
     if ($ProfileChange) {
         foreach ($role in @('host','client')) {
             $stress = Get-Content -LiteralPath (Join-Path $runRoot "$role/stress.json") -Raw | ConvertFrom-Json
