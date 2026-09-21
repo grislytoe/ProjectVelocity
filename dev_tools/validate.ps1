@@ -36,6 +36,10 @@ Invoke-GodotCheck -Name "tests" -Arguments @("--headless", "--path", ".", "--scr
 Invoke-GodotCheck -Name "m19-policy" -Arguments @("--headless", "--path", ".", "--script", "tests/eos_adapter_test.gd") -Marker "PROJECTVELOCITY_M19_POLICY_OK live=false native=false"
 Invoke-GodotCheck -Name "m20-contract" -Arguments @("--headless", "--path", ".", "--script", "tests/lobby_contract_test.gd") -Marker "PROJECTVELOCITY_M20_CONTRACT_OK live=false native=false"
 Invoke-GodotCheck -Name "m20-ui" -Arguments @("--headless", "--path", ".", "--script", "tests/lobby_ui_test.gd") -Marker "PROJECTVELOCITY_M20_UI_OK live=false native=false"
+foreach ($fps in @(30, 60, 144)) {
+    Invoke-GodotCheck -Name "m21-series-$fps" -Arguments @("--headless", "--path", ".", "--fixed-fps", "$fps", "--script", "tests/online_series_test.gd") -Marker "PROJECTVELOCITY_M21_SERIES_OK"
+}
+Invoke-GodotCheck -Name "m21-ui" -Arguments @("--headless", "--path", ".", "--script", "tests/online_match_ui_test.gd") -Marker "PROJECTVELOCITY_M21_UI_OK"
 Invoke-GodotCheck -Name "m1-tests" -Arguments @("--headless", "--path", ".", "--script", "tests/save_foundation_test.gd") -Marker "PROJECTVELOCITY_M1_TESTS_OK"
 Invoke-GodotCheck -Name "m2-tests" -Arguments @("--headless", "--path", ".", "--script", "tests/input_layer_test.gd") -Marker "PROJECTVELOCITY_M2_TESTS_OK"
 Invoke-GodotCheck -Name "m3-motor" -Arguments @("--headless", "--path", ".", "--script", "tests/player_motor_test.gd") -Marker "PROJECTVELOCITY_M3_MOTOR_OK"
@@ -129,6 +133,7 @@ foreach ($fps in @(30, 60, 144)) {
     Invoke-GodotCheck -Name "m17-stress-$fps" -Arguments @("--headless", "--path", ".", "--fixed-fps", "$fps", "--script", "tests/network_stress_test.gd") -Marker "PROJECTVELOCITY_M17_STRESS_OK"
 }
 & (Join-Path $PSScriptRoot "test_network_stress.ps1") -Godot $Godot
+& (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Retry -Series -Map industrial -Port 24931
 
 
 git diff --cached --check
@@ -141,8 +146,9 @@ if ($ExportWindows) {
     Invoke-GodotCheck -Name "export" -Arguments @("--headless", "--path", ".", "--export-debug", '"Windows Staging"', "builds/windows/ProjectVelocity.exe")
     $Godot = Join-Path $projectRoot "builds/windows/ProjectVelocity.exe"
     Invoke-GodotCheck -Name "export-boot" -Arguments @("--headless", "--quit-after", "600", "--", "--smoke-test") -Marker "PROJECTVELOCITY_BOOT_OK"
-    Invoke-GodotCheck -Name "m15-export-boot" -Arguments @("--headless", "--quit-after", "30", "--", "--local-network", "--role=host", "--port=24920") -Marker "M15_READY role=host protocol=3"
+    Invoke-GodotCheck -Name "m15-export-boot" -Arguments @("--headless", "--quit-after", "30", "--", "--local-network", "--role=host", "--port=24920") -Marker "M15_READY role=host protocol=4"
     & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Exported -Race -Malicious -Map industrial -Port 24924
+    & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Exported -Race -Retry -Series -Map industrial -Port 24932
     $editorLog = Get-Content (Join-Path $logRoot "boot.stdout.log") -Raw
     $exportLog = Get-Content (Join-Path $logRoot "export-boot.stdout.log") -Raw
     if ($editorLog -notmatch 'PV_MAP_BOOT_HASH=([0-9a-f]{64})') { throw "Missing editor map identity" }
@@ -156,4 +162,4 @@ if ($ExportWindows) {
         throw "Export Industrial identity differs from editor"
     }
 }
-Write-Output "M0-M17 validation passed, including separate-process localhost network sessions."
+Write-Output "M0-M21 validation passed, including complete separate-process localhost series."

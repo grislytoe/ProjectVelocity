@@ -74,9 +74,16 @@ func _ready() -> void:
 
 func update_spectator(winner: int, complete: bool) -> void:
 	var local_index: int = 0 if host else 1
-	var target: PlayerController = actors[1 - local_index] if winner == local_index + 1 and not complete else actors[local_index]
+	if actors.size() != 2 or not is_instance_valid(actors[local_index]):
+		return
+	var remaining: PlayerController = actors[1 - local_index]
+	var spectating: bool = winner == local_index + 1 and not complete and is_instance_valid(remaining)
+	var target: PlayerController = remaining if spectating else actors[local_index]
 	if local_camera != null and local_camera.local_target != target:
-		local_camera.follow_local(target)
+		if spectating:
+			local_camera.follow_spectator(target)
+		else:
+			local_camera.follow_local(target)
 
 func phase_summary() -> String:
 	var active: int = 0

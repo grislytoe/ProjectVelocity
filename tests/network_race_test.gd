@@ -24,9 +24,19 @@ func run() -> void:
 		await physics_frame
 		await physics_frame
 		check(course.diagnostics.valid(), "official track verified")
+		var authority_positions: Array[Vector2] = [course.actors[0].position, course.actors[1].position]
+		course.update_spectator(1, false)
+		check(course.local_camera == null or course.local_camera.local_target == course.actors[1],
+			"winner camera targets remaining player")
+		check(course.actors[0].position == authority_positions[0] and course.actors[1].position == authority_positions[1],
+			"spectator presentation cannot mutate gameplay authority")
+		course.update_spectator(1, true)
+		check(course.local_camera == null or course.local_camera.local_target == course.actors[0],
+			"spectator target safely restores on round transition")
 		var session := NetworkSession.new()
 		session.course = course
 		session.transport = MultiplayerTransport.new()
+		session.configured_rounds = 2
 		root.add_child(session)
 		session.set_physics_process(false)
 		session.joined = true
@@ -45,8 +55,8 @@ func run() -> void:
 		var wire := NetPacket.make(NetPacket.Kind.SNAPSHOT, session.session_id, 1, data)
 		check(NetPacket.decode(wire.encode(session.config), session.config) != null, "full baseline wire")
 		var old := NetworkConfig.new()
-		old.protocol = 2
-		check(NetPacket.decode(wire.encode(old), session.config) == null, "protocol 2 rejected")
+		old.protocol = 3
+		check(NetPacket.decode(wire.encode(old), session.config) == null, "protocol 3 rejected")
 		for field: int in data[10].size():
 			var broken: Array = data.duplicate(true)
 			broken[10][field] = {"forged": true}
@@ -58,16 +68,20 @@ func run() -> void:
 		data[10][7][1][0] = [2, 0]
 		check(RaceBaseline.valid(data[10]) and RaceBaseline.matches_map(data[10], unordered),
 			"non-strict map preserves actual reached set rather than count prefix")
-		session.receive(NetPacket.make(NetPacket.Kind.READY, session.session_id, 0, [true, 1]))
+		check(session.series.loaded[0] and not session.series.loaded[1], "host confirms only its actual loaded world")
+		check(not session.series.confirm_loaded(2, 0, 1, course.definition.map_id,
+			course.definition.map_version, course.definition.declared_checksum, 1), "stale series load rejected")
+		check(not session.series.confirm_loaded(2, 1, 1, "wrong",
+			course.definition.map_version, course.definition.declared_checksum, 1), "wrong map load rejected")
+		check(session.series.confirm_loaded(2, 1, 1, course.definition.map_id,
+			course.definition.map_version, course.definition.declared_checksum, 1), "matching load accepted")
+		check(session.series.begin_hint(0, 0), "both correct loads allow controls hint")
 		session.barrier.gate.set_ready(&"1", true)
-		check(session.barrier.gate.schedule(60, 0), "ready allows countdown")
-		session.receive(NetPacket.make(NetPacket.Kind.READY, session.session_id, 0, [false, 2]))
-		check(session.barrier.gate.start_tick == -1, "withdrawal cancels countdown")
-		session.receive(NetPacket.make(NetPacket.Kind.READY, session.session_id, 0, [true, 1]))
-		check(not session.guest_ready, "reordered ready cannot undo withdrawal")
-		session.receive(NetPacket.make(NetPacket.Kind.READY, session.session_id, 0, [true, 3]))
-		session.barrier.gate.schedule(60, 0)
+		session.barrier.gate.set_ready(&"2", true)
+		check(session.barrier.gate.schedule(60, 0) and session.series.begin_countdown(60, 0),
+			"loaded hint allows authoritative countdown")
 		check(not session.barrier.advance(59) and session.barrier.advance(60), "exact GO")
+		check(session.series.begin_race(60), "authoritative start tick begins race")
 		var actor: PlayerController = course.actors[1]
 		actor.advance(InputFrame.new())
 		check(not course.lives[1].finish() and session.winner == 0, "mandatory Finish guard")
@@ -84,8 +98,10 @@ func run() -> void:
 		session.disconnected()
 		session.receive(NetPacket.make(NetPacket.Kind.HELLO, "", 0, [course.definition.map_id,
 			course.definition.map_version, course.definition.declared_checksum,
-			["Guest", "ffffffff", "ffffffff"], session.reconnect_token]))
-		session.receive(NetPacket.make(NetPacket.Kind.READY, session.session_id, 0, [true, 4]))
+			["Guest", "ffffffff", "ffffffff"], session.reconnect_token,
+			BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER]))
+		session.receive(NetPacket.make(NetPacket.Kind.READY, session.session_id, 0, [true, 4,
+			session.series.series_generation, session.series.round_generation]))
 		check(not session.paused and actor.position == safe, "reconnect restores host checkpoint")
 		actor.advance(InputFrame.new())
 		check(course.lives[1].finish() and session.winner == 2, "first valid Finish wins")
@@ -95,9 +111,12 @@ func run() -> void:
 			course.lives[0].checkpoint(point.point_id, course.assembly.point_position(point, true))
 		check(course.lives[0].finish() and session.winner == 2 and session.round_complete,
 			"same-tick second valid Finish preserves first accepted winner")
+		check(NetPacket.valid_snapshot(snapshot(session)), "completed round snapshot remains wire-valid")
 		check(session.finish_times[0] == session.finish_times[1], "simultaneous tick has equal recorded times")
-		session.round_complete = true
-		session.guest_ready = true
+		check(session.series.phase == OnlineSeries.Phase.ROUND_RESULTS, "immutable round result recorded")
+		session.series.enter_between_round()
+		session.series.set_ready(2, true, session.series.series_generation,
+			session.series.round_generation, 5)
 		check(session.retry_round() and session.round_id == 2, "host ready retry transition")
 		check(course.lives[1].progress.reached.is_empty() and course.world.active_count() == 0, "round resets progress and pool")
 		var viewport := SubViewport.new()
@@ -169,7 +188,7 @@ func run() -> void:
 		var stopped_clock: int = session.clock_ticks
 		session.reconnect_remaining = 1
 		session.advance_host()
-		check(session.ended and session.round_complete and session.winner == 1
+		check(not session.ended and session.round_complete and session.winner == 1
 			and session.clock_ticks == stopped_clock, "expired reconnect awards host without advancing clock")
 		session.shutdown()
 		check(session.events.recent.is_empty() and session.remote_buffer_depth() == 0, "bounded histories teardown")

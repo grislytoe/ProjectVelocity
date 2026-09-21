@@ -5,19 +5,24 @@ extends RefCounted
 var sequence: int = 0
 var tick: int = 0
 var generation: int = 0
+var series_generation: int = 1
+var round_generation: int = 1
 var frame := InputFrame.new()
 
 func values() -> Array:
 	return [sequence, tick, frame.movement.x, frame.movement.y,
 		frame.dash_direction.x, frame.dash_direction.y, frame.jump_pressed,
-		frame.jump_held, frame.jump_released, frame.dash_pressed, generation]
+		frame.jump_held, frame.jump_released, frame.dash_pressed, generation,
+		series_generation, round_generation]
 
 static func decode(value: Variant) -> InputCommand:
-	if not value is Array or value.size() != 11:
+	if not value is Array or value.size() != 13:
 		return null
 	if not NetPacket.integer(value[0], 0, 65535) or not NetPacket.integer(value[1], 0, 2147483647):
 		return null
-	if not NetPacket.integer(value[10], 0, 2147483647):
+	if not NetPacket.integer(value[10], 0, 2147483647) \
+		or not NetPacket.integer(value[11], 1, 2147483647) \
+		or not NetPacket.integer(value[12], 1, 2147483647):
 		return null
 	for i: int in range(2, 6):
 		if not NetPacket.number(value[i], 1.0):
@@ -29,6 +34,8 @@ static func decode(value: Variant) -> InputCommand:
 	command.sequence = int(value[0])
 	command.tick = int(value[1])
 	command.generation = int(value[10])
+	command.series_generation = int(value[11])
+	command.round_generation = int(value[12])
 	command.frame.movement = Vector2(value[2], value[3])
 	command.frame.dash_direction = Vector2(value[4], value[5])
 	if command.frame.movement.length() > 1.001:

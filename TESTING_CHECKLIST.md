@@ -1,5 +1,23 @@
 # Testing checklist
 
+## M21 Online Match / Series
+
+- [x] `tests/online_series_test.gd` at fixed render30/60/144: correct/stale/wrong loaded
+  confirmations, exact hint/start/deadline ticks, Finish duplicate/late rejection, second Finish
+  and DNF boundary, 1/2-round score, Draw, best times, Play Again/Lobby/Menu and 50 clean cycles.
+- [x] `tests/network_race_test.gd`: real M7 mandatory checkpoints, forged host snapshots,
+  protocol3 rejection, spectator target/fallback without actor mutation, reset and reconnect.
+- [x] `tests/online_match_ui_test.gd`: RU/EN result history, DNF/Draw, keyboard/controller prompt
+  selection, focusable Play Again/Return Lobby/Main Menu and route activation without saves.
+- [x] Two standalone ENet processes complete two Industrial rounds: round1 both Finish; round2
+  waits the full 1800-tick post-winner window and records DNF; both converge to score1–1/Draw.
+- [ ] Live EOS Internet acceptance. This is BLOCKED by M19 prerequisites and must not be inferred
+  from editor, fixture, loopback ENet, screenshots or Windows staging export.
+
+Run the complete gate with `./dev_tools/validate.ps1 -Godot C:/Godot/Godot.exe`. The focused
+two-process command is documented in NETWORKING.md. All process roots use isolated APPDATA/
+LOCALAPPDATA and never open the user's save.
+
 ## M19 — BLOCKED, not live acceptance
 
 - Full validator includes `tests/eos_adapter_test.gd`: non-live code/metadata/identity/lobby/

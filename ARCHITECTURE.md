@@ -1,5 +1,25 @@
 # Architecture
 
+## M21 Online Match / Series
+
+`OnlineSeries` is the typed, transport-independent state owner for the complete two-player
+series lifecycle. `NetworkSession` remains the only simulation/network authority and invokes
+that model after verified M7 checkpoint/Finish signals; no parallel race authority exists.
+The model owns immutable map/settings identity, session/series/round generations, loaded and
+between-round Ready revisions, host start/deadline ticks, per-round evidence, score, best times
+and final winner/Draw. `RaceBaseline` carries a validated copy in every authoritative snapshot.
+
+Protocol4/wire3 adds generation-bound LOADED/READY/action payloads, generation-bound INPUT,
+expanded WELCOME settings identity and the complete series baseline. Incompatible protocol3
+peers fail codec/handshake admission. Save schema5 and official map identities are unchanged.
+LocalENetTransport is still only a development adapter; gameplay consumes MultiplayerTransport.
+
+`OnlineMatchOverlay` presents RU/EN controls/results/actions and reads snapshots only. The
+spectator target switch is confined to LocalPlayerCamera/NetworkCourse presentation and cannot
+move actors or validate results. Production Online continues to construct the unavailable M20
+client because M19 native EOS prerequisites remain blocked; local ENet acceptance is not EOS.
+See [M21 validation](docs/M21_VALIDATION.md) and [network contract](NETWORKING.md).
+
 ## M19 policy delivery — live integration BLOCKED
 
 `core/online` separates JoinCode, LobbyPolicy, LobbyService operation coordination,

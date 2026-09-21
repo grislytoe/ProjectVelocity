@@ -1,8 +1,8 @@
 # Build and run
 
-M18 runtime build: **0.18.0-dev /24**, schema5, protocol3/wire2; EOSG candidate2.3.0 is
+Current runtime build: **0.21.0-dev /27**, schema5, protocol4/wire3; EOSG candidate2.3.0 is
 **BLOCKED** for full integration. User-owned project.godot metadata remains preserved.
-Ordinary F5/Solo/ENet needs no EOS files, credentials or network. The full M0–M17 validator
+Ordinary F5/Solo/ENet needs no EOS files, credentials or network. The full M0–M21 validator
 remains required. Native-only test commands and outstanding export/SteamOS gates are in
 [docs/M18_COMPATIBILITY.md](docs/M18_COMPATIBILITY.md); a green native CI job is not overall
 EOS compatibility proof. Do not publish an EOS-bearing build from this gate.
@@ -28,7 +28,7 @@ The validator imports assets, parses all bootstrap/test scripts, runs M0 bootstr
 
 ## Build identity
 
-Version 0.16.0-dev and build number 22 live in core/build/build_info.gd. M16 preserves the user-owned project.godot byte-for-byte; its editor version metadata remains 0.15.0-dev. BuildInfo is the runtime identity, an explicit exception tested in bootstrap. OS.is_debug_build() is the authoritative development flag. The staging export adds the staging feature; its label is STAGING. Release-mode engine binaries disable development debug logging; release exports require developer review and are not part of M0.
+Version 0.21.0-dev and build number27 live in core/build/build_info.gd. M21 preserves the user-owned project.godot byte-for-byte; its editor version metadata remains 0.15.0-dev. BuildInfo is the runtime identity, an explicit exception tested in bootstrap. OS.is_debug_build() is the authoritative development flag. The staging export adds the staging feature; its label is STAGING. Release-mode engine binaries disable development debug logging; release exports require developer review and are not part of M0.
 
 ## CI
 
@@ -60,18 +60,19 @@ provides active-device rebinding. Course content is gameplay/race/solo_course.ts
 
 ## Current entry point
 
-Current build: **0.18.0-dev / build 24**, save schema **5**, protocol **3 /wire2**.
+Current build: **0.21.0-dev / build 27**, save schema **5**, protocol **4 /wire3**.
 From C:/Godot Projects/ProjectVelocity open project.godot with Godot 4.7.2 and press F5.
 Complete language/nickname onboarding, then New Game → Solo → Map Select → Foundry Run or Training Circuit.
 Profile header, Customization, Settings → Controls and Level Editor are available.
-Run the full M0–M16 validator with `./dev_tools/validate.ps1 -Godot C:/Godot/Godot.exe`.
+Run the full M0–M21 validator with `./dev_tools/validate.ps1 -Godot C:/Godot/Godot.exe`.
 Normal-renderer UI tests: `Godot --path . --script tests/ui_foundation_test.gd -- --render-capture`.
 These use isolated temporary saves. Do not delete or modify real saves to run tests.
 On this machine the console wrapper lacks its expected sibling executable; use Godot.exe
 with Start-Process/WaitForExit as validate.ps1 does. CI installs matching official files.
 
 M13 uses the shared MapDefinition catalog, structural validation and PV-MAP-1 checksum.
-Training Circuit now publishes map version 3 and preserves older PBs separately; save schema remains 5.
+M21's shared spectator-camera identity publishes Training v6 and Industrial v5 and preserves
+older PBs separately; save schema remains5.
 F6: res://dev_tools/map_framework.tscn. See docs/MAP_AUTHORING.md and docs/M13_VALIDATION.md.
 
 ## M14

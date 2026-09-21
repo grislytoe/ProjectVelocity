@@ -4,10 +4,14 @@ extends RefCounted
 var claims_sent: int = 0
 var fixture_steps: Dictionary = {}
 var retry_requested: bool = false
+var ready_round: int = 0
+var series_mode: bool = false
 
 func retry(session: NetworkSession) -> void:
-	if not session.round_complete or retry_requested:
+	if session.series.phase != OnlineSeries.Phase.BETWEEN_ROUND_READY \
+		or ready_round == session.series.round_generation:
 		return
+	ready_round = session.series.round_generation
 	if session.host:
 		retry_requested = session.retry_round()
 	else:
@@ -15,6 +19,9 @@ func retry(session: NetworkSession) -> void:
 		retry_requested = true
 
 func step(session: NetworkSession) -> void:
+	if series_mode:
+		step_series(session)
+		return
 	var course: NetworkCourse = session.course
 	var tick: int = session.clock_ticks
 	if not session.host or session.round_id > 1:
@@ -73,6 +80,34 @@ func step(session: NetworkSession) -> void:
 		actor.respawn_at(target, true)
 		actor.motor.invulnerability_ticks = 0
 		fixture_steps[label] = tick
+
+func step_series(session: NetworkSession) -> void:
+	if not session.host or session.series.phase not in [OnlineSeries.Phase.RACING,
+			OnlineSeries.Phase.FINISH_WINDOW]:
+		return
+	var tick: int = session.clock_ticks - session._round_started_clock
+	var guest_first: bool = session.series.round_index % 2 == 1
+	var first_index: int = 1 if guest_first else 0
+	var second_index: int = 0 if guest_first else 1
+	_series_move(session, first_index, tick, 50)
+	# Round two deliberately leaves the remaining player unfinished so the real
+	# two-process acceptance observes the full authoritative 1800-tick DNF window.
+	if session.series.round_index != 2:
+		_series_move(session, second_index, tick, 220)
+
+func _series_move(session: NetworkSession, actor_index: int, tick: int, base: int) -> void:
+	if session.series.current_finish_times[actor_index] >= 0:
+		return
+	var course: NetworkCourse = session.course
+	var key: String = "%d:%d:%d" % [session.series.round_generation, actor_index, tick]
+	for checkpoint_index: int in course.checkpoints.size():
+		if tick == base + checkpoint_index * 18 and not fixture_steps.has(key):
+			course.actors[actor_index].respawn_at(course.checkpoints[checkpoint_index].global_position, true)
+			fixture_steps[key] = tick
+			return
+	if tick == base + course.checkpoints.size() * 18 + 18 and not fixture_steps.has(key):
+		course.actors[actor_index].respawn_at(course.finish.global_position, true)
+		fixture_steps[key] = tick
 
 func attack(session: NetworkSession) -> void:
 	if session.host or not session.joined or session.clock_ticks < 30 \

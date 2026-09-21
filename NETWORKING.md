@@ -1,4 +1,46 @@
-# Networking — M19 blocked EOS integration (gameplay remains M17)
+# Networking — M21 online match/series over the transport contract
+
+Runtime **0.21.0-dev/build27**, protocol **4**, wire revision **3**, save schema **5**.
+M21 completes the two-player series lifecycle in `NetworkSession` + `OnlineSeries`: verified
+load acknowledgements, controls hint, host start tick, race/30-second Finish window, results,
+both-Ready world reset, 1–10 rounds, score/history/best times and final winner/Draw. It works
+through `MultiplayerTransport`; the reproducible acceptance adapter is loopback ENet in two
+standalone processes. This is not an Internet/EOS claim.
+
+Phase order is `SERIES_PREPARATION → SYNCHRONIZED_LOADING → CONTROLS_HINT → COUNTDOWN →
+RACING → FINISH_WINDOW → ROUND_RESULTS → BETWEEN_ROUND_READY →` the next loading cycle or
+`FINAL_SERIES_RESULTS`; RECONNECT/LOBBY/ENDED are explicit states. All transitions use host
+ticks. First Finish sets `deadline = race_clock + 1800`; the second Finish is accepted through
+the deadline tick, then becomes DNF. Host score is incremented exactly once per immutable result.
+
+LOADED is `[series_generation, round_generation, map_id, map_version, checksum, revision, true]`.
+READY is `[ready, revision, series_generation, round_generation]`. INPUT appends series and
+round generation after the actor generation. WELCOME appends rounds, series generation,
+settings identity, wire revision and build. SNAPSHOT retains eleven outer fields; RaceBaseline
+now appends OnlineSeries' strict 24-field state and immutable result rows. SERIES_ACTION is a
+request only; guest packets cannot mutate host winner/score/deadline/state. HELLO/WELCOME bind
+wire/build identity in addition to the outer protocol. LOADED/READY/actions use reliable ENet
+delivery while idempotent revision/generation checks remain authoritative above transport.
+
+Each round resets command/prediction/interpolation/events/dynamics/checkpoints/actors and bumps
+round plus actor generations before accepting new load confirmation. Play Again bumps series
+generation and clears every result/Ready/actor history. Return to Lobby preserves membership
+and immutable settings. Host loss ends the guest session; guest loss pauses the active match
+for 2700 service ticks and either restores at the host-owned safe checkpoint or awards the
+current round to host once. There is no host migration.
+
+M21 local command:
+
+```powershell
+./dev_tools/test_local_network.ps1 -Godot C:/Godot/Godot.exe -Race -Retry -Series -Map industrial -Rendered
+```
+
+Production EOS remains **BLOCKED** by M19: no configured platform/Auth/Connect/native
+Lobby/P2P executor, licensed full SDK/export, authenticated sender proof or two-client Internet
+session exists. Production Online therefore continues to show unavailable. See
+[M19 blockers](docs/M19_BLOCKERS.md) and [M21 validation](docs/M21_VALIDATION.md).
+
+## Historical M19 boundary
 
 M19 authorized after M18 PR19 merge; **M19 live acceptance remains BLOCKED**. New project
 identity/lobby/transport policy is tested exclusively through non-live fixtures. No native

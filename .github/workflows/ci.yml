@@ -1,4 +1,4 @@
-name: M0-M17 validation
+name: M0-M21 validation
 on:
   push:
     branches: [dev, 'feature/**']
@@ -53,7 +53,7 @@ jobs:
       - name: Upload staging build
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ProjectVelocity-M17-Windows-staging
+          name: ProjectVelocity-M21-Windows-staging
           path: builds/windows/
           retention-days: 1
           if-no-files-found: error
@@ -61,7 +61,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: M17-validation-logs
+          name: M21-validation-logs
           path: builds/validation/
           retention-days: 7
           if-no-files-found: warn
