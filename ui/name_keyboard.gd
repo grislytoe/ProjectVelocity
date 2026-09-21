@@ -6,6 +6,7 @@ signal accepted(value: String)
 var value: String = ""
 var russian: bool = false
 var lowercase: bool = false
+var code_mode: bool = false
 var field: LineEdit
 var keys: GridContainer
 
@@ -26,7 +27,7 @@ func _ready() -> void:
 	margin.add_child(column)
 	field = LineEdit.new()
 	field.text = value
-	field.max_length = 15
+	field.max_length = 0 if code_mode else 15 # Validate pasted text without silent truncation.
 	field.custom_minimum_size.y = 54
 	column.add_child(field)
 	keys = GridContainer.new()
@@ -36,6 +37,8 @@ func _ready() -> void:
 	column.add_child(actions)
 	for entry: Array in [["UI_ALPHABET", _alphabet], ["UI_CASE", _case], ["UI_SPACE", _space],
 		["UI_DELETE", _delete], ["UI_DONE", _accept], ["UI_CANCEL", _cancel]]:
+		if code_mode and entry[0] in ["UI_ALPHABET", "UI_CASE", "UI_SPACE"]:
+			continue
 		var item := Button.new()
 		item.text = tr(entry[0])
 		item.custom_minimum_size.y = 54
@@ -51,12 +54,14 @@ func _build_keys() -> void:
 	if lowercase:
 		alphabet = alphabet.to_lower()
 	alphabet += "0123456789_-"
+	if code_mode:
+		alphabet = JoinCode.ALPHABET
 	for character: String in alphabet:
 		var item := Button.new()
 		item.text = character
 		item.custom_minimum_size = Vector2(74, 62)
 		item.pressed.connect(func() -> void:
-			if field.text.length() < 15:
+			if field.text.length() < (6 if code_mode else 15):
 				field.text += character)
 		keys.add_child(item)
 	(keys.get_child(0) as Button).grab_focus.call_deferred()

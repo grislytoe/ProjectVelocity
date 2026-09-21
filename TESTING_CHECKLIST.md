@@ -266,3 +266,7 @@ M14: full validate.ps1 includes Industrial structural/fallback/PB/UI fixtures an
 - Review SDK1.19.1.2 notices and commercial/free redistribution package before distribution.
 - See [M18 matrix and commands](docs/M18_COMPATIBILITY.md); stop for developer review,
   with no automatic merge or production integration.
+
+## M20 Online Lobby UI
+
+M20 adds mandatory tests/lobby_contract_test.gd and tests/lobby_ui_test.gd to validate.ps1. Run normal-renderer lobby_ui_test separately with --render-capture; run M18 native/launcher and extended M17 suites explicitly. Distinguish non-live UI/contract acceptance from BLOCKED live EOS acceptance. See [M20 results](docs/M20_VALIDATION.md).

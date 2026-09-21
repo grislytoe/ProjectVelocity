@@ -123,3 +123,7 @@ Emulator shapes complete application messages above ENet, not individual network
 no bandwidth/burst/WAN model, physical WAN/platform/controller certification, persistent
 reconnect, host migration, production online service or telemetry upload. Diagnostics remain
 local developer tools, with bounded windows rather than a complete indefinite trace.
+
+## M20 Online Lobby UI
+
+M20 UI exists behind a narrow service port; production EOS remains unavailable. M19 prerequisites/native executor/privacy and Internet acceptance blockers remain unchanged. Start handoff is tested only through an authority fixture; actual native match loading is blocked. Physical controller and SteamOS are not inferred from synthetic UI input. See [M20 validation](docs/M20_VALIDATION.md).

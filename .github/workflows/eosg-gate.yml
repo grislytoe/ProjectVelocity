@@ -77,6 +77,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: M18-${{ matrix.platform }}-native-evidence
+          retention-days: 30
           path: |
             builds/validation/m18-native-*/*.stdout.log
             builds/validation/m18-native-*/*.stderr.log

@@ -472,3 +472,7 @@ variance. Application-message loss still applies after ENet reassembly/ack, so c
 retain their existing idempotent retries. No payload/framing/protocol change. The final
 mandatory M17 gate includes combined30 running reconnect AND combined30 round retry; the
 optional extended matrix has13 cases. See the recorded CI failure in M17_VALIDATION.md.
+
+## M20 Online Lobby UI
+
+M20 is a presentation/service-contract layer only. Its test executor publishes revisioned settings and resets guest Ready atomically; native EOS metadata publication and match handoff are still BLOCKED. No wire/protocol or ENet authority change. Runtime 0.20.0-dev/build26. See [M20 boundary](docs/M20_VALIDATION.md).

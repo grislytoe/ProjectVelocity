@@ -55,6 +55,7 @@ jobs:
         with:
           name: ProjectVelocity-M17-Windows-staging
           path: builds/windows/
+          retention-days: 1
           if-no-files-found: error
       - name: Upload validation logs
         if: always()
@@ -62,4 +63,5 @@ jobs:
         with:
           name: M17-validation-logs
           path: builds/validation/
+          retention-days: 7
           if-no-files-found: warn

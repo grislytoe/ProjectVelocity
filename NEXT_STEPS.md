@@ -1,10 +1,16 @@
 # Next steps
 
-M16 is implemented on feature/m16-networked-race-hazards in C:/Godot Projects/ProjectVelocity.
-Review its PR into dev, NETWORKING.md and docs/M16_VALIDATION.md. Launch the separate
-Local Network Host/Client endpoints, test authority, hazards, round retry and reconnect, and recheck offline Solo.
-Merge only after explicit user authorization. Do not start the next milestone in this task.
+Review the M20 Online Lobby UI PR from `feature/m20-online-lobby-ui` into `dev`.
+See [M20 validation](docs/M20_VALIDATION.md) for the UI/service contract and evidence.
+M20 UI/contract acceptance is independent of live EOS end-to-end acceptance, which remains
+BLOCKED by the [M19 prerequisites and native execution boundary](docs/M19_BLOCKERS.md).
 
-Each milestone uses a separate Codex task, always this main folder. No worktrees or
-project copies. Start a feature branch from approved synchronized dev; preserve unrelated
-user edits. Read WORKFLOW.md and the master specification and pass this agreement forward.
+After prerequisites and explicit native integration review, a future executor must bridge
+OnlineService/LobbyService to LobbyClient, publish settings and Ready atomically, enforce
+private membership/capacity and hand accepted Start to M16's loading/hints/round authority.
+Prove that through two authorized standalone Internet clients; never substitute the UI fake.
+
+Merge only after explicit user authorization. Do not start M21 in this task.
+Each milestone uses a separate Codex task in `C:/Godot Projects/ProjectVelocity`, no worktrees
+or project copies. Read WORKFLOW.md and the master specification, branch from synchronized
+approved dev, preserve unrelated user changes, and carry this agreement into the handoff.

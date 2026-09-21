@@ -64,3 +64,7 @@ key/mouse/controller events. Add `-- --render-capture` for the normal renderer a
 under ignored builds/. `dev_tools/time_trial_smoke.gd` drives the actual motor to Finish.
 Synthetic gamepad events do not prove physical device/driver compatibility.
 See docs/M11_VALIDATION.md and TESTING_CHECKLIST.md for review evidence and manual steps.
+
+## M20 Online Lobby UI
+
+M20 adds Create/Join/code entry, pending/error/retry/cancel, two player slots, host map/round controls, guest Ready and Start intent through LobbyClient. It reuses AppUI panels/theme/focus/modals and NameKeyboard code mode; RU/EN and clipboard fallback are covered. Production Online honestly remains unavailable. See [M20 validation](docs/M20_VALIDATION.md).
