@@ -1,4 +1,51 @@
-# Networking — M21 online match/series over the transport contract
+# Networking — M22 disconnect/reconnect over the M21 lifecycle
+
+Runtime **0.22.0-dev/build28**, protocol **5**, wire revision **4**, save schema **5**.
+M22 extends, rather than replaces, `NetworkSession` + `OnlineSeries`. The existing
+`OnlineSeries.Phase.RECONNECT` owns a typed sub-state (`PAUSED → AUTHENTICATING →
+BASELINE_SENT → RESUMING → IDLE`, or `EXPIRED`/`TERMINATED`) and captures the original phase,
+absolute service deadline and session/series/round/reconnect generations in every baseline.
+
+The fixed service clock is the authority. Guest loss at service tick `D` sets deadline
+`D + 2700`. Admission at the deadline is valid; expiry occurs at the first service tick above
+it. Packet polling/admission precedes expiry. No wall clock participates. While paused, host
+tick, countdown/GO, race clock, second-Finisher window, actors/input, dynamics/hazards/
+projectiles and result-changing callbacks do not advance. UI, transport and telemetry do.
+
+HELLO carries map/checksum, build/protocol/wire, a rotating memory-only reconnect bearer,
+a separate memory-only guest identity and all generations. Empty, wrong, expired/replayed or
+foreign credentials and stale/late packets are rejected without state mutation. Credentials
+and full identity are not logged. After admission the host clears old queues/history/events,
+increments epochs and collision-safely relocates the guest to its host checkpoint or Start,
+preserving progress/results and invulnerability. The guest validates a complete paused baseline
+and returns generation/baseline-tick-bound `RECONNECT_READY`; only then does the host emit one
+RESUME and publish the unpaused snapshot. Valid duplicates of the same frozen baseline retry
+that identical acknowledgement without reapplying world state, covering application-shaped
+loss while keeping resume host-owned. The guest cannot self-resume or choose deadline,
+checkpoint, winner or score.
+
+| Original phase | Successful reconnect | Expiry |
+| --- | --- | --- |
+| Loading / controls / countdown | Restore exact frozen phase/ticks | Host wins current round once |
+| Racing / 30-second window | Safe checkpoint/Start recovery; restore timers | Host wins current round once |
+| Round Results / between-round Ready | Restore immutable result/Ready state | No new score/result |
+| Final Series Results | Restore immutable final screen/actions | No new score/result |
+| Lobby / Ended | Not admitted | No mutation |
+
+Fixed host order is decode/direction/scope admission → transport-loss transition → reconnect
+handshake or expiry → if unpaused, world/M7 Finish callbacks → Finish-window resolution →
+snapshot. An accepted Finish stays durable; a loss observed before simulation freezes that
+tick; exact-deadline reconnect beats expiry; later packets lose. Exact-once result recording
+prevents double score. Host loss immediately ends the guest, blocks/recycles/clears/closes all
+state and never migrates authority; late packets cannot revive `ENDED`.
+
+The unstable-network warning still uses the M17 observer only: 30 fresh ticks with measured
+RTT strictly above200 ms enters, 60 ticks at/below180 clears, 180–200 is deadband and age>120
+is stale/disconnected. Reconnect/host-left presentation has priority. The warning cannot affect
+authority/timers/results/records. See [M22 validation](docs/M22_VALIDATION.md). Loopback ENet is
+transport-independent/local acceptance, never live Internet/EOS acceptance.
+
+## M21 historical online match/series contract
 
 Runtime **0.21.0-dev/build27**, protocol **4**, wire revision **3**, save schema **5**.
 M21 completes the two-player series lifecycle in `NetworkSession` + `OnlineSeries`: verified

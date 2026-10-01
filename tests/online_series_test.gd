@@ -94,7 +94,8 @@ func run() -> void:
 	var disconnect := OnlineSeries.new()
 	disconnect.configure(definition, 1); loaded(disconnect, 1); loaded(disconnect, 2)
 	disconnect.begin_hint(0, 0); disconnect.begin_countdown(1, 0); disconnect.begin_race(1)
-	check(disconnect.enter_reconnect() and disconnect.award_guest_disconnect([4, 3],
+	check(disconnect.enter_reconnect(100, 2700) and disconnect.reconnect_expired(2801) \
+		and disconnect.award_guest_disconnect([4, 3],
 		[[0, 1, 2, 3], [0, 1, 2]]), "guest timeout awards current round to host")
 	check(not disconnect.award_guest_disconnect([4, 3], [[], []]) and disconnect.score == [1, 0]
 		and disconnect.round_results.size() == 1 \

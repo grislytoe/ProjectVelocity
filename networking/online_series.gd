@@ -19,6 +19,7 @@ enum Phase {
 enum FinishStatus { PENDING, FINISHED, DNF }
 enum ResultReason { NORMAL, SECOND_PLAYER_TIMEOUT, GUEST_DISCONNECT_TIMEOUT }
 enum Action { PLAY_AGAIN, RETURN_TO_LOBBY, MAIN_MENU }
+enum ReconnectState { IDLE, PAUSED, AUTHENTICATING, BASELINE_SENT, RESUMING, EXPIRED, TERMINATED }
 
 const SECOND_PLAYER_TICKS: int = 30 * 60
 
@@ -48,6 +49,12 @@ var round_results: Array = []
 var final_winner: int = -1
 var _round_recorded: bool = false
 var _phase_before_reconnect: Phase = Phase.SYNCHRONIZED_LOADING
+var reconnect_state: ReconnectState = ReconnectState.IDLE
+var reconnect_generation: int = 0
+var reconnect_deadline_service_tick: int = -1
+var reconnect_series_generation: int = 0
+var reconnect_round_generation: int = 0
+var reconnect_started_service_tick: int = -1
 
 static func identity(id: String, version: int, checksum: String, rounds: int) -> String:
 	return "%s|%d|%s|%d|p%d|w%d" % [id, version, checksum, rounds,
@@ -216,26 +223,85 @@ func return_to_lobby() -> bool:
 	return true
 
 func end() -> void:
+	reconnect_state = ReconnectState.TERMINATED
+	reconnect_deadline_service_tick = -1
+	reconnect_started_service_tick = -1
 	phase = Phase.ENDED
 
-func enter_reconnect() -> bool:
-	if phase in [Phase.LOBBY, Phase.FINAL_SERIES_RESULTS, Phase.ENDED, Phase.RECONNECT]:
+func enter_reconnect(service_tick: int, window_ticks: int) -> bool:
+	if service_tick < 0 or window_ticks <= 0 or phase in [Phase.LOBBY, Phase.ENDED, Phase.RECONNECT]:
 		return false
 	_phase_before_reconnect = phase
+	reconnect_generation += 1
+	reconnect_state = ReconnectState.PAUSED
+	reconnect_started_service_tick = service_tick
+	reconnect_deadline_service_tick = service_tick + window_ticks
+	reconnect_series_generation = series_generation
+	reconnect_round_generation = round_generation
 	phase = Phase.RECONNECT
 	return true
 
+func begin_reconnect_handshake(now: int, series_id: int, round_id: int, generation: int) -> bool:
+	if phase != Phase.RECONNECT or reconnect_state not in [ReconnectState.PAUSED,
+			ReconnectState.AUTHENTICATING, ReconnectState.BASELINE_SENT] \
+			or now > reconnect_deadline_service_tick or series_id != reconnect_series_generation \
+			or round_id != reconnect_round_generation or generation != reconnect_generation:
+		return false
+	reconnect_state = ReconnectState.AUTHENTICATING
+	return true
+
+func baseline_sent(generation: int) -> bool:
+	if phase != Phase.RECONNECT or reconnect_state != ReconnectState.AUTHENTICATING \
+			or generation != reconnect_generation:
+		return false
+	reconnect_state = ReconnectState.BASELINE_SENT
+	return true
+
+func baseline_accepted(now: int, series_id: int, round_id: int, generation: int) -> bool:
+	if phase != Phase.RECONNECT or reconnect_state != ReconnectState.BASELINE_SENT \
+			or now > reconnect_deadline_service_tick or series_id != reconnect_series_generation \
+			or round_id != reconnect_round_generation or generation != reconnect_generation:
+		return false
+	reconnect_state = ReconnectState.RESUMING
+	return true
+
 func resume_reconnect() -> bool:
-	if phase != Phase.RECONNECT:
+	if phase != Phase.RECONNECT or reconnect_state != ReconnectState.RESUMING:
 		return false
 	phase = _phase_before_reconnect
+	reconnect_state = ReconnectState.IDLE
+	reconnect_deadline_service_tick = -1
+	reconnect_started_service_tick = -1
 	return true
+
+func reconnect_expired(now: int) -> bool:
+	# The authoritative deadline tick itself is admissible. Expiry begins on the next tick.
+	if phase != Phase.RECONNECT or now <= reconnect_deadline_service_tick:
+		return false
+	reconnect_state = ReconnectState.EXPIRED
+	phase = _phase_before_reconnect
+	return true
+
+func reconnect_phase() -> Phase:
+	return _phase_before_reconnect
+
+func reconnect_remaining(now: int) -> int:
+	return maxi(0, reconnect_deadline_service_tick - now)
+
+func reconnect_round_mutable() -> bool:
+	return _phase_before_reconnect in [Phase.SYNCHRONIZED_LOADING, Phase.CONTROLS_HINT,
+		Phase.COUNTDOWN, Phase.RACING, Phase.FINISH_WINDOW]
 
 func _reset_series() -> void:
 	score = [0, 0]
 	best_times = [-1, -1]
 	round_results.clear()
 	final_winner = -1
+	reconnect_state = ReconnectState.IDLE
+	reconnect_deadline_service_tick = -1
+	reconnect_series_generation = 0
+	reconnect_round_generation = 0
+	reconnect_started_service_tick = -1
 	_reset_round()
 
 func _reset_round() -> void:
@@ -258,10 +324,12 @@ func capture() -> Array:
 		ready.duplicate(), ready_revisions.duplicate(), hint_end_tick, start_tick, finish_deadline,
 		current_winner, current_finish_times.duplicate(), current_progress.duplicate(),
 		[current_checkpoints[0].duplicate(), current_checkpoints[1].duplicate()], score.duplicate(),
-		best_times.duplicate(), round_results.duplicate(true), final_winner]
+		best_times.duplicate(), round_results.duplicate(true), final_winner, reconnect_state,
+		reconnect_generation, reconnect_deadline_service_tick, reconnect_series_generation,
+		reconnect_round_generation, _phase_before_reconnect, reconnect_started_service_tick]
 
 static func valid(value: Variant) -> bool:
-	if not value is Array or value.size() != 24:
+	if not value is Array or value.size() != 31:
 		return false
 	if not NetPacket.integer(value[0], 1, 2147483647) or not NetPacket.integer(value[1], 1, 2147483647) \
 		or not NetPacket.integer(value[2], 1, 10) or not NetPacket.integer(value[3], 1, 10) \
@@ -286,6 +354,15 @@ static func valid(value: Variant) -> bool:
 		return false
 	for result: Variant in value[22]:
 		if not valid_result(result): return false
+	if not NetPacket.integer(value[24], ReconnectState.IDLE, ReconnectState.TERMINATED) \
+			or not NetPacket.integer(value[25], 0, 2147483647) \
+			or not NetPacket.integer(value[26], -1, 2147483647) \
+			or not NetPacket.integer(value[27], 0, 2147483647) \
+			or not NetPacket.integer(value[28], 0, 2147483647) \
+			or not NetPacket.integer(value[29], Phase.LOBBY, Phase.ENDED):
+		return false
+	if not NetPacket.integer(value[30], -1, 2147483647):
+		return false
 	return true
 
 static func valid_result(value: Variant) -> bool:
@@ -328,3 +405,8 @@ func apply(value: Array) -> void:
 	score.assign(value[20]); best_times.assign(value[21]); round_results = value[22].duplicate(true)
 	final_winner = int(value[23]); _round_recorded = not round_results.is_empty() \
 		and int(round_results.back()[0]) == round_index
+	reconnect_state = int(value[24]) as ReconnectState
+	reconnect_generation = int(value[25]); reconnect_deadline_service_tick = int(value[26])
+	reconnect_series_generation = int(value[27]); reconnect_round_generation = int(value[28])
+	_phase_before_reconnect = int(value[29]) as Phase
+	reconnect_started_service_tick = int(value[30])

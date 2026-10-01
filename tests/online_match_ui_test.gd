@@ -46,6 +46,26 @@ func run() -> void:
 	overlay.play_again_button.grab_focus()
 	await process_frame
 	check(root.gui_get_focus_owner() == overlay.play_again_button, "keyboard focus restoration")
+	for locale: String in ["en", "ru"]:
+		TranslationServer.set_locale(locale)
+		session.series.enter_reconnect(100, 2700)
+		session.paused = true
+		session.reconnect_remaining = 1800
+		overlay.refresh()
+		check(overlay.visible and overlay.result_label.text.contains("30"),
+			"%s reconnect overlay uses authoritative seconds" % locale)
+		session.series.reconnect_state = OnlineSeries.ReconnectState.BASELINE_SENT
+		overlay.refresh()
+		check(overlay.result_label.text == tr("M22_RESUMING") % 30,
+			"%s baseline/resuming status localized" % locale)
+		session.ended = true
+		session.paused = false
+		overlay.refresh()
+		check(overlay.phase_label.text == tr("M22_HOST_LEFT") and overlay.lobby_button.visible \
+			and overlay.menu_button.visible, "%s host-left safe actions" % locale)
+		session.ended = false
+		session.series.phase = OnlineSeries.Phase.FINAL_SERIES_RESULTS
+		session.series.reconnect_state = OnlineSeries.ReconnectState.IDLE
 	var routes: Array[String] = []
 	overlay.route_requested.connect(func(route: String) -> void: routes.append(route))
 	session.host = false

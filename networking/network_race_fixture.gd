@@ -2,6 +2,7 @@ class_name NetworkRaceFixture
 extends RefCounted
 ## Developer-only host relocations into the loaded map's real collision components.
 var claims_sent: int = 0
+var attack_index: int = 0
 var fixture_steps: Dictionary = {}
 var retry_requested: bool = false
 var ready_round: int = 0
@@ -111,23 +112,26 @@ func _series_move(session: NetworkSession, actor_index: int, tick: int, base: in
 
 func attack(session: NetworkSession) -> void:
 	if session.host or not session.joined or session.clock_ticks < 30 \
-		or session.service_tick % 15 != 0:
+		or session.service_tick % 6 != 0:
 		return
-	# Each class is an actual transport packet. A client has no critical-event command kind.
+	# Cycle every forged event class through actual transport packets without saturating the
+	# authoritative downlink. The long process fixture still submits hundreds of rejected claims.
 	var states: Array = []
 	for actor: PlayerController in session.course.actors:
 		states.append(ActorState.capture(actor).values())
 	var base: Array = [0, session.clock_ticks, 0, false, states,
 		session.course.capture_dynamics(), [], 0, 0, [0, 0], RaceBaseline.capture(session)]
-	for kind: int in [GameplayEvents.Kind.CHECKPOINT, GameplayEvents.Kind.DEATH,
+	var kinds: Array[int] = [GameplayEvents.Kind.CHECKPOINT, GameplayEvents.Kind.DEATH,
 		GameplayEvents.Kind.RESPAWN, GameplayEvents.Kind.FINISH, GameplayEvents.Kind.WINNER,
 		GameplayEvents.Kind.PLATFORM_BREAK, GameplayEvents.Kind.JUMP_PAD,
 		GameplayEvents.Kind.HAZARD_PHASE, GameplayEvents.Kind.SAW_HIT,
 		GameplayEvents.Kind.LASER_HIT, GameplayEvents.Kind.TURRET_FIRE,
 		GameplayEvents.Kind.PROJECTILE_HIT, GameplayEvents.Kind.POOL_RETURN,
-		GameplayEvents.Kind.ROUND_TRANSITION]:
-		var forged: Array = base.duplicate(true)
-		forged[6] = [[1, session.host_tick, 2, kind, 0, session.round_id, 1]]
-		forged[7] = 2
-		session.send(NetPacket.Kind.SNAPSHOT, forged)
-		claims_sent += 1
+		GameplayEvents.Kind.ROUND_TRANSITION]
+	var kind: int = kinds[attack_index % kinds.size()]
+	attack_index += 1
+	var forged: Array = base.duplicate(true)
+	forged[6] = [[1, session.host_tick, 2, kind, 0, session.round_id, 1]]
+	forged[7] = 2
+	session.send(NetPacket.Kind.SNAPSHOT, forged)
+	claims_sent += 1

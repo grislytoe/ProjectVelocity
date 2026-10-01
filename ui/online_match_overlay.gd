@@ -65,21 +65,43 @@ func refresh() -> void:
 	var phase: int = session.phase()
 	var show_results: bool = phase in [OnlineSeries.Phase.ROUND_RESULTS,
 		OnlineSeries.Phase.BETWEEN_ROUND_READY, OnlineSeries.Phase.FINAL_SERIES_RESULTS]
-	visible = show_results
-	if not show_results:
+	var show_reconnect: bool = phase == OnlineSeries.Phase.RECONNECT or session.paused
+	var show_terminated: bool = session.ended
+	visible = show_results or show_reconnect or show_terminated
+	if not visible:
 		return
-	phase_label.text = tr("M21_SERIES_RESULTS" if phase == OnlineSeries.Phase.FINAL_SERIES_RESULTS \
-		else "M21_ROUND_RESULTS")
-	result_label.text = _summary()
-	ready_button.visible = phase == OnlineSeries.Phase.BETWEEN_ROUND_READY
-	play_again_button.visible = phase == OnlineSeries.Phase.FINAL_SERIES_RESULTS
-	lobby_button.visible = phase == OnlineSeries.Phase.FINAL_SERIES_RESULTS
-	menu_button.visible = phase == OnlineSeries.Phase.FINAL_SERIES_RESULTS
+	if show_terminated:
+		phase_label.text = tr("M22_HOST_LEFT")
+		result_label.text = tr("M22_SAFE_RETURN")
+	elif show_reconnect:
+		phase_label.text = tr("M22_RECONNECT_TITLE")
+		result_label.text = tr(_reconnect_key()) % ceili(session.reconnect_remaining / 60.0)
+	else:
+		phase_label.text = tr("M21_SERIES_RESULTS" if phase == OnlineSeries.Phase.FINAL_SERIES_RESULTS \
+			else "M21_ROUND_RESULTS")
+		result_label.text = _summary()
+	ready_button.visible = not show_reconnect and not show_terminated \
+		and phase == OnlineSeries.Phase.BETWEEN_ROUND_READY
+	play_again_button.visible = not show_reconnect and not show_terminated \
+		and phase == OnlineSeries.Phase.FINAL_SERIES_RESULTS
+	lobby_button.visible = show_terminated or (not show_reconnect \
+		and phase == OnlineSeries.Phase.FINAL_SERIES_RESULTS)
+	menu_button.visible = lobby_button.visible
 	play_again_button.disabled = not session.host
 	if get_viewport().gui_get_focus_owner() == null or not get_viewport().gui_get_focus_owner().is_visible_in_tree():
 		if ready_button.visible: ready_button.grab_focus.call_deferred()
 		elif play_again_button.visible and not play_again_button.disabled: play_again_button.grab_focus.call_deferred()
 		else: lobby_button.grab_focus.call_deferred()
+
+func _reconnect_key() -> String:
+	match session.series.reconnect_state:
+		OnlineSeries.ReconnectState.AUTHENTICATING:
+			return "M22_RECONNECTING"
+		OnlineSeries.ReconnectState.BASELINE_SENT:
+			return "M22_RESUMING"
+		OnlineSeries.ReconnectState.EXPIRED:
+			return "M22_RECONNECT_FAILED"
+	return "M22_GUEST_PAUSED" if session.host else "M22_RECONNECTING"
 
 func _summary() -> String:
 	var series: OnlineSeries = session.series

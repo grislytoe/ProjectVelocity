@@ -37,6 +37,8 @@ func _ready() -> void:
 		get_tree().quit(1)
 		return
 	process_physics_priority = 90
+	if option("locale", "en") in ["en", "ru"]:
+		TranslationServer.set_locale(option("locale", "en"))
 	var role: String = option("role", "host")
 	var port: int = int(option("port", "24715"))
 	_retry_port = port
@@ -88,6 +90,13 @@ func _ready() -> void:
 	var condition := NetworkConditionProfile.preset(option("emulation", "clean"), int(option("seed", "15")))
 	condition.disconnect_tick = int(option("drop-at", "-1"))
 	condition.reconnect_after_ticks = int(option("drop-duration", "45"))
+	# The reconnect fixture owns its local guest drop so NetworkSession can distinguish it
+	# from an authoritative host loss before the emulator closes during transport polling.
+	if automated and not course.host and (option("reconnect") == "true" \
+			or option("guest-expiry") == "true"):
+		condition.disconnect_tick = -1
+	if automated and course.host and option("host-drop") == "true":
+		condition.disconnect_tick = -1
 	if not option("condition-file").is_empty():
 		var source := FileAccess.open(option("condition-file"), FileAccess.READ)
 		var data: Variant = null
@@ -151,7 +160,7 @@ func _ready() -> void:
 	match_overlay = OnlineMatchOverlay.new()
 	canvas.add_child(match_overlay)
 	match_overlay.bind(session, input)
-	DisplayServer.window_set_title("ProjectVelocity M17 Local Network — " + role)
+	DisplayServer.window_set_title("ProjectVelocity M22 Local Network — " + role)
 	var size_parts: PackedStringArray = option("capture-size", "1280x800").split("x")
 	if size_parts.size() == 2 and option("capture-size", "1280x800") in ["1280x800", "1920x1080"]:
 		DisplayServer.window_set_size(Vector2i(int(size_parts[0]), int(size_parts[1])))
@@ -181,8 +190,11 @@ func _physics_process(_delta: float) -> void:
 	session.telemetry.observe(session)
 	var condition: NetworkConditionProfile = (session.transport as NetworkEmulator).profile
 	if condition.disconnect_tick >= 0 and session.service_tick == condition.disconnect_tick:
-		session.disconnected()
-		if not session.host: scheduled_reconnect = session.service_tick + condition.reconnect_after_ticks
+		if session.host:
+			session.disconnected()
+		else:
+			session.guest_transport_lost()
+			scheduled_reconnect = session.service_tick + condition.reconnect_after_ticks
 	if scheduled_reconnect == session.service_tick:
 		retry_connection()
 		scheduled_reconnect = -1
@@ -197,9 +209,16 @@ func _physics_process(_delta: float) -> void:
 		var disconnect_tick: int = int(option("disconnect-tick", "700"))
 		if session.service_tick == disconnect_tick:
 			session.transport.close()
-			session.disconnected()
+			session.guest_transport_lost()
 		elif session.service_tick == disconnect_tick + 45:
 			retry_connection()
+	if automated and not session.host and option("guest-expiry") == "true" \
+			and session.service_tick == int(option("disconnect-tick", "700")):
+		session.transport.close()
+		session.guest_transport_lost()
+	if automated and session.host and option("host-drop") == "true" \
+			and session.service_tick == int(option("disconnect-tick", "900")):
+		session.shutdown()
 	if automated and session.host and option("lifecycle") == "true":
 		lifecycle_fixture()
 	if automated and option("race") == "true":
@@ -217,7 +236,7 @@ func _physics_process(_delta: float) -> void:
 		course.actors[1].position += Vector2(180, -40)
 		injected = true
 	var emulator: NetworkEmulator = session.transport as NetworkEmulator
-	var hud_text: String = "M21 DEV • %s • round %d/%d • %s\n%s" % [
+	var hud_text: String = "M22 DEV • %s • round %d/%d • %s\n%s" % [
 		"HOST" if session.host else "CLIENT", session.series.round_index, session.series.rounds_total,
 		OnlineSeries.Phase.keys()[session.phase()], start_status().left(85)]
 	hud_text += "\nMeasured RTT %.1fms • estimated one-way %.1fms • clock %.3fs" % [
@@ -241,13 +260,23 @@ func _physics_process(_delta: float) -> void:
 	hud_text += "\nF6 Ready • F7 round retry • F8 drop • F9 reconnect"
 	hud_text += "\nWASD / stick • Space / A Jump • Shift / RB Dash • no Solo records"
 	hud.text = hud_text
-	warning_label.text = ("Плохое соединение / Connection warning • measured RTT >200ms" if session.telemetry.warning else "")
+	if session.paused or session.ended:
+		warning_label.text = "" # Reconnect/host-left overlay has presentation priority.
+	elif not session.joined or session.service_tick - session.last_pong_service > 120:
+		warning_label.text = tr("M22_NETWORK_STALE")
+	else:
+		warning_label.text = tr("M22_NETWORK_WARNING") if session.telemetry.warning else ""
 	var current_start_status: String = start_status()
 	if session.clock_ticks == 0 and current_start_status != _last_start_status:
 		_last_start_status = current_start_status
 		print("M16_START ", "host" if session.host else "client", " ", current_start_status)
 	if automated and DisplayServer.get_name() != "headless" and session.clock_ticks > 120 \
 		and _screenshots < 2 and session.service_tick % 120 == 0 and not option("evidence").is_empty():
+		_screenshots += 1
+		capture.call_deferred()
+	if automated and DisplayServer.get_name() != "headless" and session.paused \
+			and not _race_captures.has("reconnect") and not option("evidence").is_empty():
+		_race_captures["reconnect"] = true
 		_screenshots += 1
 		capture.call_deferred()
 	if automated and option("race") == "true" and DisplayServer.get_name() != "headless" \
@@ -339,8 +368,11 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		session.telemetry.reset_window(session.round_id)
 		session.prediction.metrics.reset_window(session.round_id)
 	elif event.keycode == KEY_F8:
-		session.transport.close()
-		session.disconnected()
+		if session.host:
+			session.shutdown()
+		else:
+			session.transport.close()
+			session.guest_transport_lost()
 	elif event.keycode == KEY_F9 and not session.host and not session.joined:
 		retry_connection()
 	elif event.keycode == KEY_F6 and not session.host:
@@ -355,6 +387,8 @@ func apply_selected_profile(name_value: String) -> void:
 		selected_profile = NetworkConditionProfile.NAMES.find(name_value)
 
 func retry_connection() -> void:
+	if session.host or session.ended or session.reconnect_token.is_empty():
+		return
 	var emulator: NetworkEmulator = session.transport as NetworkEmulator
 	var local: LocalENetTransport = emulator.inner as LocalENetTransport
 	if local.open(false, _retry_port) == OK:
@@ -404,6 +438,11 @@ func finish_test() -> void:
 		"score": session.series.score, "round_results": session.series.round_results,
 		"best_times": session.series.best_times, "final_winner": session.series.final_winner,
 		"settings_identity": session.series.settings_identity})
+	report.merge({"reconnect_generation": session.series.reconnect_generation,
+		"reconnect_state": session.series.reconnect_state,
+		"reconnect_phase": session.series.reconnect_phase(),
+		"reconnect_started_service_tick": session.series.reconnect_started_service_tick,
+		"reconnect_deadline_service_tick": session.series.reconnect_deadline_service_tick})
 	var emulator: NetworkEmulator = session.transport as NetworkEmulator
 	var buffer: SnapshotBuffer = session._host_remote_buffer if session.host else session.interpolation
 	var stress_report: Dictionary = {"schema": NetworkTelemetry.SCHEMA, "build": BuildInfo.VERSION,

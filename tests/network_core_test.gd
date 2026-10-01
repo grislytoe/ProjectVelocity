@@ -68,7 +68,7 @@ func codec_tests() -> void:
 	check(InputCommand.decode(base) == null, "no transform claims or extra fields")
 	var hello := NetPacket.make(NetPacket.Kind.HELLO, "", 0,
 		["map", 1, "a".repeat(64), ["Guest", "ffffffff", "ffffffff"], "",
-			BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER])
+			BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER, "b".repeat(32), 1, 1, 0])
 	check(NetPacket.decode(hello.encode(config), config) != null, "anonymous session handshake, no persistent identity")
 	hello.data[3][0] = "Invalid\nName"
 	check(NetPacket.decode(hello.encode(config), config) == null, "nickname control character rejected")
@@ -194,7 +194,7 @@ func collision_tests() -> void:
 		var original_scope: String = session.session_id
 		session.receive(NetPacket.make(NetPacket.Kind.HELLO, "", 0,
 			["wrong_map", 1, "a".repeat(64), ["Guest", "ffffffff", "ffffffff"], "",
-				BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER]))
+				BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER, "b".repeat(32), 1, 1, 0]))
 		check(not session.joined and session.session_id == original_scope, "incompatible map handshake rejected")
 		check(course.actors[0].position == course.actors[1].position, "both players share Start")
 		check(is_equal_approx(course.actors[1].presentation.modulate.a, 0.3), "remote opacity")
@@ -274,7 +274,7 @@ func collision_tests() -> void:
 		session.disconnected()
 		var frozen_tick: int = session.host_tick
 		session.advance_host()
-		check(session.paused and session.host_tick == frozen_tick and session.reconnect_remaining == 2699,
+		check(session.paused and session.host_tick == frozen_tick and session.reconnect_remaining == 2700,
 			"disconnect pauses host simulation with 45s budget")
 		session.shutdown()
 		check(session.events.recent.is_empty() and session.prediction.commands.is_empty(), "session teardown")
