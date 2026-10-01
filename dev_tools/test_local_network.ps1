@@ -8,8 +8,10 @@
     [int]$HostSeed = 15,
     [int]$ClientSeed = 29,
     [ValidateSet('1280x800', '1920x1080')][string]$Resolution = '1280x800',
+    [ValidateSet('en', 'ru')][string]$Locale = 'en',
     [switch]$ProfileChange,
     [switch]$HostDrop,
+    [switch]$GuestExpiry,
     [int]$DropDuration = 45,
     [switch]$Rendered,
     [switch]$Exported,
@@ -39,10 +41,14 @@ try {
         if (-not $Rendered) { $arguments += '--headless' }
         $arguments += @('--', '--local-network', "--role=$role", "--port=$Port", '--auto=true',
             '--timeout-ticks=600',
-            "--ticks=$(if ($Series) { if ($role -eq 'host') { 3600 } else { 3480 } } elseif ($Race) { if ($role -eq 'host') { 2400 } else { 2280 } } elseif ($role -eq 'host') { 1200 } else { 1080 })", "--emulation=$Profile",
+            "--ticks=$(if ($Series -or $GuestExpiry) { if ($role -eq 'host') { 3600 } else { 3480 } } elseif ($Race) { if ($role -eq 'host') { 2400 } else { 2280 } } elseif ($role -eq 'host') { 1200 } else { 1080 })", "--emulation=$Profile",
             "--snapshots=$Snapshots", "--capture-size=$Resolution", "--seed=$(if ($role -eq 'host') { $HostSeed } else { $ClientSeed })",
             "--map=$Map",
+			"--locale=$Locale",
             "--disconnect-tick=$DisconnectTick",
+			"--reconnect=$($Reconnect.ToString().ToLowerInvariant())",
+			"--guest-expiry=$($GuestExpiry.ToString().ToLowerInvariant())",
+			"--host-drop=$($HostDrop.ToString().ToLowerInvariant())",
             "--drop-at=$(if (($Reconnect -and $role -eq 'client') -or ($HostDrop -and $role -eq 'host')) { $DisconnectTick } else { -1 })",
             "--drop-duration=$DropDuration", "--profile-change=$($ProfileChange.ToString().ToLowerInvariant())",
             ('"--report=' + (Join-Path $roleRoot 'stress.json') + '"'),
@@ -69,7 +75,7 @@ try {
         # Both run real time; no --fixed-fps, which accelerates headless clocks independently.
     }
     # Race fixtures need 40 seconds of physics plus startup/scheduling headroom on CI.
-    $processTimeoutMs = if ($Series) { 120000 } elseif ($Race) { 90000 } else { 45000 }
+    $processTimeoutMs = if ($Series -or $GuestExpiry) { 120000 } elseif ($Race) { 90000 } else { 45000 }
     $deadline = [DateTime]::UtcNow.AddMilliseconds($processTimeoutMs)
     foreach ($process in $processes) {
         if (-not $process.WaitForExit([Math]::Max(1, [int]($deadline - [DateTime]::UtcNow).TotalMilliseconds))) { throw "M15 process $($process.Id) timeout; $runRoot" }
@@ -91,8 +97,15 @@ try {
     if ($HostDrop) {
         if (-not $reports[1].status.Contains('Host disconnected')) { throw 'Host drop did not end guest session' }
     }
-    if (-not $HostDrop -and [Math]::Abs($reports[0].clock - $reports[1].clock) -gt 30) { throw 'Match clock drift exceeds 500ms under emulation' }
-    if (-not $HostDrop -and -not $reports[0].round_complete -and ($reports[0].clock - $reports[1].clock) -ne ($reports[0].host_tick - $reports[1].host_tick)) {
+    if ($GuestExpiry) {
+        if ($reports[0].score[0] -ne 1 -or $reports[0].round_results.Count -ne 1 `
+            -or $reports[0].round_results[0][10] -ne 2 -or $reports[0].reconnect_generation -ne 1 `
+            -or ($reports[0].reconnect_deadline_service_tick - $reports[0].reconnect_started_service_tick) -ne 2700) {
+            throw 'Production 2700-tick expiry did not award host exactly once'
+        }
+    }
+    if (-not $HostDrop -and -not $GuestExpiry -and [Math]::Abs($reports[0].clock - $reports[1].clock) -gt 30) { throw 'Match clock drift exceeds 500ms under emulation' }
+    if (-not $HostDrop -and -not $GuestExpiry -and -not $reports[0].round_complete -and ($reports[0].clock - $reports[1].clock) -ne ($reports[0].host_tick - $reports[1].host_tick)) {
         throw 'Clock is inconsistent with authoritative host ticks'
     }
     if ($Reconnect) {
@@ -148,7 +161,8 @@ try {
             if ($report.round_index -ne 2 -or $report.rounds_total -ne 2 -or $report.round_results.Count -ne 2) {
                 throw "M21 complete two-round series was not observed; $runRoot"
             }
-            if ($report.phase -ne 9 -or $report.score[0] -ne 1 -or $report.score[1] -ne 1 -or $report.final_winner -ne 0) {
+            $finalOrPausedFinal = $report.phase -eq 9 -or ($report.phase -eq 10 -and $report.reconnect_phase -eq 9)
+            if (-not $finalOrPausedFinal -or $report.score[0] -ne 1 -or $report.score[1] -ne 1 -or $report.final_winner -ne 0) {
                 throw "M21 final Draw/score mismatch; $runRoot"
             }
             if ($report.best_times[0] -lt 0 -or $report.best_times[1] -lt 0) { throw 'M21 best times missing' }
@@ -171,7 +185,7 @@ try {
             if ($stress.profile_changes -ne 2) { throw 'Scheduled profile changes did not both apply' }
         }
     }
-    & (Join-Path $PSScriptRoot 'evaluate_network_stress.ps1') -RunRoot $runRoot -Race:$Race -HostDrop:$HostDrop
+    & (Join-Path $PSScriptRoot 'evaluate_network_stress.ps1') -RunRoot $runRoot -Race:$Race -HostDrop:($HostDrop -or $GuestExpiry)
     $reports | ConvertTo-Json -Depth 6
     Write-Output "PROJECTVELOCITY_M15_LOCALHOST_OK $runRoot"
 } finally {
@@ -185,6 +199,12 @@ try {
     foreach ($role in @('host','client')) {
         $cachePath = [IO.Path]::GetFullPath((Join-Path $runRoot "$role/Godot"))
         if (-not $cachePath.StartsWith($ownedRoot, [StringComparison]::OrdinalIgnoreCase)) { throw 'Cleanup escaped owned run directory' }
-        if (Test-Path -LiteralPath $cachePath) { Remove-Item -LiteralPath $cachePath -Recurse -Force }
+        for ($attempt = 0; $attempt -lt 3 -and (Test-Path -LiteralPath $cachePath); $attempt++) {
+            try { [System.IO.Directory]::Delete($cachePath, $true) }
+            catch {
+                if ($attempt -eq 2 -and (Test-Path -LiteralPath $cachePath)) { throw }
+                Start-Sleep -Milliseconds 100
+            }
+        }
     }
 }

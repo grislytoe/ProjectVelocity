@@ -1,10 +1,21 @@
 # Known issues
 
-- **M21 live EOS Internet acceptance is BLOCKED.** The transport-independent lifecycle and
+- **M22 live EOS/Internet reconnect acceptance remains BLOCKED.** M22 is accepted only at the
+  transport-independent model and two-process localhost ENet boundary. M19 production
+  Auth/Connect/Lobby/P2P prerequisites, authorized Internet identities and native exports are
+  still absent. Local ENet is not presented as live Internet/EOS evidence.
+- Protocol5/wire4 is intentionally incompatible with M21 protocol4/wire3. Reconnect state is
+  memory-only: restarting the guest loses its bearer/identity and cannot resume. No host
+  migration is implemented. Save schema5 and historical records are unchanged.
+- The host process can preserve an immutable Results screen after the guest leaves; the guest
+  can reconnect during Results/final while its 45-second window remains open. If it does not,
+  no already-recorded score/result is modified.
+
+- **M21/M22 live EOS Internet acceptance is BLOCKED.** The transport-independent lifecycle and
   two-process loopback ENet series are local acceptance only. The M19 production platform,
   Auth/Connect, native Lobby/P2P executor, authorized identities, sender-safety review and
   Internet evidence are still absent; Production Online honestly remains unavailable.
-- Protocol4/wire3 is intentionally incompatible with M16/M17 protocol3/wire2. Both peers must
+- Protocol5/wire4 is intentionally incompatible with earlier protocol revisions. Both peers must
   update; there is no cross-version reconnect or persisted network state migration. Save schema
   stays5 because M21 adds no persisted data.
 - The result/series UI is connected to the development transport composition. M20's production

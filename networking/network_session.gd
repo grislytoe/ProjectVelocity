@@ -15,6 +15,12 @@ var profile: Array = ["Player", "44cceeff", "ffffffff"]
 var guest_profile: Array = ["Guest", "dd88ffff", "ffffffff"]
 var session_id: String = ""
 var reconnect_token: String = ""
+var reconnect_identity: String = ""
+var _guest_reconnect_identity: String = ""
+var _pending_reconnect_token: String = ""
+var _awaiting_reconnect_baseline: bool = false
+var _reconnect_baseline_tick: int = -1
+var _requested_reconnect_generation: int = 0
 var joined: bool = false
 var ended: bool = false
 var paused: bool = false
@@ -176,6 +182,7 @@ func _ready() -> void:
 	interpolation.config = config
 	_host_remote_buffer.config = config
 	add_child(barrier)
+	reconnect_identity = Crypto.new().generate_random_bytes(16).hex_encode()
 	barrier.arm(course.actors, [&"1", &"2"])
 	if not series.configure(course.definition, configured_rounds):
 		push_error("Invalid immutable online series settings")
@@ -228,7 +235,8 @@ func _physics_process(_delta: float) -> void:
 			transport.send(NetPacket.make(NetPacket.Kind.HELLO, "", 0,
 				[course.definition.map_id, course.definition.map_version,
 				course.definition.declared_checksum, profile, reconnect_token,
-				BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER]))
+				BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER, reconnect_identity,
+				series.series_generation, series.round_generation, _requested_reconnect_generation]))
 		elif joined:
 			send(NetPacket.Kind.PING, [service_tick])
 	if host:
@@ -245,7 +253,8 @@ func receive(packet: NetPacket) -> void:
 		return
 	if (host and packet.kind in [NetPacket.Kind.WELCOME, NetPacket.Kind.SNAPSHOT]) \
 		or (not host and packet.kind in [NetPacket.Kind.HELLO, NetPacket.Kind.READY,
-			NetPacket.Kind.INPUT, NetPacket.Kind.LOADED, NetPacket.Kind.SERIES_ACTION]):
+			NetPacket.Kind.INPUT, NetPacket.Kind.LOADED, NetPacket.Kind.SERIES_ACTION,
+			NetPacket.Kind.RECONNECT_READY]):
 		scope_rejections += 1
 		return
 	if packet.kind not in [NetPacket.Kind.INPUT, NetPacket.Kind.SNAPSHOT]:
@@ -265,43 +274,70 @@ func receive(packet: NetPacket) -> void:
 			scope_rejections += 1
 			notify("Incompatible map ID/version/checksum")
 			return
-		if (paused or joined) and data[4] != reconnect_token:
-			# HELLO retransmission before the first WELCOME needs no token.
-			if paused or barrier.gate.start_tick >= 0:
+		if paused:
+			var bearer_ok: bool = data[4] == reconnect_token or (not _pending_reconnect_token.is_empty() \
+				and data[4] == _pending_reconnect_token)
+			if not bearer_ok or data[4].is_empty() or data[7] != _guest_reconnect_identity \
+					or not series.begin_reconnect_handshake(service_tick, int(data[8]), int(data[9]),
+						int(data[10])):
+				scope_rejections += 1
 				return
-		if paused and data[4] == reconnect_token:
+			if _pending_reconnect_token.is_empty():
+				_pending_reconnect_token = Crypto.new().generate_random_bytes(16).hex_encode()
+			joined = true
+			last_packet_tick = service_tick
+			send(NetPacket.Kind.WELCOME, [_pending_reconnect_token, config.snapshot_hz, profile,
+				guest_profile, series.rounds_total, series.series_generation, series.settings_identity,
+				BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER, series.reconnect_generation])
+			if _reconnect_baseline_tick < 0 and not _prepare_reconnect_baseline():
+				joined = false
+				return
+			series.baseline_sent(series.reconnect_generation)
+			_send_authoritative_snapshot()
+			return
+		if joined:
+			# Initial HELLO retransmission is harmless; no second membership is created.
+			return
+		if not joined and not paused:
+			if not _guest_reconnect_identity.is_empty() or not data[4].is_empty() \
+					or int(data[10]) != 0 or series.phase != OnlineSeries.Phase.SYNCHRONIZED_LOADING:
+				scope_rejections += 1
+				return
+			guest_profile = data[3].duplicate()
+			_guest_reconnect_identity = data[7]
 			joined = true
 			last_packet_tick = service_tick
 			send(NetPacket.Kind.WELCOME, [reconnect_token, config.snapshot_hz, profile, guest_profile,
-				series.rounds_total, series.series_generation, series.settings_identity,
-				BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER])
-			return
-		if not joined and not paused:
-			guest_profile = data[3].duplicate()
-		joined = true
-		last_packet_tick = service_tick
-		send(NetPacket.Kind.WELCOME, [reconnect_token, config.snapshot_hz, profile, guest_profile,
 			series.rounds_total, series.series_generation, series.settings_identity,
-			BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER])
-		apply_profiles()
+			BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER, 0])
+			apply_profiles()
 		return
 	if not host and packet.kind == NetPacket.Kind.WELCOME and not joined:
 		if not session_id.is_empty() and packet.session != session_id:
+			scope_rejections += 1
 			return
 		var reconnecting: bool = not reconnect_token.is_empty()
+		var incoming_rounds: int = int(packet.data[4])
+		var incoming_generation: int = int(packet.data[5])
+		var incoming_reconnect_generation: int = int(packet.data[9])
+		if int(packet.data[7]) != BuildInfo.NETWORK_WIRE_REVISION \
+			or int(packet.data[8]) != BuildInfo.BUILD_NUMBER \
+			or (reconnecting and (incoming_generation != series.series_generation \
+				or incoming_rounds != series.rounds_total \
+				or incoming_reconnect_generation != _requested_reconnect_generation)) \
+			or (not reconnecting and incoming_reconnect_generation != 0) \
+			or packet.data[6] != series.settings_identity:
+			scope_rejections += 1
+			notify("Incompatible series settings")
+			return
+		if not reconnecting and not series.configure(course.definition, incoming_rounds, incoming_generation):
+			scope_rejections += 1
+			return
 		session_id = packet.session
 		reconnect_token = packet.data[0]
 		config.snapshot_hz = int(packet.data[1])
 		guest_profile = packet.data[2].duplicate()
-		configured_rounds = int(packet.data[4])
-		if int(packet.data[7]) != BuildInfo.NETWORK_WIRE_REVISION \
-			or int(packet.data[8]) != BuildInfo.BUILD_NUMBER \
-			or (not reconnecting and not series.configure(course.definition, configured_rounds, int(packet.data[5]))) \
-			or (reconnecting and (int(packet.data[5]) != series.series_generation \
-				or configured_rounds != series.rounds_total)) \
-			or packet.data[6] != series.settings_identity:
-			notify("Incompatible series settings")
-			return
+		configured_rounds = incoming_rounds
 		joined = true
 		host_tick = packet.tick
 		client_tick = packet.tick
@@ -309,14 +345,16 @@ func receive(packet: NetPacket) -> void:
 		course.actors[1].start_blocked = true
 		apply_profiles()
 		if reconnecting:
-			send(NetPacket.Kind.READY, [true, ready_revision,
-				series.series_generation, series.round_generation])
+			paused = true
+			_awaiting_reconnect_baseline = true
+			_reconnect_baseline_tick = -1
+			notify("Reconnect authenticated; receiving authoritative baseline")
 		else:
 			loaded_revision += 1
 			series.confirm_loaded(2, series.series_generation, series.round_generation,
 				series.map_id, series.map_version, series.map_checksum, loaded_revision)
 			_send_loaded()
-		notify("Handshake accepted; load/hints then ready")
+			notify("Handshake accepted; load/hints then ready")
 		return
 	if not joined or packet.session != session_id:
 		scope_rejections += 1
@@ -342,27 +380,19 @@ func receive(packet: NetPacket) -> void:
 				_accepted_ready_revision = int(packet.data[1])
 				guest_ready = packet.data[0]
 				last_packet_tick = service_tick
-				if paused and guest_ready:
-					queue.clear()
-					var target: Vector2 = course.lives[1].respawn_position
-					if not RespawnSafety.valid(course.actors[1], target):
-						target = course.lives[1].start_position
-					if not RespawnSafety.valid(course.actors[1], target):
-						return
-					course.actors[1].respawn_at(target, true)
-					if finish_times[1] >= 0:
-						course.actors[1].finish_run()
-					for i: int in 2:
-						course.actors[i].start_blocked = _paused_blocks[i]
-					paused = false
-					reconnect_remaining = 0
-					series.resume_reconnect()
-					emit_event(0, GameplayEvents.Kind.RESUME)
-					notify("Guest returned; match resumed")
-				else:
-					if not series.set_ready(2, guest_ready, int(packet.data[2]),
-							int(packet.data[3]), int(packet.data[1])):
-						scope_rejections += 1
+				if paused:
+					scope_rejections += 1
+				elif not series.set_ready(2, guest_ready, int(packet.data[2]),
+						int(packet.data[3]), int(packet.data[1])):
+					scope_rejections += 1
+		NetPacket.Kind.RECONNECT_READY:
+			if not host or not paused or int(packet.data[3]) != _reconnect_baseline_tick \
+					or not series.baseline_accepted(service_tick, int(packet.data[0]),
+						int(packet.data[1]), int(packet.data[2])):
+				scope_rejections += 1
+				return
+			last_packet_tick = service_tick
+			_complete_reconnect()
 		NetPacket.Kind.INPUT:
 			if host and not paused:
 				last_packet_tick = service_tick
@@ -408,13 +438,21 @@ func sample_input() -> InputFrame:
 
 func advance_host() -> void:
 	if paused:
-		reconnect_remaining -= 1
-		if reconnect_remaining <= 0:
-			if series.award_guest_disconnect(progress, _checkpoint_evidence()):
+		reconnect_remaining = series.reconnect_remaining(service_tick)
+		if joined and series.reconnect_state == OnlineSeries.ReconnectState.BASELINE_SENT \
+				and service_tick % (60 / config.snapshot_hz) == 0:
+			_send_authoritative_snapshot()
+		var mutable_round: bool = series.reconnect_round_mutable()
+		if series.reconnect_expired(service_tick):
+			joined = false
+			_pending_reconnect_token = ""
+			if mutable_round and series.award_guest_disconnect(progress, _checkpoint_evidence()):
 				_sync_series_fields()
 				emit_event(1, GameplayEvents.Kind.WINNER)
 				_results_enter_tick = host_tick
 				notify("Reconnect window expired; host wins round")
+			else:
+				notify("Reconnect window expired; immutable result retained")
 			paused = false
 		return
 	host_tick += 1
@@ -466,22 +504,69 @@ func advance_host() -> void:
 			guest_ready = false
 		emit_event(0, GameplayEvents.Kind.ROUND_TRANSITION, _previous_phase)
 	if joined and service_tick % (60 / config.snapshot_hz) == 0:
-		events.prune(host_tick, config.event_lifetime)
-		var states: Array = []
-		for i: int in 2:
-			states.append(ActorState.capture(course.actors[i], epochs[i]).values())
-			progress[i] = course.lives[i].progress.reached.size()
-		send(NetPacket.Kind.SNAPSHOT, [queue.ack, clock_ticks, barrier.gate.start_tick, paused,
-			states, course.capture_dynamics(), events.recent, winner, reconnect_remaining, progress,
-			RaceBaseline.capture(self)])
-		snapshot_count += 1
-		last_snapshot_service = service_tick
-		_host_remote_buffer.insert(host_tick, ActorState.capture(course.actors[1], epochs[1]))
+		_send_authoritative_snapshot()
 	var remote_sample: Dictionary = _host_remote_buffer.sample(host_tick - config.interpolation_ticks)
 	if not remote_sample.is_empty():
 		course.remote.presentation.position = remote_sample.position - course.remote.position
 		course.remote.presentation.present(remote_sample.state.visual(
 			visual_events_at(host_tick - config.interpolation_ticks)))
+
+func _send_authoritative_snapshot() -> void:
+	events.prune(host_tick, config.event_lifetime)
+	var states: Array = []
+	for i: int in 2:
+		states.append(ActorState.capture(course.actors[i], epochs[i]).values())
+		progress[i] = course.lives[i].progress.reached.size()
+	reconnect_remaining = series.reconnect_remaining(service_tick) if paused else 0
+	send(NetPacket.Kind.SNAPSHOT, [queue.ack, clock_ticks, barrier.gate.start_tick, paused,
+		states, course.capture_dynamics(), events.recent, winner, reconnect_remaining, progress,
+		RaceBaseline.capture(self)])
+	snapshot_count += 1
+	last_snapshot_service = service_tick
+	_host_remote_buffer.insert(host_tick, ActorState.capture(course.actors[1], epochs[1]))
+	if paused and series.reconnect_state == OnlineSeries.ReconnectState.BASELINE_SENT:
+		_reconnect_baseline_tick = host_tick
+
+func _clear_reconnect_queues() -> void:
+	queue.clear()
+	prediction.clear()
+	interpolation.clear()
+	_host_remote_buffer.clear()
+	_visual_events.clear()
+	events.recent.clear()
+	_dynamics.clear()
+	sequence = 65535
+	last_snapshot_tick = -1
+	for i: int in 2:
+		epochs[i] += 1
+
+func _complete_reconnect() -> void:
+	_clear_reconnect_queues()
+	for i: int in 2:
+		course.actors[i].start_blocked = _paused_blocks[i]
+	if not series.resume_reconnect():
+		scope_rejections += 1
+		return
+	reconnect_token = _pending_reconnect_token
+	_pending_reconnect_token = ""
+	paused = false
+	reconnect_remaining = 0
+	emit_event(0, GameplayEvents.Kind.RESUME)
+	notify("Guest returned; authoritative baseline accepted; match resumed")
+	_send_authoritative_snapshot()
+
+func _prepare_reconnect_baseline() -> bool:
+	_clear_reconnect_queues()
+	var target: Vector2 = course.lives[1].respawn_position
+	if not RespawnSafety.valid(course.actors[1], target):
+		target = course.lives[1].start_position
+	if not RespawnSafety.valid(course.actors[1], target):
+		scope_rejections += 1
+		return false
+	course.actors[1].respawn_at(target, true)
+	if finish_times[1] >= 0:
+		course.actors[1].finish_run()
+	return true
 
 func _checkpoint_evidence() -> Array:
 	var result: Array = [[], []]
@@ -547,13 +632,27 @@ func advance_client() -> void:
 func accept_snapshot(packet: NetPacket) -> void:
 	var incoming_series: Array = packet.data[10][8] if packet.data.size() == 11 \
 		and packet.data[10] is Array and packet.data[10].size() == 9 else []
-	if packet.tick <= last_snapshot_tick or not course.valid_dynamics(packet.data[5]) \
+	if not course.valid_dynamics(packet.data[5]) \
 		or incoming_series.is_empty() \
 		or int(incoming_series[0]) < series.series_generation \
 		or (int(incoming_series[0]) == series.series_generation \
 			and int(incoming_series[1]) < series.round_generation) \
 		or not RaceBaseline.matches_map(packet.data[10], course.definition):
 		scope_rejections += 1
+		return
+	if packet.tick <= last_snapshot_tick:
+		# The host tick is intentionally frozen while paused. Repeated, fully validated
+		# copies of that exact baseline retry the generation-bound acknowledgement when
+		# application shaping drops an earlier control packet; they never reapply world state.
+		if packet.tick == last_snapshot_tick and paused \
+				and int(incoming_series[8]) == OnlineSeries.Phase.RECONNECT \
+				and int(incoming_series[24]) == OnlineSeries.ReconnectState.BASELINE_SENT \
+				and int(incoming_series[25]) == series.reconnect_generation \
+				and packet.tick == _reconnect_baseline_tick:
+			last_packet_tick = service_tick
+			_send_reconnect_ready(incoming_series, packet.tick)
+		else:
+			scope_rejections += 1
 		return
 	if last_snapshot_tick >= 0:
 		telemetry.add("snapshot_gap_ticks", packet.tick - last_snapshot_tick)
@@ -610,6 +709,17 @@ func accept_snapshot(packet: NetPacket) -> void:
 			notify("Player %d finished; winner %d" % [int(event[2]), winner])
 		elif int(event[3]) == GameplayEvents.Kind.SKIPPED_CHECKPOINT:
 			notify("Player %d: skipped mandatory checkpoint" % int(event[2]))
+	if _awaiting_reconnect_baseline and remote_phase == OnlineSeries.Phase.RECONNECT \
+			and series.reconnect_state == OnlineSeries.ReconnectState.BASELINE_SENT:
+		_awaiting_reconnect_baseline = false
+		_reconnect_baseline_tick = packet.tick
+		# This ack proves the exact generation-bound baseline was accepted. It cannot resume locally.
+		_send_reconnect_ready(incoming_series, packet.tick)
+		notify("Authoritative baseline accepted; waiting for atomic resume")
+
+func _send_reconnect_ready(incoming_series: Array, baseline_tick: int) -> void:
+	send(NetPacket.Kind.RECONNECT_READY, [int(incoming_series[27]), int(incoming_series[28]),
+		int(incoming_series[25]), baseline_tick])
 
 func movement_events(index: int) -> void:
 	var bits: int = course.actors[index].motor.events
@@ -696,26 +806,53 @@ func disconnected() -> void:
 	if not joined:
 		return
 	joined = false
-	prediction.clear()
-	interpolation.clear()
-	queue.clear()
+	_clear_reconnect_queues()
 	_hint_ticks = 0
 	if host:
-		if series.phase in [OnlineSeries.Phase.FINAL_SERIES_RESULTS, OnlineSeries.Phase.LOBBY]:
+		if series.phase == OnlineSeries.Phase.LOBBY:
 			notify("Guest left after series completion")
 			return
 		paused = true
-		series.enter_reconnect()
+		if not series.enter_reconnect(service_tick, config.reconnect_ticks):
+			return
 		for i: int in 2:
 			_paused_blocks[i] = course.actors[i].start_blocked
 			course.actors[i].start_blocked = true
-		reconnect_remaining = config.reconnect_ticks
+		reconnect_remaining = series.reconnect_remaining(service_tick)
+		_reconnect_baseline_tick = -1
+		_pending_reconnect_token = ""
 		emit_event(0, GameplayEvents.Kind.DISCONNECT)
 		notify("Guest disconnected; match paused for 45 seconds")
 	else:
-		ended = true
-		series.end()
-		notify("Host disconnected; match ended. Close or restart Local Network.")
+		_terminate_host_loss()
+
+func guest_transport_lost() -> void:
+	if host or not joined or ended:
+		return
+	joined = false
+	paused = true
+	_requested_reconnect_generation = series.reconnect_generation + 1
+	_clear_reconnect_queues()
+	_hint_ticks = 0
+	course.actors[1].start_blocked = true
+	notify("Connection lost; reconnecting to host")
+
+func _terminate_host_loss() -> void:
+	ended = true
+	paused = false
+	joined = false
+	reconnect_remaining = 0
+	_awaiting_reconnect_baseline = false
+	_clear_reconnect_queues()
+	for actor: PlayerController in course.actors:
+		actor.start_blocked = true
+	if is_instance_valid(course.world):
+		for projectile: HazardProjectile in course.world.projectiles:
+			projectile.recycle()
+	if transport != null:
+		transport.close()
+	series.end()
+	notify("Host disconnected; match ended. Return to Lobby or Main Menu.")
 
 func apply_profiles() -> void:
 	for i: int in 2:
@@ -746,16 +883,19 @@ func shutdown() -> void:
 	_dynamics.clear()
 	_visual_events.clear()
 	barrier.actors.clear()
+	reconnect_token = ""
+	_pending_reconnect_token = ""
+	reconnect_identity = ""
+	_guest_reconnect_identity = ""
 
 func prepare_reconnect() -> void:
 	_ping_times.clear()
 	last_pong_service = -1000
 	# Explicit same-process retry retains only the ephemeral bearer token, never a nickname identity.
-	if host:
+	if host or ended or reconnect_token.is_empty():
 		return
 	joined = false
-	ended = false
-	paused = false
+	paused = true
 	sequence = 65535
 	ready_revision += 1
 	# F9 confirms return/load even if Results or a withdrawal had cleared race Ready.
@@ -763,7 +903,11 @@ func prepare_reconnect() -> void:
 	_hint_ticks = 0
 	prediction.clear()
 	interpolation.clear()
+	_host_remote_buffer.clear()
+	events.clear()
+	_visual_events.clear()
 	_dynamics.clear()
+	last_snapshot_tick = -1
 	course.actors[1].start_blocked = true
 	notify("Reconnecting to the same local session")
 

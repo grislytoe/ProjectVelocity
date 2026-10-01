@@ -106,7 +106,8 @@ func _valid_envelope(value: Variant) -> bool:
 		value.get("bytes") is PackedByteArray and value.bytes.size() <= 1016
 
 static func _reliable(kind: int) -> bool:
-	return kind in [NetPacket.Kind.HELLO, NetPacket.Kind.WELCOME, NetPacket.Kind.READY, NetPacket.Kind.BYE]
+	return kind in [NetPacket.Kind.HELLO, NetPacket.Kind.WELCOME, NetPacket.Kind.READY,
+		NetPacket.Kind.RECONNECT_READY, NetPacket.Kind.BYE]
 
 func close() -> void:
 	connected = false

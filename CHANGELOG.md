@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.22.0-dev — M22 Disconnect / Reconnect (build28)
+
+- Extend the existing M21 authority with a typed, generation-bound reconnect state machine;
+  freeze the complete gameplay world while the independent 60 Hz service clock runs.
+- Enforce the production 2700-tick/45-second inclusive deadline, rotating memory-only bearer,
+  same guest identity, compatible build/map/protocol and full baseline acknowledgement.
+- Restore the guest collision-safely at the last host checkpoint or Start, preserve immutable
+  results/progress, clear stale queues and prevent duplicate awards/resumes across cycles.
+- Terminate guest state immediately on host loss with no migration; add localized reconnect,
+  resume/failure/host-left presentation and retain M17 RTT hysteresis as presentation only.
+- Bump incompatible protocol4→5 and wire3→4; save schema5 and map versions/checksums stay.
+- Add deterministic fixed-rate tests and standalone ENet success, Results recovery, host-drop
+  and full production 2700-tick expiry fixtures. Live EOS/Internet remains BLOCKED.
+
 ## 0.21.0-dev — M21 Online Match / Series (build27)
 
 - Add one host-authoritative OnlineSeries state machine for synchronized load, localized

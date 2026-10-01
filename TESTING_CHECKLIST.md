@@ -1,5 +1,26 @@
 # Testing checklist
 
+## M22 Disconnect / Reconnect
+
+- [x] `tests/disconnect_reconnect_test.gd` at fixed render30/60/144: typed transitions,
+  duplicate/late idempotence, complete phase matrix, world/timer freeze, inclusive tick2700
+  acceptance and tick2701 expiry, exact-once forfeit, immutable result and race ordering.
+- [x] Empty/wrong/expired/replayed bearer, foreign identity, stale series/round/reconnect
+  generation and client self-resume/deadline mutations are rejected before authority changes.
+- [x] Full baseline handshake restores host checkpoint or collision-safe Start with progress and
+  invulnerability; input/prediction/interpolation/event queues and actor epochs are rebased.
+- [x] Repeated cycles and shutdown leave zero queues/history/events/projectiles. Host loss ends
+  the guest without migration and exposes localized Lobby/Menu actions.
+- [x] M17 observer still owns warning policy: 30 fresh ticks >200 ms, 60 ticks <=180 ms,
+  180–200 deadband, stale separate, reconnect overlay priority; RU/EN presentation tested.
+- [x] Standalone localhost ENet: active reconnect, checkpoint baseline, Results/final reconnect,
+  production 2700-tick expiry/host win and host drop. Unique paths/ports and owned-PID cleanup.
+- [x] Existing 80/150/200/250 ms, combined jitter/loss/reorder seeded profiles, 30/60/144 fixed
+  suites and M0–M21 regressions remain in `dev_tools/validate.ps1`.
+- [ ] Live EOS/Internet acceptance remains BLOCKED by M19 prerequisites. Never substitute ENet.
+
+Focused commands and evidence are in `docs/M22_VALIDATION.md`.
+
 ## M21 Online Match / Series
 
 - [x] `tests/online_series_test.gd` at fixed render30/60/144: correct/stale/wrong loaded

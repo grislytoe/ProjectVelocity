@@ -39,6 +39,7 @@ func send(packet: NetPacket) -> void:
 	# still drops decoded controls and exercises the existing idempotent retries.
 	_peer.transfer_mode = MultiplayerPeer.TRANSFER_MODE_RELIABLE if packet.kind in [
 		NetPacket.Kind.HELLO, NetPacket.Kind.WELCOME, NetPacket.Kind.READY,
+		NetPacket.Kind.RECONNECT_READY,
 		NetPacket.Kind.LOADED, NetPacket.Kind.SERIES_ACTION, NetPacket.Kind.BYE
 	] else MultiplayerPeer.TRANSFER_MODE_UNRELIABLE
 	_peer.transfer_channel = 0

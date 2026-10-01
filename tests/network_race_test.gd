@@ -55,8 +55,8 @@ func run() -> void:
 		var wire := NetPacket.make(NetPacket.Kind.SNAPSHOT, session.session_id, 1, data)
 		check(NetPacket.decode(wire.encode(session.config), session.config) != null, "full baseline wire")
 		var old := NetworkConfig.new()
-		old.protocol = 3
-		check(NetPacket.decode(wire.encode(old), session.config) == null, "protocol 3 rejected")
+		old.protocol = 4
+		check(NetPacket.decode(wire.encode(old), session.config) == null, "protocol 4 rejected")
 		for field: int in data[10].size():
 			var broken: Array = data.duplicate(true)
 			broken[10][field] = {"forged": true}
@@ -95,13 +95,17 @@ func run() -> void:
 			course.lives[1].advance()
 		check(actor.position == safe and actor.motor.invulnerability_ticks > 0, "safe checkpoint respawn and immunity")
 		check(not actor.die(), "all fatal hazards observe immunity")
+		session._guest_reconnect_identity = "e".repeat(32)
 		session.disconnected()
 		session.receive(NetPacket.make(NetPacket.Kind.HELLO, "", 0, [course.definition.map_id,
 			course.definition.map_version, course.definition.declared_checksum,
 			["Guest", "ffffffff", "ffffffff"], session.reconnect_token,
-			BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER]))
-		session.receive(NetPacket.make(NetPacket.Kind.READY, session.session_id, 0, [true, 4,
-			session.series.series_generation, session.series.round_generation]))
+			BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER, "e".repeat(32),
+			session.series.series_generation, session.series.round_generation,
+			session.series.reconnect_generation]))
+		session.receive(NetPacket.make(NetPacket.Kind.RECONNECT_READY, session.session_id, 0,
+			[session.series.series_generation, session.series.round_generation,
+			session.series.reconnect_generation, session._reconnect_baseline_tick]))
 		check(not session.paused and actor.position == safe, "reconnect restores host checkpoint")
 		actor.advance(InputFrame.new())
 		check(course.lives[1].finish() and session.winner == 2, "first valid Finish wins")
@@ -137,6 +141,7 @@ func run() -> void:
 		check(guest.round_id == 2 and guest.sequence == 65535 and guest.prediction.commands.is_empty(),
 			"new round baseline rebases guest sequence together with host command queue")
 		guest.guest_ready = false
+		guest.reconnect_token = "a".repeat(32)
 		guest.prepare_reconnect()
 		check(guest.guest_ready, "explicit reconnect confirms return after Results withdrew Ready")
 		viewport.free()
@@ -186,7 +191,7 @@ func run() -> void:
 		session.joined = true
 		session.disconnected()
 		var stopped_clock: int = session.clock_ticks
-		session.reconnect_remaining = 1
+		session.service_tick = session.series.reconnect_deadline_service_tick + 1
 		session.advance_host()
 		check(not session.ended and session.round_complete and session.winner == 1
 			and session.clock_ticks == stopped_clock, "expired reconnect awards host without advancing clock")

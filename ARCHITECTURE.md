@@ -1,5 +1,21 @@
 # Architecture
 
+## M22 Disconnect / Reconnect
+
+`OnlineSeries` now owns the typed reconnect sub-state inside the existing M21 lifecycle:
+paused, authenticating, baseline sent, resuming, expired or terminated. `NetworkSession`
+remains the only host authority. Its fixed 60 Hz service clock advances while host tick,
+race clock, actors, inputs, hazards, platforms, projectiles, countdown and Finish window stay
+frozen. The host accepts the absolute deadline tick and expires on the following service tick.
+
+Protocol5/wire4 binds HELLO to the memory-only rotating bearer, memory-only guest identity,
+session/map/build/protocol plus series/round/reconnect generations. Resume requires a complete
+host baseline and a generation-bound baseline acknowledgement. Queue/epoch cleanup and safe
+checkpoint-or-Start respawn happen before the atomic resume snapshot. Results are immutable;
+host loss terminates without migration. `OnlineMatchOverlay` presents reconnect/host-left
+states and M17 remains the only connection-quality observer. See
+[M22 validation](docs/M22_VALIDATION.md) and [network contract](NETWORKING.md).
+
 ## M21 Online Match / Series
 
 `OnlineSeries` is the typed, transport-independent state owner for the complete two-player

@@ -325,3 +325,12 @@ M21_RECONNECT,Match paused · reconnect %d sec,Матч приостановле
 M21_HOST_LEFT,Host disconnected. Match ended.,Хост отключился. Матч завершён.
 M21_RESULT_ROW,Round %d   P1 %s   ·   P2 %s,Раунд %d   И1 %s   ·   И2 %s
 M21_BEST_ROW,Best   P1 %s   ·   P2 %s,Лучшее   И1 %s   ·   И2 %s
+M22_RECONNECT_TITLE,CONNECTION INTERRUPTED,СОЕДИНЕНИЕ ПРЕРВАНО
+M22_GUEST_PAUSED,Guest disconnected · match paused · %d sec remaining,Гость отключился · матч приостановлен · осталось %d сек
+M22_RECONNECTING,Reconnecting · %d sec remaining,Переподключение · осталось %d сек
+M22_RESUMING,Authoritative state received · resuming · %d sec remaining,Состояние хоста получено · возобновление · осталось %d сек
+M22_RECONNECT_FAILED,Reconnect failed · %d sec remaining,Не удалось переподключиться · осталось %d сек
+M22_HOST_LEFT,HOST DISCONNECTED,ХОСТ ОТКЛЮЧИЛСЯ
+M22_SAFE_RETURN,The online match ended. Return to Lobby or Main Menu.,Онлайн-матч завершён. Вернитесь в лобби или главное меню.
+M22_NETWORK_WARNING,Unstable connection · measured RTT above 200 ms,Нестабильное соединение · измеренный RTT выше 200 мс
+M22_NETWORK_STALE,Connection data unavailable,Данные о соединении недоступны
