@@ -57,9 +57,10 @@ func _panel(title: String) -> void:
 	var eyebrow := Label.new()
 	eyebrow.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	eyebrow.text = "PROJECT / VELOCITY    •    " + BuildInfo.label()
-	eyebrow.add_theme_color_override("font_color", Color("73e7d2"))
+	eyebrow.add_theme_color_override("font_color", ArtPalette.ROUTE)
 	eyebrow.add_theme_font_size_override("font_size", 20)
 	layout.add_child(eyebrow)
+	layout.add_child(TechnoBrandMark.new())
 	var heading := Label.new()
 	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	heading.text = tr(title)
@@ -502,6 +503,9 @@ func start_map() -> void:
 	for item: Label in [hud, banner, status]:
 		item.add_theme_font_size_override("font_size", roundi(item.get_theme_font_size("font_size") * font_scale))
 		item.scale = Vector2.ONE * ui_scale
+		item.add_theme_color_override("font_color", ArtPalette.TEXT)
+		item.add_theme_color_override("font_outline_color", ArtPalette.BACKGROUND)
+		item.add_theme_constant_override("outline_size", 3)
 	hud.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hud.size.x = 900 / ui_scale
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

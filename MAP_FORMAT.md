@@ -1,5 +1,15 @@
 # Map format — M13 / PV-MAP-1
 
+## M23 presentation registry and identity
+
+MapDefinition does not gain an art path. `VisualAssetRegistry` selects optional presentation by
+the existing stable `map_id`, so custom/profile data cannot request arbitrary resources and map
+systems remain theme-neutral. Foundry receives a non-colliding, process-disabled far layer;
+Training receives none. Collision scenes, placement transforms, Start/Finish/checkpoint points,
+DeathZone bounds and routes are unchanged. Conservative code identity publishes Training v7
+checksum `521378ea073b7c23dec453201fb814ad806af4272f635b020323b8cdb2100981` and Foundry v6
+checksum `5f10b4e2feda6bab79dad70c13721178715fa97c223c6cd6886456fe57f15e78`.
+
 `map_data/training_circuit.tres` is the production catalog entry used by Map Select,
 SoloTrial, checkpoint progress and TrialRecords. Stable ID `solo_training`, map version
 **3**. Training Circuit remains the short M10 module demonstration, not the final map.

@@ -15,20 +15,29 @@ static func box(fill: Color, border: Color, width: int = 1) -> StyleBoxFlat:
 static func create() -> Theme:
 	var result := Theme.new()
 	result.default_font_size = 24
-	result.set_color("font_color", "Label", Color("dfebed"))
-	result.set_color("font_color", "Button", Color("dfebed"))
+	result.set_color("font_color", "Label", ArtPalette.TEXT)
+	result.set_color("font_color", "Button", ArtPalette.TEXT)
+	result.set_color("font_outline_color", "Label", ArtPalette.BACKGROUND)
+	result.set_constant("outline_size", "Label", 1)
 	result.set_color("font_hover_color", "Button", Color.WHITE)
 	result.set_color("font_focus_color", "Button", Color.WHITE)
-	result.set_color("font_disabled_color", "Button", Color("819096"))
-	result.set_stylebox("normal", "Button", box(Color("152832"), Color("39515c")))
-	result.set_stylebox("hover", "Button", box(Color("234450"), Color("73e7d2")))
-	result.set_stylebox("pressed", "Button", box(Color("326557"), Color("d0fff0")))
-	result.set_stylebox("focus", "Button", box(Color.TRANSPARENT, Color("edc675"), 3))
-	result.set_stylebox("disabled", "Button", box(Color("121d25"), Color("293640")))
-	result.set_stylebox("panel", "PanelContainer", box(Color("0e1a23"), Color("36515e")))
-	result.set_stylebox("normal", "LineEdit", box(Color("09131c"), Color("607c87")))
-	result.set_stylebox("focus", "LineEdit", box(Color.TRANSPARENT, Color("edc675"), 3))
-	result.set_stylebox("focus", "HSlider", box(Color.TRANSPARENT, Color("edc675"), 3))
+	result.set_color("font_pressed_color", "Button", ArtPalette.READY)
+	result.set_color("font_disabled_color", "Button", ArtPalette.TEXT_MUTED.darkened(0.25))
+	result.set_stylebox("normal", "Button", box(ArtPalette.PANEL_RAISED, ArtPalette.STEEL))
+	result.set_stylebox("hover", "Button", box(Color("203d47"), ArtPalette.ROUTE))
+	result.set_stylebox("pressed", "Button", box(Color("244b43"), ArtPalette.READY, 2))
+	result.set_stylebox("focus", "Button", box(Color.TRANSPARENT, ArtPalette.FOCUS, 3))
+	result.set_stylebox("disabled", "Button", box(Color("10171d"), Color("2a363d")))
+	result.set_stylebox("panel", "PanelContainer", box(Color("0b141cf5"), ArtPalette.STEEL, 2))
+	result.set_stylebox("normal", "LineEdit", box(ArtPalette.VOID, ArtPalette.STEEL))
+	result.set_stylebox("focus", "LineEdit", box(Color.TRANSPARENT, ArtPalette.FOCUS, 3))
+	result.set_stylebox("focus", "HSlider", box(Color.TRANSPARENT, ArtPalette.FOCUS, 3))
+	var separator := StyleBoxLine.new()
+	separator.color = ArtPalette.ROUTE_DIM
+	separator.thickness = 2
+	separator.grow_begin = 8
+	separator.grow_end = 8
+	result.set_stylebox("separator", "HSeparator", separator)
 	result.set_constant("separation", "VBoxContainer", 12)
 	result.set_constant("separation", "HBoxContainer", 16)
 	return result

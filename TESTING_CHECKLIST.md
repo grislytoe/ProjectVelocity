@@ -1,5 +1,24 @@
 # Testing checklist
 
+## M23 Art Pass
+
+- [x] `tests/art_pass_test.gd`: curated path policy, manifest JSON, exact 1024×512 cap,
+  2 MiB decoded estimate, import policy, background preload/process/z-order, five platform
+  grammars, 14-state inventory, 25 body/accent combinations and projectile pool bounds.
+- [x] Existing M4 state/event mapping, eight-direction Dash, speed-correlated Run,
+  Skid/Turnaround, no squash/stretch, local/remote alpha/outline/nickname/readiness policy.
+- [x] Presentation-removal replay equality and 30/60/144 M3/M5/M8/M9/M10/M14 replays.
+- [x] MapDefinition/collision/checkpoint/hazard route checks unchanged; deliberate identity bump
+  to Training v7 / Foundry v6 with regenerated PV-MAP-1 manifest/checksums.
+- [x] RU/EN native UI/focus/scaling coverage at 1280×720, 1280×800 and 1920×1080 retained;
+  splash/menu/settings/lobby/reconnect/results stay Controls with 200 ms transitions.
+- [x] Normal Compatibility captures: gallery, Foundry route and representative UI/online states;
+  inspect at the 64 px target, normal/high contrast/flash-disabled/colorblind/effects presets.
+- [x] Full M0–M23 validator including M15–M22 multiplayer/localhost scenarios, parser/import,
+  isolated boot, whitespace and secret/save scans. Exact evidence: `docs/M23_VALIDATION.md`.
+- [ ] Physical Steam Deck/Linux/controller and target-low-end profiling remain manual; do not
+  present Windows sanity measurements as the full M24 benchmark.
+
 ## M22 Disconnect / Reconnect
 
 - [x] `tests/disconnect_reconnect_test.gd` at fixed render30/60/144: typed transitions,

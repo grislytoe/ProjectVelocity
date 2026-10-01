@@ -9,4 +9,4 @@ func _ready() -> void:
 	if config == null or not config.validate():
 		push_error("Invalid platform config")
 		return
-	surface = PlatformGeometry.build(self, config)
+	surface = PlatformGeometry.build(self, config, "one_way" if config.one_way else "static")

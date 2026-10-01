@@ -16,6 +16,7 @@ var menu_button: Button
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_PASS
+	theme = IndustrialTheme.create()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var center := CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

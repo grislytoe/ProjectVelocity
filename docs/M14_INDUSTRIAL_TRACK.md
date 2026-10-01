@@ -1,5 +1,17 @@
 # M14 — Foundry Run / Литейный маршрут
 
+## M23 visual production pass
+
+Foundry Run keeps the eight M14 section scenes, route, seven ordered checkpoints, shortcut,
+camera bounds and every gameplay tuning value. A generated 1024×512 low-contrast far plate now
+sits behind the authored brutalist masses. Shared shape grammar distinguishes platform classes,
+hazard phases, Start/checkpoints/Finish and preserves route priority. The plate has no collision,
+process or map-data path; it is selected by curated `map_id` and cannot increase ultrawide view.
+
+PV-MAP-1 conservatively includes the revised presentation/gameplay scripts, so the official map
+publishes version 6/checksum `5f10b4e2feda6bab79dad70c13721178715fa97c223c6cd6886456fe57f15e78`.
+This is an identity change only: automated route/checkpoint/hazard equality remains required.
+
 Build **0.14.0-dev /20**, schema **5**, protocol **1**. Official ID
 `industrial_foundry`, version **2**, PV-MAP-1. Normal difficulty; displayed duration
 and par are 90 seconds. Human clean completion and subjective Normal acceptance

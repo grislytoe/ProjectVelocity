@@ -253,6 +253,23 @@ func run() -> void:
 			check(world.get_texture().get_image().get_size() == WorldPresentation.render_size(resolution),
 				"GPU image has the selected pixel dimensions")
 			await capture("world-" + str(resolution[0]) + "x" + str(resolution[1]))
+	# M23 renderer evidence: shape cues remain while the full presentation filter changes.
+	var visual_modes: Array[Dictionary] = [
+		{"tag": "m23-high-contrast", "contrast": true, "colorblind": "off", "quality": "quality"},
+		{"tag": "m23-deuteranopia", "contrast": false, "colorblind": "deuteranopia", "quality": "balanced"},
+		{"tag": "m23-flash-off-performance", "contrast": false, "colorblind": "off", "quality": "performance"},
+	]
+	for mode: Dictionary in visual_modes:
+		var proposed: Dictionary = store.data.settings.duplicate(true)
+		proposed.accessibility.high_contrast = mode.contrast
+		proposed.accessibility.colorblind = mode.colorblind
+		proposed.accessibility.disable_strong_flashes = mode.tag == "m23-flash-off-performance"
+		proposed.video.effects_quality = mode.quality
+		main.settings_runtime.apply(proposed)
+		await process_frame
+		check(main.settings_runtime.filter_material.get_shader_parameter("high_contrast") == mode.contrast,
+			"M23 visual mode reaches presentation shader")
+		await capture(mode.tag)
 	main.settings_runtime.apply(store.data.settings)
 	paused = false
 	ui.show_menu()

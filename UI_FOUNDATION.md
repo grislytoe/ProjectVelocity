@@ -1,5 +1,14 @@
 # UI foundation — M11
 
+## M23 visual language
+
+`IndustrialTheme` now consumes the shared M23 palette: square steel panels, cyan structural
+edges, gold 3 px focus, distinct hover/pressed/disabled states and a code-native velocity mark.
+Splash, menus, profile/customization, settings, lobby, online reconnect/results and Solo HUD
+remain native Controls with RU/EN reflow, keyboard/mouse/controller focus and 200 ms transitions.
+HUD text gains a restrained dark outline and still honors text/UI scale and 50–100% opacity.
+No screen is rasterized and no art changes navigation or online authority.
+
 F5 boots `core/bootstrap/main.tscn`. Bootstrap composes one SaveStore, InputLayer and
 InputPreferences, then AppUI. AppUI extends the M10 TrialUI presentation adapter;
 SoloTrial and its existing fixed-tick course/lifecycle/camera remain gameplay authority.

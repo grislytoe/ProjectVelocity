@@ -65,16 +65,36 @@ func _physics_process(delta: float) -> void:
 func _draw() -> void:
 	if tuning == null:
 		return
-	var tint := Color("ef394f") if lethal else Color("ffbf47")
+	var tint := ArtPalette.DANGER if lethal else ArtPalette.WARNING
 	if state == State.INACTIVE:
-		tint = Color(0.4, 0.5, 0.6, 0.25)
+		tint = Color(ArtPalette.STEEL.r, ArtPalette.STEEL.g, ArtPalette.STEEL.b, 0.34)
 	var rect := Rect2(-tuning.size / 2, tuning.size)
 	if spike_visual:
 		var count: int = maxi(1, ceili(tuning.size.x / 20))
 		var width: float = tuning.size.x / count
 		for index: int in count:
 			var x: float = rect.position.x + index * width
-			draw_colored_polygon(PackedVector2Array([Vector2(x, rect.end.y),
-				Vector2(x + width / 2, rect.position.y), Vector2(x + width, rect.end.y)]), tint)
+			var points := PackedVector2Array([Vector2(x, rect.end.y),
+				Vector2(x + width / 2, rect.position.y), Vector2(x + width, rect.end.y)])
+			if state == State.ACTIVE:
+				draw_colored_polygon(points, tint)
+			var contour := points.duplicate()
+			contour.append(points[0])
+			draw_polyline(contour, tint if state != State.ACTIVE else Color.WHITE, 2, true)
+		draw_line(Vector2(rect.position.x, rect.end.y), rect.end, ArtPalette.DANGER_DARK, 4, true)
 	else:
-		draw_rect(rect, tint, lethal, -1.0 if lethal else 2.0)
+		# Lasers use end caps and a bright core; telegraph is a hollow channel.
+		var horizontal: bool = tuning.size.x >= tuning.size.y
+		var axis_start := Vector2(rect.position.x, 0) if horizontal else Vector2(0, rect.position.y)
+		var axis_end := Vector2(rect.end.x, 0) if horizontal else Vector2(0, rect.end.y)
+		var thickness: float = minf(tuning.size.x, tuning.size.y)
+		draw_line(axis_start, axis_end, tint, thickness if lethal else 3.0, true)
+		if lethal:
+			draw_line(axis_start, axis_end, Color(1, 0.88, 0.82, 0.8), maxf(2.0, thickness * 0.18), true)
+		var cap := Vector2(0, thickness * 0.72) if horizontal else Vector2(thickness * 0.72, 0)
+		draw_line(axis_start - cap, axis_start + cap, tint, 4, true)
+		draw_line(axis_end - cap, axis_end + cap, tint, 4, true)
+		if state == State.TELEGRAPH:
+			for ratio: float in [0.25, 0.5, 0.75]:
+				var marker := axis_start.lerp(axis_end, ratio)
+				draw_circle(marker, 3.0, ArtPalette.WARNING)

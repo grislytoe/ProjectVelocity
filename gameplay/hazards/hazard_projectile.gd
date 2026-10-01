@@ -120,4 +120,11 @@ func _physics_process(_delta: float) -> void:
 
 
 func _draw() -> void:
-	draw_circle(Vector2.ZERO, radius, Color("ffcf63"))
+	if radius <= 0:
+		return
+	var direction := Vector2.RIGHT if velocity.is_zero_approx() else velocity.normalized()
+	var tangent := direction.rotated(PI / 2)
+	draw_colored_polygon(PackedVector2Array([direction * radius, tangent * radius * 0.75,
+		-direction * radius * 1.4, -tangent * radius * 0.75]), ArtPalette.WARNING)
+	draw_circle(Vector2.ZERO, maxf(1.5, radius * 0.35), Color.WHITE)
+	draw_line(-direction * radius * 1.7, -direction * radius * 3.0, Color(1, 0.74, 0.35, 0.42), 2, true)

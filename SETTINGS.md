@@ -1,5 +1,15 @@
 # Settings — M12 implementation inventory
 
+## M23 art compatibility
+
+The first production art pass keeps the M12 presentation contract intact. High Contrast and
+colorblind channel correction apply to the generated background and code-native art together;
+platform, hazard, checkpoint and readiness states also have shape/line cues. Flash-disabled
+caps the Double Jump/respawn contribution, speed intensity scales max-speed trails, effects
+quality controls procedural segment/alpha cost and shake remains camera-only. The integrated
+1024×512 background is preloaded, uses linear filtering without mipmaps/repeat at 2× display,
+and does not alter the fixed 1920×1080 competitive frame or Steam Deck visual presets.
+
 Source: master specification sections 37–42 and schema 4. No gameplay timing changes.
 
 | Category | Required values |

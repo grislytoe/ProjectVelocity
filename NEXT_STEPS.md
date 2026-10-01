@@ -1,5 +1,21 @@
 # Next steps
 
+Review the M23 Art Pass PR from `feature/m23-art-pass` into `dev`. Use
+`docs/M23_VALIDATION.md` for the exact generated-asset provenance, map identities, captures,
+budgets and regression evidence. Merge only after explicit user authorization. Do not start
+M24 in this task.
+
+M24 may perform the dedicated target-hardware performance/optimization milestone after review;
+it must not lower physics/network rates to hide presentation cost. Final character sheets and
+additional environment assets should follow `docs/ASSET_SPECIFICATION.md` and the rejection
+workflow in `docs/ASSET_GENERATION_PROMPTS.md`.
+
+The M19 live EOS/Internet blocker remains unchanged: production Auth/Connect/Lobby/P2P,
+authorized identities, native exports and real Internet evidence are still absent. Local ENet
+and M22 reconnect tests do not satisfy it.
+
+Historical handoff below describes the completed M22 boundary.
+
 Review the M22 Disconnect / Reconnect PR from `feature/m22-disconnect-reconnect` into `dev`.
 See [M22 validation](docs/M22_VALIDATION.md) for the exact deadline/order, phase matrix,
 standalone local ENet evidence and acceptance split. M22 transport-independent/local acceptance

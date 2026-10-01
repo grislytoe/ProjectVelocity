@@ -1,5 +1,21 @@
 # Character presentation — M4
 
+## M23 production pass
+
+The runtime remains a rigid seven-node modular rig and retains the historical
+`PlayerPlaceholder` class name for scene compatibility. M23 refines the module silhouettes,
+material separation, visor/torso/limb markings, joint discs and moderate action VFX without
+adding sprites or animation authority. All 14 required poses, speed-correlated Run, rotated
+eight-direction Dash, Skid → Turnaround → Run, max-speed cue, invulnerability halo, readiness
+lights and local-only Dash arrow retain their existing detached-state contract.
+
+Body/accent color is exercised across a 5×5 representative matrix. Local opacity remains 1.0;
+remote opacity/effects remain 0.3 with real colors and weak/no outline. High contrast and
+colorblind correction remain screen-presentation options; filled/hollow readiness shapes do not
+depend on hue. Future sprite modules must use the exact pivots/atlas limits in
+`docs/ASSET_SPECIFICATION.md` and curated IDs in `VisualAssetRegistry`; no profile value is a
+loadable path.
+
 ## Entry points
 
 - `dev_tools/player_playground.tscn` (F6): play M3 mechanics with the M4 robot. Existing keyboard/gamepad input, one-second reset and held Dash aim behavior are preserved.

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.23.0-dev — M23 Art Pass (build29)
+
+- Add the first cohesive clean non-pixel-art production pass: refined modular android,
+  state/readiness VFX, shape-based platform/hazard/race grammar and shared palette.
+- Integrate one generated, visually reviewed and optimized 1024×512 Industrial+Brutalism far
+  background through a curated presentation-only registry; no third-party assets/dependencies.
+- Unify splash/menu/settings/lobby/online lifecycle/results and HUD styling while preserving
+  native RU/EN Controls, focus, scaling, accessibility and 200 ms transitions.
+- Add reusable art direction, exact asset/pivot/atlas specifications, generation prompts,
+  provenance, machine-readable manifest and automated 75-check M23 asset/policy gate.
+- Keep collision, movement, hazard/platform timing, checkpoint order, authority, protocol5/
+  wire4 and save5 unchanged. Conservative PV-MAP-1 identity publishes Training v7 and Foundry
+  v6 with regenerated checksums; historical PB keys remain stored.
+
 ## 0.22.0-dev — M22 Disconnect / Reconnect (build28)
 
 - Extend the existing M21 authority with a typed, generation-bound reconnect state machine;

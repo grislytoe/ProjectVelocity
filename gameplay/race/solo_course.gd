@@ -11,11 +11,15 @@ var input_layer: InputLayer
 var definition: MapDefinition = MapCatalog.training()
 var assembly: MapAssembly
 var diagnostics := MapDiagnostics.new()
+var environment_art: Node2D
 
 func _ready() -> void:
 	diagnostics = MapValidator.inspect(definition)
 	if not diagnostics.valid():
 		return
+	environment_art = VisualAssetRegistry.create_environment(definition.map_id)
+	if environment_art != null:
+		add_child(environment_art)
 	assembly = MapAssembly.new()
 	assembly.assemble(definition)
 	player = preload("res://gameplay/player/player.tscn").instantiate() as PlayerController
@@ -35,12 +39,15 @@ func _ready() -> void:
 		add_child(anchor)
 		trigger.respawn_anchor = anchor
 		trigger.players[player] = lifecycle
-		box(self, trigger, assembly.point_position(point), point.trigger_size, Color(0, 0.8, 0.8, 0.12))
+		box(self, trigger, assembly.point_position(point), point.trigger_size, Color.TRANSPARENT)
 		checkpoints.append(trigger)
+	var start_marker := StartMarker.new()
+	start_marker.position = assembly.point_position(definition.start, true) + Vector2(0, 2)
+	add_child(start_marker)
 	finish = FinishTrigger.new()
 	finish.players[player] = lifecycle
 	box(self, finish, assembly.point_position(definition.finish),
-		definition.finish.trigger_size, Color("adcc43"))
+		definition.finish.trigger_size, Color.TRANSPARENT)
 	world = HazardWorld.new()
 	add_child(world)
 	world.register_player(&"local", player)

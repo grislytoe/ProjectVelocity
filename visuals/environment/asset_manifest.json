@@ -1,0 +1,20 @@
+{
+  "manifest_version": 1,
+  "runtime_registry": "res://visuals/environment/visual_asset_registry.gd",
+  "assets": [
+    {
+      "id": "industrial_foundry_far_v1",
+      "path": "res://visuals/environment/industrial_foundry_far.webp",
+      "kind": "environment_far_background",
+      "status": "integrated_first_pass",
+      "canvas": [1024, 512],
+      "atlas": false,
+      "decoded_rgba_bytes": 2097152,
+      "repeat": false,
+      "mipmaps": false,
+      "filter": "linear_mipmap",
+      "source": "OpenAI built-in image generation; generated 2026-10-01; prompt in docs/ASSET_GENERATION_PROMPTS.md",
+      "license": "project-generated"
+    }
+  ]
+}
