@@ -26,6 +26,8 @@ func _initialize() -> void:
 		"uncertified hardware cannot pass")
 	check(Stats.classify(Stats.summarize([16.0, 34.0]), true).status == "FAIL",
 		"stutter fails engineering convention")
+	check(Stats.classify(Stats.summarize([16.0, 34.0]), false, false).status == "BLOCKED",
+		"composition smoke records metrics without applying machine thresholds")
 	var profile := Profile.new()
 	profile.preset = "low"
 	profile.resolution = Vector2i(1920, 1080)

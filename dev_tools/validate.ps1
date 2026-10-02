@@ -143,7 +143,8 @@ foreach ($fps in @(30, 60, 144)) {
 & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -HostDrop -DisconnectTick 900 -Port 24934
 # Bounded normal-renderer composition smoke; status is BLOCKED rather than a CI hardware certification.
 & (Join-Path $PSScriptRoot "performance_benchmark.ps1") -Godot $Godot -Scenario hazard_station `
-    -Preset performance -Resolution 1280x800 -Unpaced -Warmup 30 -Samples 60 -TimeoutSeconds 120
+    -Preset performance -Resolution 1280x800 -Unpaced -Warmup 30 -Samples 60 -TimeoutSeconds 120 `
+    -HardwareClass ci-software-renderer -CompositionOnly -AllowSoftwareRenderer
 
 
 git diff --cached --check

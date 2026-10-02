@@ -338,7 +338,9 @@ func finish() -> void:
 		"pools": pool_data,
 		"leak": leak,
 		"first_use": first_use if not first_use.is_empty() else {"available": false, "reason": "not exercised"},
-		"acceptance": Stats.classify(frame_summary, option("certified-hardware", "false") == "true"),
+		"acceptance": Stats.classify(frame_summary,
+			option("certified-hardware", "false") == "true",
+			option("composition-only", "false") != "true"),
 	}
 	var errors: PackedStringArray = Stats.validate_result(result)
 	if not errors.is_empty():

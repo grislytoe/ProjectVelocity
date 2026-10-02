@@ -101,9 +101,12 @@ static func validate_result(result: Dictionary) -> PackedStringArray:
 	return errors
 
 
-static func classify(frame_summary: Dictionary, certified_hardware: bool) -> Dictionary:
+static func classify(frame_summary: Dictionary, certified_hardware: bool,
+		enforce_frame_budget: bool = true) -> Dictionary:
 	if not frame_summary.get("available", false):
 		return {"status": "FAIL", "reason": "frame metrics unavailable"}
+	if not enforce_frame_budget:
+		return {"status": "BLOCKED", "reason": "composition smoke; hardware thresholds not evaluated"}
 	# Engineering convention, not a master-spec quotation: paced p95 <= 17.5 ms
 	# (one half-tick scheduler tolerance), p99 <= 25 ms, no >33.333 ms gameplay frame.
 	var workload_ok: bool = float(frame_summary.p95_ms) <= 17.5 \

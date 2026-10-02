@@ -8,7 +8,9 @@ param(
     [ValidateRange(30,20000)][int]$Samples = 600,
     [ValidateRange(10,600)][int]$TimeoutSeconds = 180,
     [string]$HardwareClass = 'actual-not-certified',
-    [switch]$CertifiedHardware
+    [switch]$CertifiedHardware,
+    [switch]$CompositionOnly,
+    [switch]$AllowSoftwareRenderer
 )
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
@@ -22,14 +24,15 @@ $stderr = Join-Path $runRoot 'stderr.log'
 $sha = (git rev-parse HEAD).Trim()
 $activePower = (powercfg /getactivescheme | Out-String).Trim()
 $powerState = if ($activePower -match '\(([^)]+)\)') { $Matches[1] } else { 'reported-in-local-log' }
-$arguments = @('--path', ('"' + $projectRoot + '"'), '--resolution', $Resolution, '--log-file',
+$arguments = @('--path', ('"' + $projectRoot + '"'), '--resolution', $Resolution, '--audio-driver', 'Dummy', '--log-file',
     ('"' + (Join-Path $runRoot 'godot.log') + '"'))
 if (-not $Unpaced) { $arguments += @('--max-fps', '60') }
 $arguments += @('dev_tools/performance_benchmark.tscn', '--', "--scenario=$Scenario", "--preset=$Preset",
     "--resolution=$Resolution", "--paced=$(( -not $Unpaced).ToString().ToLowerInvariant())",
     "--vsync=$(( -not $Unpaced).ToString().ToLowerInvariant())", "--warmup=$Warmup", "--samples=$Samples",
     ('"--output=' + $resultPath.Replace('\','/') + '"'), "--git-sha=$sha", ('"--hardware-class=' + $HardwareClass + '"'),
-    "--certified-hardware=$($CertifiedHardware.ToString().ToLowerInvariant())", ('"--power-state=' + $powerState + '"'))
+    "--certified-hardware=$($CertifiedHardware.ToString().ToLowerInvariant())",
+    "--composition-only=$($CompositionOnly.ToString().ToLowerInvariant())", ('"--power-state=' + $powerState + '"'))
 $process = $null
 $memorySamples = @()
 try {
@@ -45,7 +48,13 @@ try {
     if (-not $process.HasExited) { throw "M24 benchmark timeout after $TimeoutSeconds seconds" }
     $process.WaitForExit()
     $output = (Get-Content -LiteralPath $stdout -Raw) + (Get-Content -LiteralPath $stderr -Raw)
-    if ($process.ExitCode -ne 0 -or $output -match '(?m)(SCRIPT ERROR:|Parse Error|ERROR:|WARNING:)' `
+    $diagnostics = @($output -split "`r?`n" | Where-Object { $_ -match '^(SCRIPT ERROR:|Parse Error|ERROR:|WARNING:)' })
+    if ($AllowSoftwareRenderer) {
+        $diagnostics = @($diagnostics | Where-Object {
+            $_ -ne 'WARNING: Your video card drivers seem not to support the required OpenGL 3.3 version, switching to ANGLE.'
+        })
+    }
+    if ($process.ExitCode -ne 0 -or $diagnostics.Count -gt 0 `
         -or -not $output.Contains('PROJECTVELOCITY_M24_BENCHMARK_OK')) {
         Write-Output $output
         throw "M24 benchmark failed; inspect $runRoot"

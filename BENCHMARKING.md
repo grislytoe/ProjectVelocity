@@ -50,7 +50,9 @@ The 1280×800 profiles retain the 1280×720 world buffer inside the fixed compet
   pause/results are excluded.
 
 CI runs deterministic statistics/schema/cap tests and one bounded normal-renderer composition
-smoke. CI does not apply machine performance thresholds and cannot certify target hardware.
+smoke using explicit composition-only/software-renderer flags. Expected CI ANGLE fallback is
+allowlisted only in that invocation; other diagnostics still fail. CI does not apply machine
+performance thresholds and cannot certify target hardware.
 
 ## Sampling and interpretation
 
