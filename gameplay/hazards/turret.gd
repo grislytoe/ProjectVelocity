@@ -38,9 +38,15 @@ func _physics_process(_delta: float) -> void:
 	if not is_instance_valid(authority):
 		set_physics_process(false)
 		return
+	var redraw: bool = false
 	for index: int in 2:
+		var previous_angle: float = channels[index].angle
+		var previous_state: TurretChannel.State = channels[index].state
 		channels[index].step(authority, get_instance_id(), to_global(config.barrel_offsets[index]), tuning(index))
-	queue_redraw()
+		redraw = redraw or not is_equal_approx(previous_angle, channels[index].angle) \
+			or previous_state != channels[index].state
+	if redraw:
+		queue_redraw()
 
 
 func _exit_tree() -> void:

@@ -1,5 +1,14 @@
 # Settings — M12 implementation inventory
 
+## M24 performance profiles
+
+M24 names 1920×1080 `Low` as a benchmark profile mapped to the existing Performance visual
+budget; it is not a new persisted setting. Steam Deck profile validation uses 1280×800 native UI
+and the existing 1280×720 world buffer. Quality/Balanced/Performance continue to change only
+filter/effect segments/alpha/AA. Physics stays60Hz and snapshots/input/service, collision,
+checkpoint/hazard timing, camera authority and accessibility telegraphs are unchanged. Paced
+VSync/60 and unpaced throughput measurements are reported separately in BENCHMARKING.md.
+
 ## M23 art compatibility
 
 The first production art pass keeps the M12 presentation contract intact. High Contrast and

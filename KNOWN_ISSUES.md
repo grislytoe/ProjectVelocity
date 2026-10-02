@@ -1,5 +1,18 @@
 # Known issues
 
+## M24 performance certification
+
+- Low-end 1080p60 and Steam Deck Balanced/Performance 60 are BLOCKED until run on the exact
+  physical target classes. The current Ryzen 7 7730U integrated-Radeon Windows machine proves
+  profile composition only; no extrapolated certification is permitted.
+- Cold-ish direct Foundry construction remains about1.34–1.38s locally. Duplicate Solo validation
+  is removed, but first driver shader compilation cannot be guaranteed by Godot resource preload.
+- Two simultaneous rendered local ENet windows oversubscribe the current integrated GPU/window
+  scheduler and miss the frame convention (client p95 about33.8ms, max111.7ms). Repeat on separate
+  physical endpoints and isolate one-render-client cost before further optimization.
+- Compatibility GPU utilization and driver shader-compilation counters are unavailable through
+  the current Godot monitors. Reports mark them unavailable rather than zero.
+
 - M23 is a first cohesive production pass, not the final complete asset library. The android,
   gameplay objects and UI mark are polished procedural/code-native art; future illustrated
   module sheets, additional biome kits, licensed typography and final audio remain open under

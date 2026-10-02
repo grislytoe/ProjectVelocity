@@ -12,9 +12,13 @@ var definition: MapDefinition = MapCatalog.training()
 var assembly: MapAssembly
 var diagnostics := MapDiagnostics.new()
 var environment_art: Node2D
+## Set only by an owner that has just completed MapValidator.inspect on this exact Resource.
+## Direct/editor/network composition retains the defensive validation below.
+var definition_prevalidated: bool = false
 
 func _ready() -> void:
-	diagnostics = MapValidator.inspect(definition)
+	if not definition_prevalidated:
+		diagnostics = MapValidator.inspect(definition)
 	if not diagnostics.valid():
 		return
 	environment_art = VisualAssetRegistry.create_environment(definition.map_id)

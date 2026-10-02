@@ -23,8 +23,8 @@ func _run() -> void:
 		"Compatibility renderer required")
 	_check(ProjectSettings.get_setting("display/window/stretch/aspect") == "keep",
 		"Competitive view must retain its aspect ratio")
-	_check(BuildInfo.VERSION == "0.23.0-dev" and BuildInfo.BUILD_NUMBER == 29,
-		"M22 runtime identity; project metadata retained per editor-file preservation agreement")
+	_check(BuildInfo.VERSION == "0.24.0-dev" and BuildInfo.BUILD_NUMBER == 30,
+		"M24 runtime identity; project metadata retained per editor-file preservation agreement")
 	_check(BuildInfo.NETWORK_PROTOCOL_VERSION == 5 and BuildInfo.NETWORK_WIRE_REVISION == 4,
 		"M22 reconnect admission/baseline requires protocol 5 / wire 4")
 	_check(BuildInfo.is_development() == OS.is_debug_build(), "Build flag mismatch")

@@ -1,5 +1,15 @@
 # Networking — M22 disconnect/reconnect over the M21 lifecycle
 
+## M24 performance observation
+
+The development Local ENet composition now appends a schema-1 `performance` block to each M17
+`stress.json`: active-racing-only frame/process/physics distributions, draw/primitives, static
+memory, node/resource/orphan counts and course construction. It starts after120 service ticks and
+excludes reconnect pause/results. Frame/render sampling is available only in rendered runs;
+headless functional gates keep the schema but report no active renderer samples. The diagnostic HUD/overlay formats at10Hz; telemetry sampling,
+transport polling, input, physics/service60Hz and snapshots20/30Hz are unchanged. This remains
+local evidence, not target-hardware or EOS certification.
+
 Runtime **0.22.0-dev/build28**, protocol **5**, wire revision **4**, save schema **5**.
 M22 extends, rather than replaces, `NetworkSession` + `OnlineSeries`. The existing
 `OnlineSeries.Phase.RECONNECT` owns a typed sub-state (`PAUSED → AUTHENTICATING →

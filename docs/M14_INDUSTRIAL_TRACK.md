@@ -1,5 +1,12 @@
 # M14 — Foundry Run / Литейный маршрут
 
+## M24 performance identity
+
+Redraw/prevalidation changes are inside conservative PV-MAP-1 shared code, so Foundry publishes
+version **7**, checksum `6a0d41dc3125fb01a3fcdc4206c20ebe0b2745f39deb89f2a7439be14e52ef60`.
+Geometry, route, checkpoints, platform/hazard tuning and the M14 input trace remain unchanged.
+Training publishes v8 independently; protocol5/wire4/save5 remain.
+
 ## M23 visual production pass
 
 Foundry Run keeps the eight M14 section scenes, route, seven ordered checkpoints, shortcut,

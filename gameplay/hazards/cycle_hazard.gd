@@ -38,6 +38,8 @@ func set_trigger(active: bool) -> void:
 
 
 func update_phase() -> void:
+	var previous_state: State = state
+	var previous_lethal: bool = lethal
 	var warning: int = maxi(1, PlayerMovementConfig.ticks(tuning.telegraph_duration))
 	if permanent:
 		state = State.ACTIVE
@@ -51,7 +53,9 @@ func update_phase() -> void:
 		state = State.INACTIVE if phase < rest else (
 			State.TELEGRAPH if phase < rest + warning else State.ACTIVE)
 	lethal = state == State.ACTIVE
-	queue_redraw()
+	# Phase visuals are static between transitions; avoid rebuilding the same geometry at 60 Hz.
+	if state != previous_state or lethal != previous_lethal:
+		queue_redraw()
 
 
 func _physics_process(delta: float) -> void:

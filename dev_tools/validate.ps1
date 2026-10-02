@@ -57,6 +57,7 @@ foreach ($fps in @(30, 60, 144)) {
 if (@($replayHashes | Select-Object -Unique).Count -ne 1) { throw "M3 physics differs between render rates" }
 Invoke-GodotCheck -Name "m4-tests" -Arguments @("--headless", "--path", ".", "--script", "tests/character_presentation_test.gd") -Marker "PROJECTVELOCITY_M4_OK"
 Invoke-GodotCheck -Name "m23-art" -Arguments @("--headless", "--path", ".", "--script", "tests/art_pass_test.gd") -Marker "PROJECTVELOCITY_M23_ART_OK"
+Invoke-GodotCheck -Name "m24-performance-unit" -Arguments @("--headless", "--path", ".", "--script", "tests/performance_benchmark_test.gd") -Marker "PROJECTVELOCITY_M24_PERFORMANCE_OK"
 Invoke-GodotCheck -Name "m4-no-visuals" -Arguments @("--headless", "--path", ".", "--fixed-fps", "60", "--script", "tests/player_physics_test.gd", "--", "--without-presentation") -Marker "PROJECTVELOCITY_M3_PHYSICS_OK"
 $noVisuals = Get-Content (Join-Path $logRoot "m4-no-visuals.stdout.log") -Raw
 if ($noVisuals -notmatch 'M3_REPLAY_HASH=([0-9a-f]{64})' -or $Matches[1] -ne $replayHashes[0]) { throw "Presentation affects physics replay" }
@@ -140,6 +141,9 @@ foreach ($fps in @(30, 60, 144)) {
 & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -Race -Retry -Series -Map industrial -Port 24931
 & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -GuestExpiry -DisconnectTick 700 -Port 24933
 & (Join-Path $PSScriptRoot "test_local_network.ps1") -Godot $Godot -HostDrop -DisconnectTick 900 -Port 24934
+# Bounded normal-renderer composition smoke; status is BLOCKED rather than a CI hardware certification.
+& (Join-Path $PSScriptRoot "performance_benchmark.ps1") -Godot $Godot -Scenario hazard_station `
+    -Preset performance -Resolution 1280x800 -Unpaced -Warmup 30 -Samples 60 -TimeoutSeconds 120
 
 
 git diff --cached --check
@@ -168,4 +172,4 @@ if ($ExportWindows) {
         throw "Export Industrial identity differs from editor"
     }
 }
-Write-Output "M0-M23 validation passed, including art budgets and production 2700-tick reconnect expiry / localhost ENet scenarios."
+Write-Output "M0-M24 validation passed, including benchmark composition, art budgets and production 2700-tick reconnect expiry / localhost ENet scenarios."

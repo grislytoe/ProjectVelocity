@@ -25,6 +25,12 @@ var scheduled_reconnect: int = -1
 var profile_changes: int = 0
 var warning_label: Label
 var match_overlay: OnlineMatchOverlay
+var _course_construct_ms: float = 0.0
+var _perf_frame_ms: Array[float] = []
+var _perf_process_ms: Array[float] = []
+var _perf_physics_ms: Array[float] = []
+var _perf_draw_calls: Array[float] = []
+var _perf_primitives: Array[float] = []
 
 func option(key: String, fallback: String = "") -> String:
 	for argument: String in OS.get_cmdline_user_args():
@@ -59,10 +65,12 @@ func _ready() -> void:
 	add_child(runtime)
 	var settings: Dictionary = SaveSchema.defaults().settings
 	runtime.apply(settings)
+	var course_started: int = Time.get_ticks_usec()
 	course = NetworkCourse.new()
 	course.host = role == "host"
 	course.definition = MapCatalog.industrial() if option("map") == "industrial" else MapCatalog.training()
 	runtime.world.viewport.add_child(course)
+	_course_construct_ms = (Time.get_ticks_usec() - course_started) / 1000.0
 	if not course.diagnostics.valid():
 		push_error("Network map validation failed")
 		get_tree().quit(1)
@@ -167,6 +175,33 @@ func _ready() -> void:
 	print("M15_READY role=", role, " protocol=", config.protocol,
 		" wire=", BuildInfo.NETWORK_WIRE_REVISION, " map=", course.definition.map_id)
 
+
+func _process(delta: float) -> void:
+	# M24 diagnostics only. Sampling observes active gameplay after warm-up and never
+	# changes the fixed service/simulation cadence or includes reconnect pauses/results.
+	# Headless runs are functional gates and have no representative renderer timings.
+	if DisplayServer.get_name() == "headless" or not automated or session == null \
+		or session.service_tick <= 120 or session.paused \
+		or not session.joined or session.phase() != OnlineSeries.Phase.RACING \
+		or _perf_frame_ms.size() >= 3600:
+		return
+	_perf_frame_ms.append(delta * 1000.0)
+	_perf_process_ms.append(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
+	_perf_physics_ms.append(Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0)
+	_perf_draw_calls.append(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+	_perf_primitives.append(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME))
+
+
+func _performance_summary(values: Array[float]) -> Dictionary:
+	if values.is_empty():
+		return {"available": false, "reason": "no active gameplay samples"}
+	var ordered: Array[float] = values.duplicate()
+	ordered.sort()
+	var at := func(ratio: float) -> float:
+		return ordered[maxi(0, ceili(ratio * ordered.size()) - 1)]
+	return {"available": true, "samples": ordered.size(), "p50": at.call(0.50),
+		"p95": at.call(0.95), "p99": at.call(0.99), "max": ordered.back()}
+
 func bot_input() -> InputFrame:
 	var frame := InputFrame.new()
 	if option("race") == "true" and not session.host and session.clock_ticks >= 70:
@@ -186,7 +221,6 @@ func _physics_process(_delta: float) -> void:
 	if session == null:
 		return
 	update_countdown()
-	match_overlay.refresh()
 	session.telemetry.observe(session)
 	var condition: NetworkConditionProfile = (session.transport as NetworkEmulator).profile
 	if condition.disconnect_tick >= 0 and session.service_tick == condition.disconnect_tick:
@@ -235,37 +269,11 @@ func _physics_process(_delta: float) -> void:
 		session.prediction.injected_pending = true
 		course.actors[1].position += Vector2(180, -40)
 		injected = true
-	var emulator: NetworkEmulator = session.transport as NetworkEmulator
-	var hud_text: String = "M22 DEV • %s • round %d/%d • %s\n%s" % [
-		"HOST" if session.host else "CLIENT", session.series.round_index, session.series.rounds_total,
-		OnlineSeries.Phase.keys()[session.phase()], start_status().left(85)]
-	hud_text += "\nMeasured RTT %.1fms • estimated one-way %.1fms • clock %.3fs" % [
-		session.measured_rtt_ms, session.measured_rtt_ms / 2, session.clock_ticks / 60.0]
-	hud_text += "\n%s: simulated one-way %.1fms / RTT %.1fms • jitter ±%.1fms" % [
-		condition.id, condition.one_way_ms, condition.one_way_ms * 2, condition.jitter_ms]
-	hud_text += "\nLoss in/out %.0f/%.0f%% • queue %d/256 (peak %d)" % [
-		condition.inbound_loss * 100, condition.outbound_loss * 100, emulator.pending.size(), emulator.queue_high_water]
-	hud_text += "\nOrdinary error p95 %.2fpx • corrections %d • rebases %d" % [
-		session.prediction.metrics.metric("ordinary_error_px").p95,
-		session.prediction.ordinary_corrections, session.prediction.lifecycle_rebases]
-	hud_text += "\nHistory %d/240 • interpolation %d/32 • snapshot age %d ticks" % [
-		session.prediction.commands.size(), session.remote_buffer_depth(), session.service_tick - session.last_snapshot_service]
-	hud_text += "\nProgress %s • pool %d/10 • rejects %d • Ready %s" % [
-		str(session.progress), course.world.active_count(), session.scope_rejections, str(session.guest_ready)]
-	hud_text += "\nScore %d–%d • opponent %d/%d • reconnect %ds" % [session.series.score[0],
-		session.series.score[1], session.progress[1 if session.host else 0], course.checkpoints.size(),
-		ceili(session.reconnect_remaining / 60.0)]
-	hud_text += " • opponent %s" % opponent_direction()
-	hud_text += "\nF2 next [%s] • F3 apply • F4 clean • F5 metrics reset" % NetworkConditionProfile.NAMES[selected_profile]
-	hud_text += "\nF6 Ready • F7 round retry • F8 drop • F9 reconnect"
-	hud_text += "\nWASD / stick • Space / A Jump • Shift / RB Dash • no Solo records"
-	hud.text = hud_text
-	if session.paused or session.ended:
-		warning_label.text = "" # Reconnect/host-left overlay has presentation priority.
-	elif not session.joined or session.service_tick - session.last_pong_service > 120:
-		warning_label.text = tr("M22_NETWORK_STALE")
-	else:
-		warning_label.text = tr("M22_NETWORK_WARNING") if session.telemetry.warning else ""
+	# The developer HUD is observational. Ten updates/second preserve useful telemetry
+	# while avoiding large string/layout allocation bursts on every 60 Hz simulation tick.
+	if session.service_tick % 6 == 0:
+		match_overlay.refresh()
+		refresh_hud(condition)
 	var current_start_status: String = start_status()
 	if session.clock_ticks == 0 and current_start_status != _last_start_status:
 		_last_start_status = current_start_status
@@ -297,6 +305,40 @@ func _physics_process(_delta: float) -> void:
 			capture.call_deferred()
 	if limit > 0 and session.service_tick >= limit:
 		finish_test()
+
+
+func refresh_hud(condition: NetworkConditionProfile) -> void:
+	var emulator: NetworkEmulator = session.transport as NetworkEmulator
+	var hud_text: String = "M22 DEV • %s • round %d/%d • %s\n%s" % [
+		"HOST" if session.host else "CLIENT", session.series.round_index, session.series.rounds_total,
+		OnlineSeries.Phase.keys()[session.phase()], start_status().left(85)]
+	hud_text += "\nMeasured RTT %.1fms • estimated one-way %.1fms • clock %.3fs" % [
+		session.measured_rtt_ms, session.measured_rtt_ms / 2, session.clock_ticks / 60.0]
+	hud_text += "\n%s: simulated one-way %.1fms / RTT %.1fms • jitter ±%.1fms" % [
+		condition.id, condition.one_way_ms, condition.one_way_ms * 2, condition.jitter_ms]
+	hud_text += "\nLoss in/out %.0f/%.0f%% • queue %d/256 (peak %d)" % [
+		condition.inbound_loss * 100, condition.outbound_loss * 100, emulator.pending.size(), emulator.queue_high_water]
+	hud_text += "\nOrdinary error p95 %.2fpx • corrections %d • rebases %d" % [
+		session.prediction.metrics.metric("ordinary_error_px").p95,
+		session.prediction.ordinary_corrections, session.prediction.lifecycle_rebases]
+	hud_text += "\nHistory %d/240 • interpolation %d/32 • snapshot age %d ticks" % [
+		session.prediction.commands.size(), session.remote_buffer_depth(), session.service_tick - session.last_snapshot_service]
+	hud_text += "\nProgress %s • pool %d/10 • rejects %d • Ready %s" % [
+		str(session.progress), course.world.active_count(), session.scope_rejections, str(session.guest_ready)]
+	hud_text += "\nScore %d–%d • opponent %d/%d • reconnect %ds" % [session.series.score[0],
+		session.series.score[1], session.progress[1 if session.host else 0], course.checkpoints.size(),
+		ceili(session.reconnect_remaining / 60.0)]
+	hud_text += " • opponent %s" % opponent_direction()
+	hud_text += "\nF2 next [%s] • F3 apply • F4 clean • F5 metrics reset" % NetworkConditionProfile.NAMES[selected_profile]
+	hud_text += "\nF6 Ready • F7 round retry • F8 drop • F9 reconnect"
+	hud_text += "\nWASD / stick • Space / A Jump • Shift / RB Dash • no Solo records"
+	hud.text = hud_text
+	if session.paused or session.ended:
+		warning_label.text = "" # Reconnect/host-left overlay has presentation priority.
+	elif not session.joined or session.service_tick - session.last_pong_service > 120:
+		warning_label.text = tr("M22_NETWORK_STALE")
+	else:
+		warning_label.text = tr("M22_NETWORK_WARNING") if session.telemetry.warning else ""
 
 func capture() -> void:
 	await RenderingServer.frame_post_draw
@@ -465,6 +507,18 @@ func finish_test() -> void:
 		"interpolation": {"underflow": buffer.underflow, "extrapolation": buffer.extrapolated,
 			"hold": buffer.held, "interpolated": buffer.interpolated, "high_water": buffer.high_water},
 		"functional": report.duplicate(true)}
+	stress_report["performance"] = {"schema": 1, "warmup_service_ticks": 120,
+		"excludes_reconnect_pause_and_results": true, "course_construction_ms": _course_construct_ms,
+		"frame_ms": _performance_summary(_perf_frame_ms),
+		"process_ms": _performance_summary(_perf_process_ms),
+		"physics_ms": _performance_summary(_perf_physics_ms),
+		"draw_calls": _performance_summary(_perf_draw_calls),
+		"primitives": _performance_summary(_perf_primitives),
+		"static_memory_bytes": Performance.get_monitor(Performance.MEMORY_STATIC),
+		"static_peak_bytes": Performance.get_monitor(Performance.MEMORY_STATIC_MAX),
+		"nodes": Performance.get_monitor(Performance.OBJECT_NODE_COUNT),
+		"resources": Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT),
+		"orphans": Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)}
 	session.shutdown()
 	stress_report["cleanup"] = {"queue": emulator.pending.size(), "history": session.prediction.commands.size(),
 		"interpolation": session.remote_buffer_depth(), "pool_active": course.world.active_count(),

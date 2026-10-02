@@ -1,5 +1,20 @@
 # Testing checklist
 
+## M24 performance and benchmark
+
+- Run `dev_tools/validate.ps1 -Godot C:/Godot/Godot.exe`; require the M0–M24 marker, unchanged
+  deterministic trace hashes, benchmark unit/schema smoke, ENet cleanup and Git whitespace.
+- Run paced and unpaced Low 1920×1080 plus Balanced/Performance 1280×800 three times after warm-up.
+  Keep >16.667/25/33.333 counts and all unexplained outliers; never include loading/reconnect pause.
+- Complete `solo_traversal` with `route_complete=1`; exercise worst station at 3 engagements/target,
+  5 projectiles/target, 10 global, over-cap skip and stable IDs; run10 post-warm teardown cycles.
+- Exercise menu/lobby/results first-open in RU/EN and retain hazard/platform/checkpoint/readiness,
+  opponent30%, high-contrast/colorblind/flash-disabled cues at Low/Deck profiles.
+- Run rendered two-process Industrial races at M17 80/150/200+ms, 20/30 snapshots, prediction and
+  interpolation; verify cadence/warnings/results/pool cleanup and inspect each performance block.
+- Certify Low/Deck only on the physical hardware described in BENCHMARKING.md. CI and this local
+  iGPU are profile validation only. Windows export/boot plus benchmark smoke must pass CI.
+
 ## M23 Art Pass
 
 - [x] `tests/art_pass_test.gd`: curated path policy, manifest JSON, exact 1024×512 cap,
