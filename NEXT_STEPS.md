@@ -1,5 +1,14 @@
 # Next steps
 
+Review the M24 PR from `feature/m24-performance-benchmark` into `dev`; do not merge without explicit
+authorization and do not start M25 in this task. Reproduce the blocked matrix in
+`docs/M24_VALIDATION.md` on the approved low-end Windows class and physical Steam Deck, preserving
+physics/network rates and attaching sanitized schema-1 results/profiler captures. Investigate the
+two-render-process iGPU stutter and remaining cold construction only when the target trace proves
+the same hotspot. M19 live EOS/Internet remains a separate BLOCKED gate.
+
+Historical M23 handoff follows.
+
 Review the M23 Art Pass PR from `feature/m23-art-pass` into `dev`. Use
 `docs/M23_VALIDATION.md` for the exact generated-asset provenance, map identities, captures,
 budgets and regression evidence. Merge only after explicit user authorization. Do not start

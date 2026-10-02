@@ -1,5 +1,16 @@
 # Architecture
 
+## M24 performance boundary
+
+M24 adds only development benchmark composition under `dev_tools`; production exports exclude it.
+The benchmark reuses SoloCourse/NetworkCourse, Foundry sections, M7–M9 authority, two M23 player
+presentations and M17 telemetry. Quality profiles contain no simulation/network fields. Runtime
+optimizations retain draw commands and avoid unchanged redraw/layout work; SoloTrial passes a
+one-transaction prevalidation fact for the exact Resource it just inspected. Direct/network/editor
+course construction still performs MapValidator inspection. Physics60, protocol5/wire4/save5 and
+authority are unchanged. Conservative code identity publishes Training v8 and Foundry v7. See
+`BENCHMARKING.md`, `PERFORMANCE_BUDGETS.md` and `docs/M24_VALIDATION.md`.
+
 ## M23 cohesive art pass
 
 M23 keeps presentation downstream of the established gameplay/network boundaries. Shared

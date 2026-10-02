@@ -47,6 +47,9 @@ func retry(show_hint: bool = false) -> void:
 	course = load(records.definition.scene_path).instantiate() as SoloCourse
 	course.input_layer = layer
 	course.definition = records.definition
+	# The exact Resource was validated immediately above; avoid repeating the expensive
+	# semantic scene/checksum walk during the same atomic load transaction.
+	course.definition_prevalidated = true
 	add_child(course)
 	if not course.diagnostics.valid():
 		diagnostics = course.diagnostics

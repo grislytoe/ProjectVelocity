@@ -199,12 +199,11 @@ try {
     foreach ($role in @('host','client')) {
         $cachePath = [IO.Path]::GetFullPath((Join-Path $runRoot "$role/Godot"))
         if (-not $cachePath.StartsWith($ownedRoot, [StringComparison]::OrdinalIgnoreCase)) { throw 'Cleanup escaped owned run directory' }
-        for ($attempt = 0; $attempt -lt 3 -and (Test-Path -LiteralPath $cachePath); $attempt++) {
-            try { [System.IO.Directory]::Delete($cachePath, $true) }
-            catch {
-                if ($attempt -eq 2 -and (Test-Path -LiteralPath $cachePath)) { throw }
-                Start-Sleep -Milliseconds 100
-            }
+        # Shader-cache workers can retire individual files while PowerShell enumerates.
+        # Retry only this validated owned cache and tolerate already-gone children.
+        for ($attempt = 0; $attempt -lt 10 -and (Test-Path -LiteralPath $cachePath); $attempt++) {
+            Remove-Item -LiteralPath $cachePath -Recurse -Force -ErrorAction SilentlyContinue
+            if (Test-Path -LiteralPath $cachePath) { Start-Sleep -Milliseconds 200 }
         }
     }
 }

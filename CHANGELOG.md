@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.24.0-dev — M24 Performance and Benchmark (build30)
+
+- Add a dev-only real Foundry benchmark scene, strict versioned JSON/text/CSV results, unique
+  PowerShell launcher with external memory sampling, deterministic stats/schema tests and CI smoke.
+- Cover full scripted Solo traversal, capped hazards/projectiles/VFX, UI first-open, ten-cycle
+  leak checks and active-gameplay performance fields in two-process M17 ENet reports.
+- Remove duplicate same-transaction Solo map validation; retain procedural draw lists until a
+  visual change; throttle only developer HUD layout to10Hz while simulation/telemetry remain60Hz.
+- Preserve physics60, snapshot/input rates, authority, collisions, protocol5/wire4/save5 and M23
+  readability. Conservative PV-MAP-1 publishes Training v8 and Foundry v7.
+- Local profiles pass the documented M24 convention; low-end and Steam Deck certification remain
+  BLOCKED pending physical target hardware. Dual rendered iGPU processes show documented stutter.
+
 ## 0.23.0-dev — M23 Art Pass (build29)
 
 - Add the first cohesive clean non-pixel-art production pass: refined modular android,

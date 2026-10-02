@@ -86,6 +86,12 @@ func refresh_style() -> void:
 
 func present(frame: PlayerVisualFrame, selection: Vector2 = Vector2.ZERO) -> void:
 	var previous_pose: PlayerAnimationMachine.Pose = animation.current
+	var previous_selection: Vector2 = selected_direction
+	var previous_dash_direction: Vector2 = dash_direction
+	var previous_jump_ready: bool = jump_ready
+	var previous_dash_ready: bool = dash_ready
+	var previous_max_speed: bool = _max_speed
+	var previous_invulnerable: bool = _invulnerable
 	animation.advance(frame)
 	if is_local and is_instance_valid(_audio) and previous_pose != animation.current and (
 		animation.current in [PlayerAnimationMachine.Pose.JUMP, PlayerAnimationMachine.Pose.DASH,
@@ -106,7 +112,14 @@ func present(frame: PlayerVisualFrame, selection: Vector2 = Vector2.ZERO) -> voi
 	_invulnerable = frame.invulnerable
 	if is_inside_tree() and rig != null:
 		pose_modules()
-	queue_redraw()
+	# Module transforms/modulate are retained draw commands. Rebuild root draw data only
+	# when a visible cue changes or while the expanding Double Jump ring animates.
+	if previous_pose != animation.current or previous_selection != selected_direction \
+		or previous_dash_direction != dash_direction or previous_jump_ready != jump_ready \
+		or previous_dash_ready != dash_ready or previous_max_speed != _max_speed \
+		or previous_invulnerable != _invulnerable \
+		or animation.current == PlayerAnimationMachine.Pose.DOUBLE_JUMP:
+		queue_redraw()
 
 
 func pose_modules() -> void:
@@ -177,10 +190,12 @@ func pose_modules() -> void:
 			part.position += part.position.normalized() * scatter * 38
 			part.rotation += scatter * (1.0 if part.position.x >= 0 else -1.0)
 		part.modulate.a = 1.0 - scatter
-		part.emission = 1.0 if dash_ready else 0.12
+		var emission: float = 1.0 if dash_ready else 0.12
 		if "leg" in module:
-			part.emission = 1.0 if jump_ready else 0.12
-		part.queue_redraw()
+			emission = 1.0 if jump_ready else 0.12
+		if not is_equal_approx(part.emission, emission):
+			part.emission = emission
+			part.queue_redraw()
 
 
 func _draw() -> void:
