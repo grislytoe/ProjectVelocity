@@ -7,8 +7,8 @@ the existing stable `map_id`, so custom/profile data cannot request arbitrary re
 systems remain theme-neutral. Foundry receives a non-colliding, process-disabled far layer;
 Training receives none. Collision scenes, placement transforms, Start/Finish/checkpoint points,
 DeathZone bounds and routes are unchanged. Conservative code identity publishes Training v7
-checksum `521378ea073b7c23dec453201fb814ad806af4272f635b020323b8cdb2100981` and Foundry v6
-checksum `5f10b4e2feda6bab79dad70c13721178715fa97c223c6cd6886456fe57f15e78`.
+checksum `59b0ff23a5b2c6360a35f8a538b0e4b3207ffbaf430bead7d302e3049c881992` and Foundry v6
+checksum `8a7ff588ae3f2dc37e8b370d5a4bdd9077601a49ab8716551e7e208a3769b654`.
 
 `map_data/training_circuit.tres` is the production catalog entry used by Map Select,
 SoloTrial, checkpoint progress and TrialRecords. Stable ID `solo_training`, map version

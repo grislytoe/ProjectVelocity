@@ -76,8 +76,8 @@ publishes new official identities while retaining all historical PB keys:
 
 | Map | Previous → M23 version | M23 checksum |
 | --- | ---: | --- |
-| Training Circuit (`solo_training`) | 6 → **7** | `521378ea073b7c23dec453201fb814ad806af4272f635b020323b8cdb2100981` |
-| Foundry Run (`industrial_foundry`) | 5 → **6** | `5f10b4e2feda6bab79dad70c13721178715fa97c223c6cd6886456fe57f15e78` |
+| Training Circuit (`solo_training`) | 6 → **7** | `59b0ff23a5b2c6360a35f8a538b0e4b3207ffbaf430bead7d302e3049c881992` |
+| Foundry Run (`industrial_foundry`) | 5 → **6** | `8a7ff588ae3f2dc37e8b370d5a4bdd9077601a49ab8716551e7e208a3769b654` |
 
 `check_trial_hash.ps1 -Update` generated these values and the full validator rechecked them.
 No map geometry/checkpoint/route/hazard data changed.

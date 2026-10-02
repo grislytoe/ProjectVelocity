@@ -9,7 +9,7 @@ hazard phases, Start/checkpoints/Finish and preserves route priority. The plate 
 process or map-data path; it is selected by curated `map_id` and cannot increase ultrawide view.
 
 PV-MAP-1 conservatively includes the revised presentation/gameplay scripts, so the official map
-publishes version 6/checksum `5f10b4e2feda6bab79dad70c13721178715fa97c223c6cd6886456fe57f15e78`.
+publishes version 6/checksum `8a7ff588ae3f2dc37e8b370d5a4bdd9077601a49ab8716551e7e208a3769b654`.
 This is an identity change only: automated route/checkpoint/hazard equality remains required.
 
 Build **0.14.0-dev /20**, schema **5**, protocol **1**. Official ID
