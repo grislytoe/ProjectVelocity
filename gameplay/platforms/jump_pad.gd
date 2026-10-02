@@ -11,7 +11,7 @@ func _ready() -> void:
 	if config == null or not config.validate():
 		push_error("Invalid jump pad config")
 		return
-	PlatformGeometry.build(self, config)
+	PlatformGeometry.build(self, config, "jump_pad")
 	var arrow := Line2D.new()
 	arrow.points = PackedVector2Array([Vector2(0, -6), Vector2(0, -6) + config.direction.normalized() * 45])
 	arrow.width = 5

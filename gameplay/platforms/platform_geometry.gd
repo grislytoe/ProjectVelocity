@@ -2,7 +2,7 @@ class_name PlatformGeometry
 extends RefCounted
 
 
-static func build(body: PhysicsBody2D, config: PlatformConfig) -> CollisionPolygon2D:
+static func build(body: PhysicsBody2D, config: PlatformConfig, kind: String = "static") -> CollisionPolygon2D:
 	var shape := CollisionPolygon2D.new()
 	shape.polygon = config.polygon
 	shape.one_way_collision = config.one_way
@@ -13,4 +13,8 @@ static func build(body: PhysicsBody2D, config: PlatformConfig) -> CollisionPolyg
 	visual.polygon = config.polygon
 	visual.color = config.color
 	body.add_child(visual)
+	var markings := PlatformVisual.new()
+	markings.name = "VisualGrammar"
+	markings.configure(config.polygon, kind)
+	body.add_child(markings)
 	return shape

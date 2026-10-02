@@ -34,8 +34,17 @@ func _physics_process(delta: float) -> void:
 
 
 func _draw() -> void:
-	draw_circle(Vector2.ZERO, config.radius, Color("ef394f"))
-	draw_circle(Vector2.ZERO, config.radius * 0.4, Color("26333e"))
-	for index: int in 12:
-		var direction := Vector2.RIGHT.rotated(index * TAU / 12)
-		draw_line(direction * config.radius * 0.6, direction * config.radius, Color.WHITE, 2)
+	var teeth := PackedVector2Array()
+	for index: int in 24:
+		var tooth_radius: float = config.radius if index % 2 == 0 else config.radius * 0.78
+		teeth.append(Vector2.RIGHT.rotated(index * TAU / 24.0) * tooth_radius)
+	draw_colored_polygon(teeth, ArtPalette.DANGER)
+	var contour := teeth.duplicate()
+	contour.append(teeth[0])
+	draw_polyline(contour, Color(1, 0.82, 0.82), 2, true)
+	draw_circle(Vector2.ZERO, config.radius * 0.55, ArtPalette.STEEL_DARK)
+	draw_circle(Vector2.ZERO, config.radius * 0.20, ArtPalette.WARNING)
+	for index: int in 8:
+		var direction := Vector2.RIGHT.rotated(index * TAU / 8.0)
+		draw_line(direction * config.radius * 0.27, direction * config.radius * 0.51,
+			ArtPalette.TEXT_MUTED, 3, true)

@@ -17,7 +17,7 @@ func _ready() -> void:
 		push_error("Invalid breakable platform config")
 		set_physics_process(false)
 		return
-	surface = PlatformGeometry.build(self, config)
+	surface = PlatformGeometry.build(self, config, "breakable")
 	var shape := ConvexPolygonShape2D.new()
 	shape.points = config.polygon
 	_clearance.shape = shape

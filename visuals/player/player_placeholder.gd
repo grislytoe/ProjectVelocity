@@ -33,6 +33,7 @@ func _ready() -> void:
 	for module: String in ["head", "torso", "left_arm", "right_arm", "left_leg", "right_leg", "hat"]:
 		var part := RobotPart.new()
 		part.name = module.to_pascal_case()
+		part.kind = module
 		part.size = Vector2(7, 18)
 		if module == "head":
 			part.size = Vector2(26, 17)
@@ -194,12 +195,24 @@ func _draw() -> void:
 	if SettingsRuntime.access("disable_strong_flashes", false):
 		flash = minf(flash, 0.2)
 	var pose: PlayerAnimationMachine.Pose = animation.current
+	# Joint discs preserve the modular read at the 64 px gameplay target scale.
+	if pose != PlayerAnimationMachine.Pose.DEATH:
+		for joint: Vector2 in [Vector2(-15, -4), Vector2(15, -4), Vector2(-7, 14), Vector2(7, 14)]:
+			draw_circle(joint, 4.0, ArtPalette.BACKGROUND)
+			draw_circle(joint, 2.4, appearance.accent_color)
 	if pose == PlayerAnimationMachine.Pose.DOUBLE_JUMP:
 		var flash_color: Color = accent
 		flash_color.a *= flash
-		draw_arc(Vector2.ZERO, 35 + animation.age_ticks, 0, TAU, segments, flash_color, 2, antialias)
+		draw_arc(Vector2.ZERO, 34 + animation.age_ticks * 1.15, 0, TAU, segments, flash_color, 2, antialias)
+		for direction: Vector2 in [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]:
+			draw_line(direction * 28, direction * (34 + animation.age_ticks), flash_color, 2, antialias)
 	if pose == PlayerAnimationMachine.Pose.DASH:
-		draw_line(-dash_direction * 28, -dash_direction * 76, accent, 5, antialias)
+		for lane: float in [-1.0, 0.0, 1.0]:
+			var perpendicular := dash_direction.rotated(PI / 2) * lane * 7
+			var lane_color := accent
+			lane_color.a *= 1.0 - absf(lane) * 0.35
+			draw_line(-dash_direction * 26 + perpendicular, -dash_direction * (76 - absf(lane) * 10) + perpendicular,
+				lane_color, 4 if lane == 0 else 2, antialias)
 	if pose in [PlayerAnimationMachine.Pose.SKID, PlayerAnimationMachine.Pose.TURNAROUND]:
 		draw_line(Vector2(-_facing * 20, 31), Vector2(-_facing * 43, 31), accent, 2, true)
 	if pose == PlayerAnimationMachine.Pose.RESPAWN or _invulnerable:
@@ -208,7 +221,10 @@ func _draw() -> void:
 		draw_arc(Vector2.ZERO, 37, 0, TAU, segments, flash_color, 1, antialias)
 	if _max_speed and pose == PlayerAnimationMachine.Pose.RUN:
 		accent.a *= float(SettingsRuntime.video("speed_intensity", 1.0))
-		draw_line(Vector2(-_facing * 23, 5), Vector2(-_facing * 39, 5), accent, 1.5, true)
+		for offset: float in [-8.0, 0.0, 8.0]:
+			draw_line(Vector2(-_facing * 23, offset), Vector2(-_facing * (43 - absf(offset)), offset), accent, 1.5, true)
+	if pose == PlayerAnimationMachine.Pose.FINISH_VICTORY:
+		draw_arc(Vector2(0, -38), 11, PI, TAU, 12, accent, 2, antialias)
 	# Shape cues remain legible independently of user-selected color hues.
 	if pose != PlayerAnimationMachine.Pose.DEATH:
 		draw_circle(Vector2(-8, 35), 2.5, Color.WHITE, jump_ready, -1 if jump_ready else 1, true)

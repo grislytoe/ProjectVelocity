@@ -1,5 +1,20 @@
 # Architecture
 
+## M23 cohesive art pass
+
+M23 keeps presentation downstream of the established gameplay/network boundaries. Shared
+`ArtPalette` and code-native character/platform/hazard/race grammar replace placeholder styling;
+`PlayerAnimationMachine` still consumes only detached `PlayerVisualFrame` values and all 14
+required states. `VisualAssetRegistry` is a curated ID allowlist: the generated Foundry plate is
+preloaded and instantiated only for `industrial_foundry`; profile/map strings cannot become
+resource paths. The background has no collision, input or processing. UI stays Control/theme
+based, with the existing 200 ms transitions and fixed logical frame.
+
+Because PV-MAP-1 conservatively includes shared gameplay/visual code, Training publishes v7
+and Industrial Foundry v6 with regenerated checksums. Geometry, checkpoint order, hazard/platform
+timing, protocol5/wire4 and save5 are unchanged. See `docs/ART_DIRECTION.md`,
+`docs/ASSET_SPECIFICATION.md`, `docs/ASSET_GENERATION_PROMPTS.md` and M23 validation.
+
 ## M22 Disconnect / Reconnect
 
 `OnlineSeries` now owns the typed reconnect sub-state inside the existing M21 lifecycle:

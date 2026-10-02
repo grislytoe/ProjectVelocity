@@ -50,12 +50,23 @@ func _exit_tree() -> void:
 
 
 func _draw() -> void:
-	draw_circle(Vector2.ZERO, 28, Color("455968"))
+	draw_colored_polygon(PackedVector2Array([Vector2(-30, 18), Vector2(-25, -16),
+		Vector2(-14, -28), Vector2(14, -28), Vector2(25, -16), Vector2(30, 18),
+		Vector2(18, 28), Vector2(-18, 28)]), ArtPalette.STEEL_DARK)
+	draw_arc(Vector2.ZERO, 28, 0, TAU, 20, ArtPalette.TEXT_MUTED, 2, true)
+	draw_circle(Vector2.ZERO, 9, ArtPalette.BACKGROUND)
 	for index: int in channels.size():
 		var channel: TurretChannel = channels[index]
 		var origin: Vector2 = config.barrel_offsets[index]
 		var direction := Vector2.RIGHT.rotated(channel.angle - global_rotation)
 		var color := Color("58cfea") if index == 0 else Color("c08bff")
-		draw_line(origin, origin + direction * 40, color, 9)
+		draw_circle(origin, 7, ArtPalette.BACKGROUND)
+		draw_line(origin, origin + direction * 43, ArtPalette.STEEL, 12, true)
+		draw_line(origin, origin + direction * 43, color, 4, true)
+		draw_line(origin + direction * 39, origin + direction * 48, color, 8, true)
 		if channel.state in [TurretChannel.State.TELEGRAPH, TurretChannel.State.FIRE]:
-			draw_line(origin, origin + direction * tuning(index).fire_range, color * Color(1, 1, 1, 0.6), 2)
+			var telegraph := color
+			telegraph.a = 0.62
+			draw_dashed_line(origin + direction * 50, origin + direction * tuning(index).fire_range,
+				telegraph, 2, 14, true)
+			draw_circle(origin + direction * 50, 4, ArtPalette.WARNING, false, 2, true)

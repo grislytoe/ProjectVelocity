@@ -13,7 +13,7 @@ func _ready() -> void:
 		push_error("Invalid moving platform config")
 		set_physics_process(false)
 		return
-	PlatformGeometry.build(self, config)
+	PlatformGeometry.build(self, config, "moving")
 	route = PlatformRoute.new(config)
 	_origin = position
 	position = _origin + route.sample(0)

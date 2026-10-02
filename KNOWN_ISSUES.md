@@ -1,5 +1,18 @@
 # Known issues
 
+- M23 is a first cohesive production pass, not the final complete asset library. The android,
+  gameplay objects and UI mark are polished procedural/code-native art; future illustrated
+  module sheets, additional biome kits, licensed typography and final audio remain open under
+  `docs/ASSET_SPECIFICATION.md`.
+- The generated Foundry plate is a deliberately dark presentation layer. Windows Compatibility
+  rendering is validated locally; physical Steam Deck/Linux/low-end GPU performance, HDR and
+  display calibration remain manual M24+ work. No full M24 benchmark is claimed.
+- The 1024×512 plate repeats every 2048 world pixels behind authored masses. Repetition can be
+  visible during long uninterrupted views, but is preferable to oversized textures and does
+  not create a gameplay affordance. Future variants must keep the same visibility budget.
+- M23 map version bumps are conservative code-identity changes: Training v7 and Industrial v6.
+  Geometry/routes/timing did not change; older PB keys remain preserved but are not promoted.
+
 - **M22 live EOS/Internet reconnect acceptance remains BLOCKED.** M22 is accepted only at the
   transport-independent model and two-process localhost ENet boundary. M19 production
   Auth/Connect/Lobby/P2P prerequisites, authorized Internet identities and native exports are
@@ -78,7 +91,8 @@
 - Quarantined corrupt files and interrupted test-cache folders can remain for diagnosis.
 - Linux export, Steam Deck hardware behavior and target-hardware performance are not validated. CI builds Windows staging with official templates.
 
-- M4 uses procedural modular placeholder art. Unknown cosmetic slot IDs use the base modules; an asset registry and final art remain future work; M11 supplies RGB customization.
+- M4/M23 uses a polished procedural modular first-pass android. Unknown cosmetic slot IDs use
+  base modules through a curated registry; final illustrated module sheets remain future work.
 - Opponent opacity/nickname support is a presentation framework tested using synthetic snapshots, not live multiplayer. The developer accepted the placeholder presentation; replacement art is planned later.
 
 - M5 camera zones are authored axis-aligned world-space Resource rectangles. A map smaller than the visible frame is centered and necessarily exposes its backdrop. Camera collision, cinematics and spectator switching are later work; M12 adds optional bounded shake.
@@ -91,9 +105,10 @@
 - M8 platform routes are local fixed-tick simulation; no synchronized online clock/state replication yet.
 - Pad flight resumes ordinary M3 variable-height gravity/air control after the impulse. Final feel and physical-controller review remain manual.
 - Moving platforms carry riders but do not implement crushing damage. Authors must leave player clearance along routes.
-- Platform art is procedural placeholder geometry; final art and an editor UI are deferred. Temporary restore clearance uses a conservative convex hull.
+- Platform art is polished procedural shape grammar; authored surface kits and an editor UI are
+  deferred. Temporary restore clearance uses a conservative convex hull.
 
-- M9 uses procedural hazard/telegraph art and offline authority, with two explicitly registered
+- M9/M23 uses polished procedural hazard/telegraph art and offline authority, with two explicitly registered
   player IDs. The second playground actor is neutral-input, not a network peer or physical
   input owner. Production map, host replication and synchronized clocks are later milestones.
 - Turret engagement contention uses stable scene processing order; no fairness scheduler is
