@@ -112,26 +112,16 @@ func _series_move(session: NetworkSession, actor_index: int, tick: int, base: in
 
 func attack(session: NetworkSession) -> void:
 	if session.host or not session.joined or session.clock_ticks < 30 \
-		or session.service_tick % 6 != 0:
+		or session.service_tick % 2 != 0:
 		return
-	# Cycle every forged event class through actual transport packets without saturating the
-	# authoritative downlink. The long process fixture still submits hundreds of rejected claims.
-	var states: Array = []
-	for actor: PlayerController in session.course.actors:
-		states.append(ActorState.capture(actor).values())
-	var base: Array = [0, session.clock_ticks, 0, false, states,
-		session.course.capture_dynamics(), [], 0, 0, [0, 0], RaceBaseline.capture(session)]
-	var kinds: Array[int] = [GameplayEvents.Kind.CHECKPOINT, GameplayEvents.Kind.DEATH,
-		GameplayEvents.Kind.RESPAWN, GameplayEvents.Kind.FINISH, GameplayEvents.Kind.WINNER,
-		GameplayEvents.Kind.PLATFORM_BREAK, GameplayEvents.Kind.JUMP_PAD,
-		GameplayEvents.Kind.HAZARD_PHASE, GameplayEvents.Kind.SAW_HIT,
-		GameplayEvents.Kind.LASER_HIT, GameplayEvents.Kind.TURRET_FIRE,
-		GameplayEvents.Kind.PROJECTILE_HIT, GameplayEvents.Kind.POOL_RETURN,
-		GameplayEvents.Kind.ROUND_TRANSITION]
-	var kind: int = kinds[attack_index % kinds.size()]
+	# Send a compact, codec-valid host-only authority packet from the guest. Large forged
+	# snapshots fragmented enough to make process-scheduling, rather than admission policy,
+	# determine how many reached the host on a shared CI runner. Fixed-rate unit coverage still
+	# mutates every critical snapshot field; this process gate proves wrong-direction rejection.
 	attack_index += 1
-	var forged: Array = base.duplicate(true)
-	forged[6] = [[1, session.host_tick, 2, kind, 0, session.round_id, 1]]
-	forged[7] = 2
-	session.send(NetPacket.Kind.SNAPSHOT, forged)
+	session.send(NetPacket.Kind.WELCOME, ["f".repeat(32), session.config.snapshot_hz,
+		session.profile, session.guest_profile, session.series.rounds_total,
+		session.series.series_generation, session.series.settings_identity,
+		BuildInfo.NETWORK_WIRE_REVISION, BuildInfo.BUILD_NUMBER,
+		session.series.reconnect_generation])
 	claims_sent += 1

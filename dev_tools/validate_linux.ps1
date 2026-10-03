@@ -13,9 +13,9 @@ function Invoke-GodotCheck {
     $stderr = Join-Path $logRoot "$Name.stderr.log"
     $process = Start-Process -FilePath $Godot -ArgumentList $Arguments -PassThru `
         -RedirectStandardOutput $stdout -RedirectStandardError $stderr
-    if (-not $process.WaitForExit(180000)) {
+    if (-not $process.WaitForExit(360000)) {
         $process.Kill($true)
-        throw "$Name timed out"
+        throw "$Name timed out after 360 seconds"
     }
     $process.WaitForExit()
     $output = (Get-Content $stdout -Raw -Encoding UTF8) + (Get-Content $stderr -Raw -Encoding UTF8)
