@@ -2,8 +2,6 @@ name: M18 native compatibility evidence (online blocked)
 on:
   push:
     branches: ['feature/m18-eos-compatibility-gate']
-  pull_request:
-    branches: [dev]
   workflow_dispatch:
 
 permissions:

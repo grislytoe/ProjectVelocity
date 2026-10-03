@@ -1,5 +1,21 @@
 # Known issues
 
+## M25 release-candidate blockers
+
+- **Overall release is NO-GO until developer review.** CI artifacts/PR are staging output only;
+  manual clean-machine/distro/gameplay/UI/controller checks are not inferred from automation.
+- Windows/Linux packages are unsigned portable builds. Signing, installer behavior and OS warning
+  acceptance are separate BLOCKED/PENDING gates; do not bypass platform security mechanisms.
+- The SteamOS-compatible tar proves Linux x86_64 layout/launcher only. Physical Steam Deck/
+  SteamOS runtime, suspend/controller/UI and Balanced/Performance profiles remain BLOCKED.
+- M24 low-end certification remains BLOCKED: the Ryzen 7 7730U iGPU profile is not evidence for
+  GTX1050Ti/RX570-class 1080p Low or Steam Deck.
+- **Production Online remains BLOCKED by M19** and intentionally unavailable/non-crashing in the
+  release export. No Auth/Connect/Lobby/P2P executor, authorized Internet session or EOS-bearing
+  export exists. Local ENet is development evidence only and is absent from release entry points.
+- Artifact hashes and supported environment are candidate-specific. Ubuntu 24.04 CI/Xvfb does not
+  certify every distro. Archive timestamps may prevent byte-for-byte reproducibility.
+
 ## M24 performance certification
 
 - Low-end 1080p60 and Steam Deck Balanced/Performance 60 are BLOCKED until run on the exact
@@ -102,7 +118,8 @@
 - One InputLayer and one save writer are supported per application. Concurrent processes writing the same save are not coordinated.
 - Recovery remains localized state for future UI. Same-directory rename plus flush is not a universal power-loss durability guarantee; unsupported saves stay read-only.
 - Quarantined corrupt files and interrupted test-cache folders can remain for diagnosis.
-- Linux export, Steam Deck hardware behavior and target-hardware performance are not validated. CI builds Windows staging with official templates.
+- M25 CI builds and smokes Linux on Ubuntu 24.04, but physical Steam Deck behavior and target-
+  hardware performance remain unvalidated. Historical milestones before M25 built Windows only.
 
 - M4/M23 uses a polished procedural modular first-pass android. Unknown cosmetic slot IDs use
   base modules through a curated registry; final illustrated module sheets remain future work.

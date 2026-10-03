@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.25.0-rc.1 — M25 Standalone Release Candidate (build31)
+
+- Add official release-template Windows x86_64 and Linux x86_64 staging presets, plus a
+  SteamOS-compatible Linux package/launcher with no Steam client or Steamworks dependency.
+- Embed exact source SHA and STAGING identity; preserve protocol5/wire4/save5, physics/network
+  rates and Training v8/Foundry v7 map identities.
+- Add resource/archive allow/deny audits, isolated extracted smokes, executable/PCK/archive
+  hashes, deterministic-schema manifests and post-upload/download SHA-256 verification.
+- Split CI into independent Windows/Linux validation and build jobs using pinned actions,
+  official Godot SHA-512 verification, least privilege, timeouts and bounded retention.
+- Add authoritative release/manual QA/security/run documentation. Production EOS/Internet,
+  physical Steam Deck/low-end/controller/manual approval and signing remain BLOCKED/PENDING;
+  this candidate is not an approved release.
+
 ## 0.24.0-dev — M24 Performance and Benchmark (build30)
 
 - Add a dev-only real Foundry benchmark scene, strict versioned JSON/text/CSV results, unique

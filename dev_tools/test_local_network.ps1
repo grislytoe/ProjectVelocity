@@ -153,7 +153,7 @@ try {
             if ($reports[0].events.$event -ne $reports[1].events.$event) { throw "M16 event count mismatch/double presentation: $event" }
         }
         if ($Malicious -and ($reports[1].claims_sent -lt 100 -or $reports[0].authority_rejections -lt 100)) {
-            throw 'M16 forged packet rejection was not exercised'
+            throw 'M16 wrong-direction authority rejection was not exercised'
         }
     }
     if ($Series) {

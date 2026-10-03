@@ -1,5 +1,10 @@
 # Networking — M22 disconnect/reconnect over the M21 lifecycle
 
+Current M25 candidate identity is 0.25.0-rc.1/build31, protocol5/wire4/save5. M25 changes only
+release packaging/source provenance and does not modify packet schemas, authority, rates or maps.
+Production release exports reject the development Local ENet entry. Production EOS/Internet is
+still unavailable/BLOCKED by M19; no staging artifact upgrades loopback evidence to Internet.
+
 ## M24 performance observation
 
 The development Local ENet composition now appends a schema-1 `performance` block to each M17

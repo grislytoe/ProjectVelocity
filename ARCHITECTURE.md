@@ -1,5 +1,17 @@
 # Architecture
 
+## M25 standalone RC boundary
+
+M25 changes build/release composition only. BuildInfo publishes 0.25.0-rc.1/build31 and reads an
+exact 40-hex source SHA from a provenance Resource patched only in the clean staging snapshot.
+Windows and Linux presets use
+official release templates; production exports reject the development local-ENet entry. Packaging
+audits the selected resource ZIP and portable archives, uses isolated user-data roots, and emits
+external manifests/checksums. Linux and SteamOS packages share the same dependency-free x86_64
+content and launcher; no Steam/EOS runtime is introduced. Protocol5/wire4/save5, physics60,
+snapshots20–30 and Training v8/Foundry v7 identities are unchanged. CI validation/build jobs are
+separate and staging cannot run until both platform gates pass. See `docs/M25_VALIDATION.md`.
+
 ## M24 performance boundary
 
 M24 adds only development benchmark composition under `dev_tools`; production exports exclude it.

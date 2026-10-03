@@ -43,7 +43,19 @@ $logRoot = Join-Path $root 'builds/validation'
 New-Item -ItemType Directory -Force $logRoot | Out-Null
 $argsList = @('--headless', '--path', '.', '--script', 'dev_tools/bake_map_checksum.gd')
 if ($Update) { $argsList += @('--', '--update') }
-$process = Start-Process -FilePath $Godot -ArgumentList $argsList -WorkingDirectory $root -WindowStyle Hidden -PassThru -RedirectStandardOutput "$logRoot/map-hash.out.log" -RedirectStandardError "$logRoot/map-hash.err.log"
+$startOptions = @{
+    FilePath = $Godot
+    ArgumentList = $argsList
+    WorkingDirectory = $root
+    PassThru = $true
+    RedirectStandardOutput = "$logRoot/map-hash.out.log"
+    RedirectStandardError = "$logRoot/map-hash.err.log"
+}
+if ([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(
+        [System.Runtime.InteropServices.OSPlatform]::Windows)) {
+    $startOptions.WindowStyle = 'Hidden'
+}
+$process = Start-Process @startOptions
 $handle = $process.Handle
 if (-not $process.WaitForExit(120000)) { $process.Kill(); throw 'Map checksum timed out' }
 $process.WaitForExit()
