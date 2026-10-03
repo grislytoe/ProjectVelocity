@@ -1,5 +1,30 @@
 # Testing checklist
 
+## M25 standalone release candidate — authoritative current gate
+
+- [ ] Run the complete Windows `dev_tools/validate.ps1` on the immutable candidate source:
+  all M0–M24 suites, parser/import/isolated boot, deterministic hashes, save migration/recovery,
+  synthetic input/controller, maps/Time Trial/UI/settings, network authority/series/reconnect,
+  80/150/200+ profiles, malicious rejection, production2700 expiry, cleanup and benchmark schema.
+- [ ] Run `release_source_audit.ps1 -RequireClean`: whitespace/status, credentials/keys, saves,
+  logs/cache/vendor/EOS binaries and dependency/license inventory.
+- [ ] Run independent Ubuntu24.04 `validate_linux.ps1`: every GDScript parser and deterministic
+  suite at required30/60/144 rates plus isolated headless main boot.
+- [ ] Windows official release-template package: resource and archive allow/deny listings, clean
+  extraction, executable/PCK hashes, isolated headless boot, normal Compatibility startup at
+  1280×720/1280×800/1920×1080 and release dev-ENet denial.
+- [ ] Linux official release-template package: resource/archive audit, tar executable permissions,
+  `ldd` with no missing dependency, clean extraction/headless boot and Xvfb Compatibility startup.
+- [ ] SteamOS-compatible tar: same Linux x86_64 content, safe launcher/readme/permissions and no
+  Steam/Steamworks dependency. Keep physical SteamOS/Deck runtime/controller/performance BLOCKED.
+- [ ] Download uploaded CI artifacts, require successful conclusions/non-zero sizes, then verify
+  every `SHA256SUMS` line and the exact source/build/channel/protocol/wire/save/map manifest.
+- [ ] Complete every applicable blank row in `M25_MANUAL_QA.md`; prior milestone checks retain
+  their historical scope only. Low-end/Deck and M19 live EOS remain BLOCKED until real evidence.
+
+The release verdict cannot be PASS while manual/hardware/EOS/signing gates remain open. A green
+candidate may be **READY FOR MANUAL REVIEW**, not approved or released.
+
 ## M24 performance and benchmark
 
 - Run `dev_tools/validate.ps1 -Godot C:/Godot/Godot.exe`; require the M0–M24 marker, unchanged

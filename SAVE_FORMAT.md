@@ -21,7 +21,7 @@ Every listed field is required. JSON integer-valued numbers are accepted as inte
 
 | Field | Shape and constraints |
 | --- | --- |
-| save_version | Nonnegative integer; current version 4 |
+| save_version | Nonnegative integer; current version 5 |
 | profile.uuid | Cryptographically random RFC 4122-style UUID v4, lowercase, generated at first profile creation |
 | profile.nickname | 3–15 Unicode code points; rules below |
 | profile.body_color / accent_color | Eight lowercase hexadecimal RGBA digits |

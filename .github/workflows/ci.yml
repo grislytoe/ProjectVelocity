@@ -1,67 +1,225 @@
-name: M0-M24 validation
+name: M25 standalone RC staging
+
 on:
   push:
     branches: [dev, 'feature/**']
   pull_request:
-    branches: [main, dev, 'feature/**']
+    branches: [main, dev]
   workflow_dispatch:
-    inputs:
-      extended_network:
-        description: Run the extended M17 network stress matrix
-        type: boolean
-        default: false
 
 permissions:
   contents: read
 
+env:
+  GODOT_VERSION: '4.7.2'
+  GODOT_RELEASE: '4.7.2-stable'
+  GODOT_MANIFEST_URL: https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/SHA512-SUMS.txt
+  GODOT_TEMPLATES_SHA512: ca4d71c4d7b81dfc15d1a98baa07534aa95b03fdda78a0075b06672e1648d2e5f40980c9adc28d23e1b92e732ee7bf3461997aa804af74ec2fcd7a93ccb84079
+  GODOT_WINDOWS_SHA512: 83decd58fdf67b9d657958a1ae6bf1929c20785315a81effe245874cdc57acb709bf868e00778a96984338c1b29dafdb453c6847747694621c6ecf5da2259993
+  GODOT_LINUX_SHA512: 9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65
+
 jobs:
-  validate-and-build:
-    runs-on: windows-latest
-    timeout-minutes: 20
+  windows-validation:
+    runs-on: windows-2025
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Install pinned Godot and export templates
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install verified official Godot editor
         shell: pwsh
         run: |
-          $ErrorActionPreference = "Stop"
-          $version = "4.7.2"
-          $base = "https://github.com/godotengine/godot-builds/releases/download/$version-stable"
-          $engine = "Godot_v$version-stable_win64.exe.zip"
-          $templates = "Godot_v$version-stable_export_templates.tpz"
-          New-Item -ItemType Directory -Force .tools | Out-Null
-          Invoke-WebRequest "$base/SHA512-SUMS.txt" -OutFile .tools/SHA512-SUMS.txt
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force .tools/godot | Out-Null
+          $asset = "Godot_v$env:GODOT_RELEASE`_win64.exe.zip"
+          Invoke-WebRequest $env:GODOT_MANIFEST_URL -OutFile .tools/SHA512-SUMS.txt
+          Invoke-WebRequest "https://github.com/godotengine/godot-builds/releases/download/$env:GODOT_RELEASE/$asset" -OutFile ".tools/$asset"
+          $entry = @(Get-Content .tools/SHA512-SUMS.txt | Where-Object { ($_ -split '\s+')[-1].TrimStart('*') -eq $asset })
+          if ($entry.Count -ne 1 -or ($entry[0] -split '\s+')[0] -ne $env:GODOT_WINDOWS_SHA512) { throw 'Official Windows manifest pin mismatch' }
+          if ((Get-FileHash ".tools/$asset" -Algorithm SHA512).Hash -ne $env:GODOT_WINDOWS_SHA512) { throw 'Windows engine SHA512 mismatch' }
+          Expand-Archive ".tools/$asset" .tools/godot
+      - name: Release source and dependency audit
+        shell: pwsh
+        run: ./dev_tools/release_source_audit.ps1 -RequireClean
+      - name: Full M0-M25 automated validation
+        shell: pwsh
+        run: ./dev_tools/validate.ps1 -Godot "$pwd/.tools/godot/Godot_v4.7.2-stable_win64_console.exe"
+      - name: Upload Windows validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: M25-windows-validation-${{ github.run_attempt }}
+          path: builds/validation/
+          retention-days: 14
+          if-no-files-found: warn
+
+  linux-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install verified official Godot editor
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force .tools/godot | Out-Null
+          $asset = "Godot_v$env:GODOT_RELEASE`_linux.x86_64.zip"
+          Invoke-WebRequest $env:GODOT_MANIFEST_URL -OutFile .tools/SHA512-SUMS.txt
+          Invoke-WebRequest "https://github.com/godotengine/godot-builds/releases/download/$env:GODOT_RELEASE/$asset" -OutFile ".tools/$asset"
+          $entry = @(Get-Content .tools/SHA512-SUMS.txt | Where-Object { ($_ -split '\s+')[-1].TrimStart('*') -eq $asset })
+          if ($entry.Count -ne 1 -or ($entry[0] -split '\s+')[0] -ne $env:GODOT_LINUX_SHA512) { throw 'Official Linux manifest pin mismatch' }
+          if ((Get-FileHash ".tools/$asset" -Algorithm SHA512).Hash -ne $env:GODOT_LINUX_SHA512) { throw 'Linux engine SHA512 mismatch' }
+          Expand-Archive ".tools/$asset" .tools/godot
+          chmod 755 .tools/godot/Godot_v4.7.2-stable_linux.x86_64
+      - name: Release source and dependency audit
+        shell: pwsh
+        run: ./dev_tools/release_source_audit.ps1 -RequireClean
+      - name: Linux parser, deterministic and headless matrix
+        shell: pwsh
+        run: ./dev_tools/validate_linux.ps1 -Godot "$pwd/.tools/godot/Godot_v4.7.2-stable_linux.x86_64"
+      - name: Upload Linux validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: M25-linux-validation-${{ github.run_attempt }}
+          path: builds/validation-linux/
+          retention-days: 14
+          if-no-files-found: warn
+
+  windows-staging:
+    needs: [windows-validation, linux-validation]
+    runs-on: windows-2025
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install verified official engine and export templates
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force .tools/godot | Out-Null
+          $engine = "Godot_v$env:GODOT_RELEASE`_win64.exe.zip"
+          $templates = "Godot_v$env:GODOT_RELEASE`_export_templates.tpz"
+          Invoke-WebRequest $env:GODOT_MANIFEST_URL -OutFile .tools/SHA512-SUMS.txt
           foreach ($asset in @($engine, $templates)) {
-            Invoke-WebRequest "$base/$asset" -OutFile ".tools/$asset"
-            $entry = Get-Content .tools/SHA512-SUMS.txt | Where-Object { ($_ -split '\s+')[-1].TrimStart('*') -eq $asset }
-            if (@($entry).Count -ne 1) { throw "Missing unique checksum for $asset" }
-            $expected = ($entry -split '\s+')[0]
-            if ((Get-FileHash ".tools/$asset" -Algorithm SHA512).Hash -ne $expected) { throw "Checksum mismatch: $asset" }
+            Invoke-WebRequest "https://github.com/godotengine/godot-builds/releases/download/$env:GODOT_RELEASE/$asset" -OutFile ".tools/$asset"
+            $entry = @(Get-Content .tools/SHA512-SUMS.txt | Where-Object { ($_ -split '\s+')[-1].TrimStart('*') -eq $asset })
+            if ($entry.Count -ne 1) { throw "Missing official checksum for $asset" }
+            $expected = if ($asset -eq $engine) { $env:GODOT_WINDOWS_SHA512 } else { $env:GODOT_TEMPLATES_SHA512 }
+            if (($entry[0] -split '\s+')[0] -ne $expected -or (Get-FileHash ".tools/$asset" -Algorithm SHA512).Hash -ne $expected) { throw "SHA512 mismatch: $asset" }
           }
           Expand-Archive ".tools/$engine" .tools/godot
           Copy-Item ".tools/$templates" .tools/templates.zip
           Expand-Archive .tools/templates.zip .tools/templates
-          $destination = "$env:APPDATA/Godot/export_templates/$version.stable"
+          $destination = "$env:APPDATA/Godot/export_templates/$env:GODOT_VERSION.stable"
           New-Item -ItemType Directory -Force $destination | Out-Null
           Copy-Item .tools/templates/templates/* $destination -Recurse
-      - name: Validate and build Windows staging
+      - name: Build, audit, extract and smoke Windows release template
         shell: pwsh
-        run: ./dev_tools/validate.ps1 -Godot "$pwd/.tools/godot/Godot_v4.7.2-stable_win64_console.exe" -ExportWindows
-      - name: Extended network stress matrix
-        if: github.event_name == 'workflow_dispatch' && inputs.extended_network
-        shell: pwsh
-        run: ./dev_tools/test_network_stress.ps1 -Godot "$pwd/.tools/godot/Godot_v4.7.2-stable_win64_console.exe" -Extended
-      - name: Upload staging build
+        run: ./dev_tools/release_staging.ps1 -Target windows -Godot "$pwd/.tools/godot/Godot_v4.7.2-stable_win64_console.exe" -SourceSha '${{ github.event.pull_request.head.sha || github.sha }}' -RenderedSmoke
+      - name: Upload Windows staging candidate
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ProjectVelocity-M24-Windows-staging
-          path: builds/windows/
-          retention-days: 1
+          name: ProjectVelocity-0.25.0-rc.1-build31-windows-x86_64
+          path: builds/staging/windows/
+          retention-days: 14
           if-no-files-found: error
-      - name: Upload validation logs
-        if: always()
+
+  linux-staging:
+    needs: [windows-validation, linux-validation]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install verified official engine and export templates
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force .tools/godot | Out-Null
+          $engine = "Godot_v$env:GODOT_RELEASE`_linux.x86_64.zip"
+          $templates = "Godot_v$env:GODOT_RELEASE`_export_templates.tpz"
+          Invoke-WebRequest $env:GODOT_MANIFEST_URL -OutFile .tools/SHA512-SUMS.txt
+          foreach ($asset in @($engine, $templates)) {
+            Invoke-WebRequest "https://github.com/godotengine/godot-builds/releases/download/$env:GODOT_RELEASE/$asset" -OutFile ".tools/$asset"
+            $entry = @(Get-Content .tools/SHA512-SUMS.txt | Where-Object { ($_ -split '\s+')[-1].TrimStart('*') -eq $asset })
+            if ($entry.Count -ne 1) { throw "Missing official checksum for $asset" }
+            $expected = if ($asset -eq $engine) { $env:GODOT_LINUX_SHA512 } else { $env:GODOT_TEMPLATES_SHA512 }
+            if (($entry[0] -split '\s+')[0] -ne $expected -or (Get-FileHash ".tools/$asset" -Algorithm SHA512).Hash -ne $expected) { throw "SHA512 mismatch: $asset" }
+          }
+          Expand-Archive ".tools/$engine" .tools/godot
+          chmod 755 .tools/godot/Godot_v4.7.2-stable_linux.x86_64
+          Copy-Item ".tools/$templates" .tools/templates.zip
+          Expand-Archive .tools/templates.zip .tools/templates
+          $destination = "$env:HOME/.local/share/godot/export_templates/$env:GODOT_VERSION.stable"
+          New-Item -ItemType Directory -Force $destination | Out-Null
+          Copy-Item .tools/templates/templates/* $destination -Recurse
+      - name: Build, audit, extract and headless-smoke Linux release template
+        shell: pwsh
+        run: ./dev_tools/release_staging.ps1 -Target linux -Godot "$pwd/.tools/godot/Godot_v4.7.2-stable_linux.x86_64" -SourceSha '${{ github.event.pull_request.head.sha || github.sha }}'
+      - name: Compatibility renderer smoke under Xvfb
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$(mktemp -d)"
+          trap 'rm -rf "$root"' EXIT
+          export XDG_CONFIG_HOME="$root/config"
+          export XDG_CACHE_HOME="$root/cache"
+          export XDG_DATA_HOME="$root/data"
+          mkdir -p "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME" "$XDG_DATA_HOME"
+          exe="builds/staging/linux/ProjectVelocity-0.25.0-rc.1-build31-linux-x86_64/ProjectVelocity.x86_64"
+          chmod 755 "$exe"
+          xvfb-run -a "$exe" --quit-after 900 --resolution 1280x800 -- --smoke-test > builds/staging/linux/validation/xvfb.stdout.log 2> builds/staging/linux/validation/xvfb.stderr.log
+          cat builds/staging/linux/validation/xvfb.stdout.log
+          cat builds/staging/linux/validation/xvfb.stderr.log
+          ! grep -E 'SCRIPT ERROR:|Parse Error|ERROR:|WARNING:' builds/staging/linux/validation/xvfb.std*.log
+          grep -F 'channel=STAGING' builds/staging/linux/validation/xvfb.stdout.log
+          grep -F 'PROJECTVELOCITY_BOOT_OK' builds/staging/linux/validation/xvfb.stdout.log
+      - name: Upload Linux and SteamOS-compatible staging candidates
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: M24-validation-logs
-          path: builds/validation/
-          retention-days: 7
-          if-no-files-found: warn
+          name: ProjectVelocity-0.25.0-rc.1-build31-linux-steamos-x86_64
+          path: builds/staging/linux/
+          retention-days: 14
+          if-no-files-found: error
+
+  verify-staging-artifacts:
+    needs: [windows-staging, linux-staging]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Download Windows staging artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ProjectVelocity-0.25.0-rc.1-build31-windows-x86_64
+          path: downloaded/windows
+      - name: Download Linux staging artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ProjectVelocity-0.25.0-rc.1-build31-linux-steamos-x86_64
+          path: downloaded/linux
+      - name: Verify downloaded hashes, manifests and non-empty archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd downloaded/windows && sha256sum -c SHA256SUMS)
+          (cd downloaded/linux && sha256sum -c SHA256SUMS)
+          test -s downloaded/windows/staging-manifest.json
+          test -s downloaded/linux/staging-manifest.json
+          find downloaded -type f \( -name '*.zip' -o -name '*.tar.gz' \) -size +1M -print
+          grep -R '"channel": "STAGING"' downloaded/*/staging-manifest.json
+          grep -R '"source_sha": "${{ github.event.pull_request.head.sha || github.sha }}"' downloaded/*/staging-manifest.json
+          echo 'M25_DOWNLOADED_ARTIFACTS_VERIFIED'
+      - name: Upload compact staging metadata
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ProjectVelocity-0.25.0-rc.1-build31-staging-metadata
+          path: |
+            downloaded/*/staging-manifest.json
+            downloaded/*/SHA256SUMS
+          retention-days: 30
+          if-no-files-found: error

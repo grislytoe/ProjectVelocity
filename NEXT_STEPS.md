@@ -1,11 +1,15 @@
 # Next steps
 
-Review the M24 PR from `feature/m24-performance-benchmark` into `dev`; do not merge without explicit
-authorization and do not start M25 in this task. Reproduce the blocked matrix in
-`docs/M24_VALIDATION.md` on the approved low-end Windows class and physical Steam Deck, preserving
-physics/network rates and attaching sanitized schema-1 results/profiler captures. Investigate the
-two-render-process iGPU stutter and remaining cold construction only when the target trace proves
-the same hotspot. M19 live EOS/Internet remains a separate BLOCKED gate.
+Review the M25 PR from `feature/m25-standalone-release-candidate` into `dev`; do not merge without
+explicit developer authorization and do not start M26. Verify the exact attached hashes, then
+execute `M25_MANUAL_QA.md` on a clean Windows environment, Ubuntu target and physical Steam Deck,
+plus keyboard/mouse and physical controller/hotplug. Reproduce the M24 low-end/Deck matrix on the
+approved hardware. Production EOS/Internet remains BLOCKED by M19 and prevents a truthful full-v1
+release under the current master scope. Signing, installer/tag/GitHub Release/Steam/store/CDN work
+requires a separate explicit decision. Until those gates resolve, status is READY FOR MANUAL
+REVIEW at most, never release approved.
+
+Historical handoffs follow.
 
 Historical M23 handoff follows.
 

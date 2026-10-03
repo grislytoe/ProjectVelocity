@@ -74,6 +74,10 @@ func _open_navigation() -> void:
 func _run_smoke_test() -> void:
 	await get_tree().process_frame
 	await get_tree().physics_frame
+	print("PV_BUILD_IDENTITY version=%s build=%d channel=%s protocol=%d wire=%d save=%d source_sha=%s" % [
+		BuildInfo.VERSION, BuildInfo.BUILD_NUMBER, BuildInfo.channel(),
+		BuildInfo.NETWORK_PROTOCOL_VERSION, BuildInfo.NETWORK_WIRE_REVISION,
+		SaveSchema.CURRENT_VERSION, BuildInfo.source_sha()])
 	# Exercise the same canonical identity and section loading in editor and compiled PCK.
 	var trial := SoloTrial.new()
 	trial.layer = input_layer

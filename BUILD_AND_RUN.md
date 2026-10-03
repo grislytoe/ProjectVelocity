@@ -1,15 +1,16 @@
 # Build and run
 
-Current runtime build: **0.21.0-dev /27**, schema5, protocol4/wire3; EOSG candidate2.3.0 is
-**BLOCKED** for full integration. User-owned project.godot metadata remains preserved.
-Ordinary F5/Solo/ENet needs no EOS files, credentials or network. The full M0–M21 validator
-remains required. Native-only test commands and outstanding export/SteamOS gates are in
-[docs/M18_COMPATIBILITY.md](docs/M18_COMPATIBILITY.md); a green native CI job is not overall
-EOS compatibility proof. Do not publish an EOS-bearing build from this gate.
+Current runtime candidate: **0.25.0-rc.1 / build31 / STAGING**, save schema5,
+protocol5/wire4. User-owned `project.godot` metadata remains preserved; BuildInfo is authoritative.
+Ordinary F5/Solo needs no EOS files, credentials or network. Production Online is unavailable and
+the live M19 gate remains BLOCKED. M25 CI builds unsigned Windows/Linux review packages from a
+clean committed snapshot and never downloads or bundles EOS/vendor binaries.
 
 ## Requirements
 
-Godot 4.7.2 Stable (standard GDScript edition), Git, and PowerShell. No external GDScript test framework or runtime SDK is needed. Windows staging export additionally needs the matching official 4.7.2 export templates.
+Godot 4.7.2 Stable (standard GDScript edition), Git, and PowerShell 7. No external GDScript test
+framework or runtime SDK is needed. Windows/Linux staging exports require the matching official
+4.7.2 release templates verified against the official SHA-512 manifest.
 
 ## Local commands
 
@@ -19,20 +20,33 @@ From the repository root:
 godot --version
 godot --editor --path .
 powershell -ExecutionPolicy Bypass -File dev_tools/validate.ps1
-powershell -ExecutionPolicy Bypass -File dev_tools/validate.ps1 -ExportWindows
+powershell -ExecutionPolicy Bypass -File dev_tools/release_source_audit.ps1
 ~~~
 
 If Godot's GUI launcher does not wait in your shell, pass the installed console executable using `-Godot C:/Godot/Godot.exe` (or its actual console wrapper path). The validator starts and waits for the selected process, applies a 120-second timeout per check, and rejects engine errors/warnings as well as missing success markers.
 
-The validator imports assets, parses all bootstrap/test scripts, runs M0 bootstrap, M1 persistence and M2 input behavior tests, boots the actual main scene through a physics tick and checks Git whitespace. With -ExportWindows it exports and boots the Windows staging executable. Logs go to ignored builds/validation.
+The validator runs the complete M0–M25 automated Windows gate and checks Git whitespace. Release
+packaging is intentionally separate: `release_staging.ps1` requires an exact source SHA, official
+release templates and a clean snapshot. It audits resource/archive contents, extracts, smoke-boots
+with isolated user paths, hashes files and writes `staging-manifest.json` plus `SHA256SUMS`.
 
 ## Build identity
 
-Version 0.21.0-dev and build number27 live in core/build/build_info.gd. M21 preserves the user-owned project.godot byte-for-byte; its editor version metadata remains 0.15.0-dev. BuildInfo is the runtime identity, an explicit exception tested in bootstrap. OS.is_debug_build() is the authoritative development flag. The staging export adds the staging feature; its label is STAGING. Release-mode engine binaries disable development debug logging; release exports require developer review and are not part of M0.
+Version 0.25.0-rc.1 and build31 live in `core/build/build_info.gd`. The user-owned
+`project.godot` remains byte-for-byte outside commits. BuildInfo is the runtime identity.
+`OS.is_debug_build()` is the development flag; release-template exports add `staging`, and the
+clean snapshot patches `source_provenance.tres` with the exact 40-hex candidate SHA. Their visible
+channel is STAGING and source identity is testable. Release mode disables development-only ENet
+entry and debug logging.
 
 ## CI
 
-GitHub Actions runs on feature/* and dev pushes, PRs into main/dev, and manual dispatch. It downloads the exact engine/templates from the official release, verifies SHA-512 against the release manifest, runs the same validator on Windows, exports debug staging, smoke-boots the executable and uploads build/log artifacts. Actions are pinned to commit SHAs.
+GitHub Actions runs on feature/dev pushes, PRs into main/dev and manual dispatch. Separate Windows
+and Ubuntu validation jobs must pass before either staging job runs. The jobs verify official
+engine/templates against pinned upstream SHA-512 entries, build release-template exports, run
+platform smokes and upload 14-day review artifacts. A final job downloads them, verifies every
+hash and publishes compact manifests for 30 days. Actions are pinned to immutable commits and use
+`contents: read`; failed tests are never suppressed.
 
 ## Logs
 
@@ -60,15 +74,15 @@ provides active-device rebinding. Course content is gameplay/race/solo_course.ts
 
 ## Current entry point
 
-Current build: **0.21.0-dev / build 27**, save schema **5**, protocol **4 /wire3**.
+Current build: **0.25.0-rc.1 / build31**, save schema **5**, protocol **5/wire4**.
 From C:/Godot Projects/ProjectVelocity open project.godot with Godot 4.7.2 and press F5.
 Complete language/nickname onboarding, then New Game → Solo → Map Select → Foundry Run or Training Circuit.
 Profile header, Customization, Settings → Controls and Level Editor are available.
-Run the full M0–M21 validator with `./dev_tools/validate.ps1 -Godot C:/Godot/Godot.exe`.
+Run the full M0–M25 validator with `./dev_tools/validate.ps1 -Godot C:/Godot/Godot.exe`.
 Normal-renderer UI tests: `Godot --path . --script tests/ui_foundation_test.gd -- --render-capture`.
 These use isolated temporary saves. Do not delete or modify real saves to run tests.
-On this machine the console wrapper lacks its expected sibling executable; use Godot.exe
-with Start-Process/WaitForExit as validate.ps1 does. CI installs matching official files.
+CI installs and verifies the matching official files. Local release builds must use a clean
+committed snapshot so the unrelated working-tree `project.godot` cannot enter an artifact.
 
 M13 uses the shared MapDefinition catalog, structural validation and PV-MAP-1 checksum.
 M21's shared spectator-camera identity publishes Training v6 and Industrial v5 and preserves
