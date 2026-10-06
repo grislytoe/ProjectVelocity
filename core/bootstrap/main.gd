@@ -102,8 +102,10 @@ func _run_smoke_test() -> void:
 		get_tree().quit(1)
 		return
 	input_preferences.flush()
-	var save_ok: bool = SaveSchema.validate(save_store.data) and (
-		save_store.notification_key.is_empty())
+	# A rendered CI host can legitimately reject the saved display mode and set a
+	# presentation notification. Exercise persistence directly so that this marker
+	# reports save integrity only, independently of the host's virtual display.
+	var save_ok: bool = SaveSchema.validate(save_store.data) and save_store.save()
 	if not _smoke_directory.is_empty():
 		for filename: String in ["save.json", "save.backup.json"]:
 			if FileAccess.file_exists(_smoke_directory.path_join(filename)):

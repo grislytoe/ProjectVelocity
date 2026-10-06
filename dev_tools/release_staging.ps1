@@ -130,6 +130,10 @@ function Invoke-ExtractedSmoke {
     foreach ($path in $environment.Values) { New-Item -ItemType Directory -Force -Path $path | Out-Null }
     $arguments = @('--quit-after', '900')
     if (-not $Render) { $arguments = @('--headless') + $arguments }
+    if ($Render) { $arguments = @('--audio-driver', 'Dummy') + $arguments }
+    if ($Render -and $isWindowsTarget) {
+        $arguments = @('--rendering-method', 'gl_compatibility', '--rendering-driver', 'opengl3_angle') + $arguments
+    }
     if ($Resolution) { $arguments += @('--resolution', $Resolution) }
     $arguments += @('--', '--smoke-test')
     try {

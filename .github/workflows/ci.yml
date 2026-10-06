@@ -169,14 +169,6 @@ jobs:
       - name: Build, audit, extract and headless-smoke Linux release template
         shell: pwsh
         run: ./dev_tools/release_staging.ps1 -Target linux -Godot "$pwd/.tools/godot/Godot_v4.7.2-stable_linux.x86_64" -SourceSha '${{ github.event.pull_request.head.sha || github.sha }}'
-      - name: Upload Linux staging failure evidence
-        if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: M25-linux-staging-failure-${{ github.run_attempt }}
-          path: builds/staging/linux/validation/
-          retention-days: 14
-          if-no-files-found: warn
       - name: Compatibility renderer smoke under Xvfb
         shell: bash
         run: |
@@ -189,12 +181,20 @@ jobs:
           mkdir -p "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME" "$XDG_DATA_HOME"
           exe="builds/staging/linux/ProjectVelocity-0.25.0-rc.1-build31-linux-x86_64/ProjectVelocity.x86_64"
           chmod 755 "$exe"
-          xvfb-run -a "$exe" --quit-after 900 --resolution 1280x800 -- --smoke-test > builds/staging/linux/validation/xvfb.stdout.log 2> builds/staging/linux/validation/xvfb.stderr.log
+          xvfb-run -a "$exe" --audio-driver Dummy --quit-after 900 --resolution 1280x800 -- --smoke-test > builds/staging/linux/validation/xvfb.stdout.log 2> builds/staging/linux/validation/xvfb.stderr.log
           cat builds/staging/linux/validation/xvfb.stdout.log
           cat builds/staging/linux/validation/xvfb.stderr.log
           ! grep -E 'SCRIPT ERROR:|Parse Error|ERROR:|WARNING:' builds/staging/linux/validation/xvfb.std*.log
           grep -F 'channel=STAGING' builds/staging/linux/validation/xvfb.stdout.log
           grep -F 'PROJECTVELOCITY_BOOT_OK' builds/staging/linux/validation/xvfb.stdout.log
+      - name: Upload Linux staging failure evidence
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: M25-linux-staging-failure-${{ github.run_attempt }}
+          path: builds/staging/linux/validation/
+          retention-days: 14
+          if-no-files-found: warn
       - name: Upload Linux and SteamOS-compatible staging candidates
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
