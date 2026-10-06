@@ -79,27 +79,23 @@ func _run_smoke_test() -> void:
 		BuildInfo.NETWORK_PROTOCOL_VERSION, BuildInfo.NETWORK_WIRE_REVISION,
 		SaveSchema.CURRENT_VERSION, BuildInfo.source_sha()])
 	# Exercise the same canonical identity and section loading in editor and compiled PCK.
-	var training_map := MapCatalog.training()
 	var trial := SoloTrial.new()
 	trial.layer = input_layer
-	trial.records = TrialRecords.new(save_store, training_map)
+	trial.records = TrialRecords.new(save_store, MapCatalog.training())
 	settings_runtime.world.viewport.add_child(trial)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	var map_ok: bool = trial.phase == SoloTrial.Phase.HINT and is_instance_valid(trial.course)
 	print("PV_MAP_BOOT_HASH=" + trial.records.checksum)
-	_print_map_checksum_components(training_map)
 	trial.free()
-	var industrial_map := MapCatalog.industrial()
 	trial = SoloTrial.new()
 	trial.layer = input_layer
-	trial.records = TrialRecords.new(save_store, industrial_map)
+	trial.records = TrialRecords.new(save_store, MapCatalog.industrial())
 	settings_runtime.world.viewport.add_child(trial)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	map_ok = map_ok and trial.phase == SoloTrial.Phase.HINT and is_instance_valid(trial.course)
 	print("PV_INDUSTRIAL_BOOT_HASH=" + trial.records.checksum)
-	_print_map_checksum_components(industrial_map)
 	trial.free()
 	if not map_ok:
 		_logger.error("Map identity/assembly smoke failed", "bootstrap")
@@ -123,27 +119,6 @@ func _run_smoke_test() -> void:
 		return
 	print("PROJECTVELOCITY_BOOT_OK")
 	get_tree().quit(0)
-
-
-func _print_map_checksum_components(map: MapDefinition) -> void:
-	var components: Array = [["identity", ["PV-MAP-1", MapCodeManifest.DIGEST, map.map_id,
-		map.map_version, map.map_type, map.grid_pixels, map.strict_order, map.par_time_ticks,
-		map.death_bounds, map.start, map.finish, map.checkpoints, map.camera_bounds,
-		map.camera_zones]], ["map_scene", load(map.scene_path)]]
-	for path: String in MapCodeManifest.DATA_PATHS:
-		components.append(["data:" + path, [path, load(path)]])
-	for placement: MapSectionPlacement in map.sections:
-		var section: MapSectionDefinition = placement.section
-		components.append(["section:" + str(placement.instance_id), [placement.instance_id,
-			placement.transform, placement.next_id, section.section_id, section.entrance,
-			section.exit, section.major_geometry, load(section.scene_path)]])
-	for component: Array in components:
-		var report := MapDiagnostics.new()
-		var encoded: String = MapChecksum.encode(component[1], report)
-		print("PV_MAP_COMPONENT map=%s name=%s sha256=%s valid=%s" % [map.map_id,
-			component[0], encoded.sha256_text(), report.valid()])
-
-
 func _update_prompts() -> void:
 	prompt_label.text = tr("INPUT_PROMPTS") % [
 		input_layer.prompt("jump").get("label", ""), input_layer.prompt("dash").get("label", "")]
