@@ -111,6 +111,7 @@ static func _node(node: Node, root: Node, nodes: Array, report: MapDiagnostics) 
 	for property: Dictionary in node.get_property_list():
 		var key: String = property.name
 		if property.usage & PROPERTY_USAGE_STORAGE and key not in ["editor_description", "scene_file_path"] \
+			and not (node is CollisionShape2D and key == "debug_color") \
 			and not key.begins_with("metadata/_editor"):
 			properties[key] = node.get(key)
 	var groups: Array = Array(node.get_groups())

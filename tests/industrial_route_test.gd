@@ -190,10 +190,23 @@ func run() -> void:
 		evidence.physics_max_ms = driver.physics_ms.back()
 	print("M14_REPLAY_HASH=" + str(evidence.input_sha256))
 	var suffix: String = "recovery" if driver.recovery else ("shortcut" if driver.shortcut else "main")
+	var evidence_dir := ProjectSettings.globalize_path("res://builds/m14")
+	if DirAccess.make_dir_recursive_absolute(evidence_dir) != OK:
+		push_error("Unable to create M14 evidence directory: " + evidence_dir)
+		quit(1)
+		return
 	var evidence_file := FileAccess.open("res://builds/m14/" + suffix + "-evidence.json", FileAccess.WRITE)
+	if evidence_file == null:
+		push_error("Unable to open M14 evidence file: " + str(FileAccess.get_open_error()))
+		quit(1)
+		return
 	evidence_file.store_string(JSON.stringify(evidence, "\t"))
 	evidence_file.close()
 	var file := FileAccess.open("res://builds/m14/replay.json", FileAccess.WRITE)
+	if file == null:
+		push_error("Unable to open M14 replay file: " + str(FileAccess.get_open_error()))
+		quit(1)
+		return
 	file.store_string(JSON.stringify(driver.frames))
 	file.close()
 	driver.free()

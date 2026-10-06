@@ -74,6 +74,10 @@ func _open_navigation() -> void:
 func _run_smoke_test() -> void:
 	await get_tree().process_frame
 	await get_tree().physics_frame
+	print("PV_BUILD_IDENTITY version=%s build=%d channel=%s protocol=%d wire=%d save=%d source_sha=%s" % [
+		BuildInfo.VERSION, BuildInfo.BUILD_NUMBER, BuildInfo.channel(),
+		BuildInfo.NETWORK_PROTOCOL_VERSION, BuildInfo.NETWORK_WIRE_REVISION,
+		SaveSchema.CURRENT_VERSION, BuildInfo.source_sha()])
 	# Exercise the same canonical identity and section loading in editor and compiled PCK.
 	var trial := SoloTrial.new()
 	trial.layer = input_layer
@@ -98,8 +102,10 @@ func _run_smoke_test() -> void:
 		get_tree().quit(1)
 		return
 	input_preferences.flush()
-	var save_ok: bool = SaveSchema.validate(save_store.data) and (
-		save_store.notification_key.is_empty())
+	# A rendered CI host can legitimately reject the saved display mode and set a
+	# presentation notification. Exercise persistence directly so that this marker
+	# reports save integrity only, independently of the host's virtual display.
+	var save_ok: bool = SaveSchema.validate(save_store.data) and save_store.save()
 	if not _smoke_directory.is_empty():
 		for filename: String in ["save.json", "save.backup.json"]:
 			if FileAccess.file_exists(_smoke_directory.path_join(filename)):
@@ -115,8 +121,6 @@ func _run_smoke_test() -> void:
 		return
 	print("PROJECTVELOCITY_BOOT_OK")
 	get_tree().quit(0)
-
-
 func _update_prompts() -> void:
 	prompt_label.text = tr("INPUT_PROMPTS") % [
 		input_layer.prompt("jump").get("label", ""), input_layer.prompt("dash").get("label", "")]

@@ -104,24 +104,33 @@ Unsupported or cyclic resource content fails closed.
 Scenes are instantiated **detached**, without _ready or physics, to resolve inheritance
 and default properties before canonicalizing stored properties. Stored Resource
 properties are recursively canonicalized. File formatting, ext/subresource IDs, UIDs,
-editor_description, metadata/_editor*, resource_name, scene_file_path and machine-local
-paths are excluded. Node names/paths are significant references. Relocating equivalent
+editor_description, metadata/_editor*, resource_name, scene_file_path, machine-local
+paths and `CollisionShape2D.debug_color` are excluded. The latter is editor/debug
+visualization only; Godot strips its storage usage under `DEBUG_ENABLED` but exposes it in
+release templates, so excluding it keeps PV-MAP-1 identical across official engine builds.
+Node names/paths are significant references. Relocating equivalent
 section scene files preserves identity; changing geometry/module tuning/point metadata
 changes it. Presentation properties inside gameplay scenes/resources are conservatively
 included; the map's preview/translations/difficulty/expected duration are excluded.
 
-MapCodeManifest is a generated, ordinal-path-sorted code bundle digest covering all .gd
-in gameplay, map_data (except the manifest), core/input, core/camera and visuals.
-UTF-8 source uses normalized LF. Comments and unrelated code in those folders are
-conservatively significant. DATA_PATHS lists all .tscn/.tres in gameplay, core/input,
+MapCodeManifest records two generated digests over the same ordinal-path-sorted `.gd`
+bundle in gameplay, map_data (except the manifest), core/input, core/camera and visuals.
+`AUDIT_DIGEST` covers the exact normalized-LF UTF-8 source bytes, so comments and unrelated
+code in those folders are conservatively significant and every edit is detected. `DIGEST`
+is the reviewed compatibility identity consumed by PV-MAP-1; it changes for semantic gameplay
+changes, but may be explicitly preserved for a proven cross-build normalization that leaves the
+canonical editor value unchanged. DATA_PATHS lists all .tscn/.tres in gameplay, core/input,
 core/camera and visuals so implicit default/preloaded configs also participate via
 semantic hashing. Section scenes are added through the map's references. No timestamps,
 caches, absolute paths or translated strings enter the digest. No dynamic external
 content/code dependencies are supported; new modules must join the verified bundle.
 
-`dev_tools/check_trial_hash.ps1 -Update -Godot C:/Godot/Godot.exe` regenerates that code
-manifest and calls the **same Godot checksum implementation** to bake the official
-checksum. Without -Update it rejects stale code/data identities. Run import first
+`dev_tools/check_trial_hash.ps1 -Update -Godot C:/Godot/Godot.exe` updates both audit and
+compatibility identity for reviewed gameplay changes. The exceptional
+`-Update -PreserveMapIdentity` mode updates the exact-source audit while retaining the
+compatibility digest; it requires explicit review that the editor checksum and map semantics are
+unchanged. Both modes call the **same Godot checksum implementation** to bake the official
+checksum. Without `-Update` the script rejects stale code/data identities. Run import first
 for new classes/assets. CI imports, parses, runs tests and compares editor versus compiled
 Windows PCK map hashes during isolated boot/assembly. Exported scripts use the baked
 code identity; CI verifies its source. A runtime checksum is not a signature, an

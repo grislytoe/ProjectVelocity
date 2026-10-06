@@ -2,7 +2,18 @@
 
 Competitive high-speed 2D racing platformer, built with Godot **4.7.2 Stable** and typed GDScript.
 
-M0 establishes the engineering foundation; M1 adds versioned persistence; M2 adds keyboard/gamepad input and device prompts. M3 adds a data-driven CharacterBody2D controller, separate movement/animation state machines and an isolated movement laboratory. M10 adds Solo Time Trial and M11 adds the complete UI foundation; online services remain future work. See SAVE_FORMAT.md for persistence and [PLAYER_CONTROLLER.md](PLAYER_CONTROLLER.md) for movement.
+Current staging candidate: **0.25.0-rc.1 / build31 / STAGING**, protocol5/wire4/save5.
+Windows x86_64 and Linux x86_64/SteamOS-compatible portable packages are produced by the M25
+release gate. They are unsigned review artifacts, not an approved release. Production Online is
+honestly unavailable while the M19 EOS/Auth/Connect/Lobby/P2P gate remains blocked. See
+[release checklist](RELEASE_CHECKLIST.md), [release notes](RELEASE_NOTES.md),
+[staging instructions](STAGING_BUILD.md) and [manual QA](M25_MANUAL_QA.md).
+
+The implemented standalone game includes versioned persistence, keyboard/gamepad abstraction,
+data-driven movement and presentation, modular platforms/hazards, Solo Time Trial, Foundry,
+settings/accessibility, transport-independent local network authority/series/reconnect foundations,
+an art pass and performance tooling. See SAVE_FORMAT.md for persistence and
+[PLAYER_CONTROLLER.md](PLAYER_CONTROLLER.md) for movement.
 
 Open `project.godot` in Godot 4.7.2 and press F6/F5 to run the main scene. See [BUILD_AND_RUN.md](BUILD_AND_RUN.md) for reproducible validation and staging export.
 
@@ -14,7 +25,9 @@ To play M3, open `dev_tools/player_playground.tscn` and press **F6**, or run `go
 - [Known issues](KNOWN_ISSUES.md)
 - [Next steps](NEXT_STEPS.md)
 
-Primary targets: Windows x64, Linux x64, SteamOS/Steam Deck. Initial CI exports Windows staging only.
+Primary targets: Windows x64, Linux x64, SteamOS/Steam Deck. M25 CI builds Windows and Linux
+release-template staging packages independently, then downloads and re-verifies their hashes.
+Physical Steam Deck and approved low-end certification remain blocked/pending.
 
 M4 adds modular android poses, profile-driven body/accent colors, opponent opacity/nickname/outline policy and readiness cues. Open `dev_tools/character_gallery.tscn` with **F6** for the interactive pose/color sheet. The playable M3 arena also uses the new presentation. See [CHARACTER_PRESENTATION.md](CHARACTER_PRESENTATION.md).
 
@@ -39,7 +52,7 @@ See [UI foundation](UI_FOUNDATION.md) and [M11 validation](docs/M11_VALIDATION.m
 
 M12: Settings enables Video, Audio, Controls and Accessibility with Apply/Cancel/defaults,
 15-second display confirmation and persisted device profiles. See [Settings](SETTINGS.md).
-Build 0.16.0-dev /22; save schema 5; network protocol 3 (wire revision 2).
+Historical M12 UI note. Current runtime identity is listed at the top of this document.
 
 ## M16 Local Network
 

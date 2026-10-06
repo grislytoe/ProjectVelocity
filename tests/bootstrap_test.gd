@@ -23,12 +23,13 @@ func _run() -> void:
 		"Compatibility renderer required")
 	_check(ProjectSettings.get_setting("display/window/stretch/aspect") == "keep",
 		"Competitive view must retain its aspect ratio")
-	_check(BuildInfo.VERSION == "0.24.0-dev" and BuildInfo.BUILD_NUMBER == 30,
-		"M24 runtime identity; project metadata retained per editor-file preservation agreement")
+	_check(BuildInfo.VERSION == "0.25.0-rc.1" and BuildInfo.BUILD_NUMBER == 31,
+		"M25 RC runtime identity; project metadata retained per editor-file preservation agreement")
 	_check(BuildInfo.NETWORK_PROTOCOL_VERSION == 5 and BuildInfo.NETWORK_WIRE_REVISION == 4,
 		"M22 reconnect admission/baseline requires protocol 5 / wire 4")
 	_check(BuildInfo.is_development() == OS.is_debug_build(), "Build flag mismatch")
 	_check(BuildInfo.channel() == "DEV", "Editor tests must run as DEV")
+	_check(BuildInfo.source_sha() == "UNEMBEDDED", "Editor source identity must not be fabricated")
 	var config: AppConfig = load("res://core/config/default_app_config.tres") as AppConfig
 	_check(config != null and config.log_debug_messages, "Default config failed to load")
 	var logger: Node = root.get_node_or_null("AppLogger")

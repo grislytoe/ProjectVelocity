@@ -1,5 +1,10 @@
 # Dependencies
 
+M25 adds no runtime dependency. Official Godot 4.7.2 Windows/Linux editors and the shared export
+template bundle are verified against the upstream SHA-512 manifest before use. Release packages
+contain only the Godot export executable/PCK and project readme/launcher; EOSG/full EOS SDK,
+Steamworks and vendor binaries remain absent. The CI-only download action is pinned below.
+
 M19 adds no runtime dependency or vendor patch. EOSG2.3.0 / SDK1.19.1.2-53289219 remain
 pinned and unbundled; full SDK/notices/configuration are absent in this task's process.
 Native P2P source review and private-code search permissions remain additional integration
@@ -12,6 +17,7 @@ boundaries. [M19 BLOCKED report](docs/M19_BLOCKERS.md); M18 evidence below remai
 | PowerShell | Host / GitHub runner version | https://github.com/PowerShell/PowerShell | MIT for PowerShell 7; Windows PowerShell is OS tooling, not bundled | Validation tooling |
 | actions/checkout | v4.2.2, 11bd71901bbe5b1630ceea73d27597364c9af683 | https://github.com/actions/checkout | MIT; CI only, not bundled | CI |
 | actions/upload-artifact | v4.6.2, ea165f8d65b6e75b540449e92b4886f43607fa02 | https://github.com/actions/upload-artifact | MIT; CI only, not bundled | CI |
+| actions/download-artifact | v4.3.0, d3f86a106a0bac45b974a628896c90dbdf5c8093 | https://github.com/actions/download-artifact | MIT; CI only, not bundled | CI artifact verification |
 
 EOSG 2.3.0 remains the exact approved candidate. **M18 verdict: BLOCKED**. Official tag
 `e84320567a3a17d305478f5796707e69d2bdac4f`, EOS SDK1.19.1.2; Windows/Linux native-only evaluation
