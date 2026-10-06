@@ -125,7 +125,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: M25-windows-staging-failure-${{ github.run_attempt }}
-          path: builds/staging/windows/validation/
+          path: |
+            builds/staging/windows/validation/
+            builds/staging/windows/ProjectVelocity-0.25.0-rc.1-build31-windows-x86_64/
           retention-days: 14
           if-no-files-found: warn
       - name: Upload Windows staging candidate
@@ -174,7 +176,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: M25-linux-staging-failure-${{ github.run_attempt }}
-          path: builds/staging/linux/validation/
+          path: |
+            builds/staging/linux/validation/
+            builds/staging/linux/ProjectVelocity-0.25.0-rc.1-build31-linux-x86_64/
           retention-days: 14
           if-no-files-found: warn
       - name: Compatibility renderer smoke under Xvfb
