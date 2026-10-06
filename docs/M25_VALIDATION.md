@@ -1,6 +1,6 @@
 # M25 Standalone Release Candidate — validation evidence
 
-Date: 2026-10-03. Workspace: `C:/Godot Projects/ProjectVelocity`; branch
+Date: 2026-10-06. Workspace: `C:/Godot Projects/ProjectVelocity`; branch
 `feature/m25-standalone-release-candidate`; exact approved base
 `origin/dev` `1b226dfc8e5efe12209822801554334847770a97`. The unrelated user
 `project.godot` remains byte-identical SHA-256
@@ -13,6 +13,8 @@ schema **5**. Official map identities are unchanged because M25 build/release fi
 PV-MAP-1: Training Circuit v8
 `fa75d8960d6ff1e3436f6ecd0ddd5446122073c0fc8e22a0f60128912498529b` and Industrial
 Foundry v7 `6a0d41dc3125fb01a3fcdc4206c20ebe0b2745f39deb89f2a7439be14e52ef60`.
+The immutable exported source identity is
+`a56d530fac5c8bee4d7c6961065812f57125584a`.
 
 ## Toolchain provenance
 
@@ -62,17 +64,28 @@ final CI job downloads both uploaded artifacts and re-verifies every `SHA256SUMS
 
 ## Artifact evidence
 
-The authoritative per-platform `staging-manifest.json` records schema, exact source SHA, build and
+The authoritative [PR workflow run](https://github.com/grislytoe/ProjectVelocity/actions/runs/37450631012)
+completed successfully on 2026-10-06. All five jobs passed: Windows validation, Linux validation,
+Windows staging, Linux staging and post-upload artifact verification. The authoritative
+per-platform `staging-manifest.json` records schema, exact source SHA, build and
 gameplay identity, archive filename/size/SHA-256, executable/PCK hashes, official toolchain hashes,
-map identity and validation-log references. `SHA256SUMS` is verified after upload/download. Exact
-review-run URLs, uploaded sizes and hashes are added here after the immutable candidate workflow
-finishes; absence of those values keeps this row **PENDING**, not PASS.
+map identity and validation-log references. The final job downloaded both uploaded artifacts and
+successfully re-ran every `SHA256SUMS` check before producing the compact metadata artifact.
 
 | Artifact | Size | SHA-256 | Status |
 | --- | ---: | --- | --- |
-| `ProjectVelocity-0.25.0-rc.1-build31-windows-x86_64.zip` | pending CI | pending CI manifest | PENDING |
-| `ProjectVelocity-0.25.0-rc.1-build31-linux-x86_64.tar.gz` | pending CI | pending CI manifest | PENDING |
-| `ProjectVelocity-0.25.0-rc.1-build31-steamos-x86_64.tar.gz` | pending CI | pending CI manifest | PENDING; package compatibility only |
+| `ProjectVelocity-0.25.0-rc.1-build31-windows-x86_64.zip` | 39,810,523 bytes | `0ba6e9096b66e06878cc2d3399bfbc6a58139db0b370a025c47f0da1bbc03c0c` | PASS |
+| `ProjectVelocity-0.25.0-rc.1-build31-linux-x86_64.tar.gz` | 29,038,397 bytes | `178807cfa04fc3d855e0a094e714a76ec5f5a924680b3332893ef5702b30b350` | PASS |
+| `ProjectVelocity-0.25.0-rc.1-build31-steamos-x86_64.tar.gz` | 29,038,397 bytes | `178807cfa04fc3d855e0a094e714a76ec5f5a924680b3332893ef5702b30b350` | PASS for package compatibility only |
+
+GitHub Actions wraps the deliverables, extracted package, manifests and validation logs in its own
+download ZIP. Do not confuse these transport digests with the deliverable archive hashes above:
+
+| Actions artifact | ID | Uploaded size | Actions transport SHA-256 | Retained until |
+| --- | ---: | ---: | --- | --- |
+| `ProjectVelocity-0.25.0-rc.1-build31-windows-x86_64` | `11406919751` | 79,232,461 bytes | `7d4d747b6d289dff30b59189807f00908fbd5214b58ee3882b51f92607557848` | 2026-10-20 |
+| `ProjectVelocity-0.25.0-rc.1-build31-linux-steamos-x86_64` | `11407600210` | 87,666,573 bytes | `50dbbe63e58b84c3e1f3e67b9e4d0dbc16a1917db768e0d82750979238eebb1b` | 2026-10-20 |
+| `ProjectVelocity-0.25.0-rc.1-build31-staging-metadata` | `11406959854` | 3,955 bytes | `aa4ca957eeb0848f9f7f69b63e1d925e10f7900a7b517568b9768d4cbc1306a8` | 2026-11-05 |
 
 Byte-for-byte reproducibility is not promised: archive/export timestamps can vary. Exact hashes
 identify the produced review candidate.
@@ -81,12 +94,12 @@ identify the produced review candidate.
 
 | Gate | Status | Exact evidence / limitation |
 | --- | --- | --- |
-| Source/dependency/license/secret audit | PENDING | Must pass on immutable review SHA; Godot MIT and CI-only dependencies are inventoried |
-| Complete automated M0–M25 Windows gate | PENDING | Required full validator, no suppressed failures |
-| Linux deterministic/parser gate | PENDING | Independent Ubuntu 24.04 runner required |
-| Windows release artifact | PENDING | Official release template, clean extraction, three normal-render sizes and isolated headless boot required |
-| Linux release artifact | PENDING | Official release template, tar permissions, `ldd`, extracted headless and Xvfb boot required |
-| SteamOS-compatible package layout | PENDING | Same dependency-free Linux x86_64 content, launcher/readme/permissions; Linux command line evidence required |
+| Source/dependency/license/secret audit | **PASS** | Clean CI checkout at `a56d530fac5c8bee4d7c6961065812f57125584a`; Godot MIT and CI-only dependencies inventoried; forbidden paths/secrets/vendor scan passed |
+| Complete automated M0–M25 Windows gate | **PASS** | `windows-validation` passed without suppressed failures in run `37450631012` |
+| Linux deterministic/parser gate | **PASS** | Independent Ubuntu 24.04 `linux-validation` passed |
+| Windows release artifact | **PASS** | Official release template, clean extraction, isolated headless plus 1280×720/1280×800/1920×1080 ANGLE Compatibility smokes passed |
+| Linux release artifact | **PASS** | Official release template, tar permissions, `ldd`, extracted headless and Xvfb Compatibility boot passed |
+| SteamOS-compatible package layout | **PASS (package only)** | Same dependency-free Linux x86_64 content, launcher/readme/permissions and Linux command-line evidence; not physical SteamOS certification |
 | Physical Steam Deck/SteamOS runtime/controller/performance | **BLOCKED** | No physical Deck evidence; Ubuntu/Xvfb is not SteamOS certification |
 | Approved low-end 1080p60 target | **BLOCKED** | M24 Ryzen 7 7730U iGPU evidence is not GTX1050Ti/RX570 certification |
 | Physical controller/hotplug and subjective UI/gameplay/readability | **PENDING** | Developer must execute `M25_MANUAL_QA.md` against exact hashes |
@@ -95,7 +108,7 @@ identify the produced review candidate.
 | Signing/installers/store/CDN | **BLOCKED / NOT APPLICABLE to staging** | Portable binaries are unsigned; no installer, tag, GitHub Release, Steam or public upload is authorized |
 | Developer release approval | **PENDING** | PR/artifacts are reviewable staging only |
 
-Overall release verdict: **NO-GO / READY FOR MANUAL REVIEW only after automated artifact rows pass**.
+Overall release verdict: **NO-GO for public release / READY FOR MANUAL REVIEW**.
 M25 cannot be approved while manual, target-hardware, Steam Deck and EOS gates remain unresolved.
 Under the master v1 scope, missing production standalone Online is a release blocker, not a hidden
 optional success. The PR must remain unmerged and no tag/release/publication may be created.

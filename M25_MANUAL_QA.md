@@ -6,13 +6,13 @@ named physical/subjective check is actually performed.
 
 Candidate version: `0.25.0-rc.1`  Build: `31`  Channel: `STAGING`
 
-Source SHA: ________________________________
+Source SHA: `a56d530fac5c8bee4d7c6961065812f57125584a`
 
-Windows archive SHA-256: ________________________________________________________________
+Windows archive SHA-256: `0ba6e9096b66e06878cc2d3399bfbc6a58139db0b370a025c47f0da1bbc03c0c`
 
-Linux archive SHA-256: _________________________________________________________________
+Linux archive SHA-256: `178807cfa04fc3d855e0a094e714a76ec5f5a924680b3332893ef5702b30b350`
 
-SteamOS archive SHA-256: _______________________________________________________________
+SteamOS archive SHA-256: `178807cfa04fc3d855e0a094e714a76ec5f5a924680b3332893ef5702b30b350`
 
 Use `PASS`, `FAIL`, or `BLOCKED`, plus a short note/evidence path. Use a new isolated OS user or
 back up real data; the package tests must not overwrite an existing ProjectVelocity save.

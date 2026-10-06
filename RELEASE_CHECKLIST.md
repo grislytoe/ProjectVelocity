@@ -10,22 +10,22 @@ merge, tag, GitHub Release, Steam/store/CDN publication or a public release.
 - [x] User `project.godot` hash preserved and excluded.
 - [x] Godot 4.7.2 official engine/templates pinned to upstream SHA-512 manifest entries.
 - [x] Dependencies/licenses inventoried; no new runtime dependency or EOS/vendor binary.
-- [ ] Immutable candidate source SHA recorded after commit.
-- [ ] Clean tracked-source/credential/save/log/cache/vendor scan passes in CI.
-- [ ] Git whitespace and repository-clean checks pass in CI.
+- [x] Immutable candidate source SHA recorded: `a56d530fac5c8bee4d7c6961065812f57125584a`.
+- [x] Clean tracked-source/credential/save/log/cache/vendor scan passes in CI.
+- [x] Git whitespace and repository-clean checks pass in CI.
 
 ## Automated and packaging gates
 
-- [ ] Complete Windows M0–M25 automated validator passes without `continue-on-error`.
-- [ ] Independent Linux parser/deterministic/headless matrix passes on Ubuntu 24.04.
-- [ ] Windows x86_64 release-template export, resource/package audit and clean extraction pass.
-- [ ] Windows isolated headless plus 1280×720, 1280×800 and 1920×1080 normal smokes pass.
-- [ ] Linux x86_64 release-template export, permissions, `ldd`, extraction, headless and Xvfb pass.
-- [ ] SteamOS-compatible tar layout/launcher/permissions pass on Linux.
-- [ ] Uploaded artifacts exist, are non-empty, download successfully and pass `SHA256SUMS`.
-- [ ] Both platforms embed the same source/version/channel/protocol/wire/save/map identity.
-- [ ] Export denies tests/dev_tools/docs/builds/.tools/.git/.github, saves/logs/credentials/vendor files.
-- [ ] Release export refuses developer ENet tooling; production Online stays unavailable cleanly.
+- [x] Complete Windows M0–M25 automated validator passes without `continue-on-error`.
+- [x] Independent Linux parser/deterministic/headless matrix passes on Ubuntu 24.04.
+- [x] Windows x86_64 release-template export, resource/package audit and clean extraction pass.
+- [x] Windows isolated headless plus 1280×720, 1280×800 and 1920×1080 normal smokes pass.
+- [x] Linux x86_64 release-template export, permissions, `ldd`, extraction, headless and Xvfb pass.
+- [x] SteamOS-compatible tar layout/launcher/permissions pass on Linux (package compatibility only).
+- [x] Uploaded artifacts exist, are non-empty, download successfully and pass `SHA256SUMS`.
+- [x] Both platforms embed the same source/version/channel/protocol/wire/save/map identity.
+- [x] Export denies tests/dev_tools/docs/builds/.tools/.git/.github, saves/logs/credentials/vendor files.
+- [x] Release export refuses developer ENet tooling; production Online stays unavailable cleanly.
 
 ## Manual and external gates
 
@@ -39,7 +39,8 @@ merge, tag, GitHub Release, Steam/store/CDN publication or a public release.
 - [ ] Signing/installer/distribution decision is made separately; current binaries remain unsigned.
 - [ ] Developer explicitly approves or rejects the candidate.
 
-Current verdict: **NO-GO for release; staging automation in progress.** Once automated rows pass,
-the maximum truthful status is **READY FOR MANUAL REVIEW** until the unchecked external rows are
+Current verdict: **NO-GO for public release / READY FOR MANUAL REVIEW.** The authoritative
+[workflow run](https://github.com/grislytoe/ProjectVelocity/actions/runs/37450631012) passed every
+automated and packaging job. The maximum truthful status remains **READY FOR MANUAL REVIEW** until the unchecked external rows are
 resolved. Never convert PENDING/BLOCKED to PASS from synthetic, loopback, CI or prior-milestone
 evidence outside its actual scope.
