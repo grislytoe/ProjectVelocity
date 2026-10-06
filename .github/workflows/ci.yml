@@ -120,6 +120,14 @@ jobs:
       - name: Build, audit, extract and smoke Windows release template
         shell: pwsh
         run: ./dev_tools/release_staging.ps1 -Target windows -Godot "$pwd/.tools/godot/Godot_v4.7.2-stable_win64_console.exe" -SourceSha '${{ github.event.pull_request.head.sha || github.sha }}' -RenderedSmoke
+      - name: Upload Windows staging failure evidence
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: M25-windows-staging-failure-${{ github.run_attempt }}
+          path: builds/staging/windows/validation/
+          retention-days: 14
+          if-no-files-found: warn
       - name: Upload Windows staging candidate
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -161,6 +169,14 @@ jobs:
       - name: Build, audit, extract and headless-smoke Linux release template
         shell: pwsh
         run: ./dev_tools/release_staging.ps1 -Target linux -Godot "$pwd/.tools/godot/Godot_v4.7.2-stable_linux.x86_64" -SourceSha '${{ github.event.pull_request.head.sha || github.sha }}'
+      - name: Upload Linux staging failure evidence
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: M25-linux-staging-failure-${{ github.run_attempt }}
+          path: builds/staging/linux/validation/
+          retention-days: 14
+          if-no-files-found: warn
       - name: Compatibility renderer smoke under Xvfb
         shell: bash
         run: |
